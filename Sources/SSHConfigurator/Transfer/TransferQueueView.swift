@@ -36,7 +36,7 @@ struct TransferQueueView: View {
     private var header: some View {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Aktarım Kuyruğu")
+                Text("Transfer queue")
                     .font(.headline)
                 if selectedTab == .queue {
                     Text(headerSubtitle)
@@ -46,8 +46,8 @@ struct TransferQueueView: View {
             }
             Spacer()
 
-            Picker("Sekme", selection: $selectedTab) {
-                Text("Kuyruk").tag(Tab.queue)
+            Picker("Tab", selection: $selectedTab) {
+                Text("Queue").tag(Tab.queue)
                 Text(historyTabLabel).tag(Tab.history)
             }
             .pickerStyle(.segmented)
@@ -59,12 +59,12 @@ struct TransferQueueView: View {
                         ProgressView(value: total, total: 1)
                             .frame(width: 90)
                     }
-                    Button("Tümünü iptal et", role: .destructive) {
+                    Button("Cancel all", role: .destructive) {
                         engine.cancelAll()
                     }
                     .controlSize(.small)
                 } else {
-                    Button("Listeyi temizle") {
+                    Button("Clear list") {
                         engine.clearFinished()
                     }
                     .controlSize(.small)
@@ -78,18 +78,21 @@ struct TransferQueueView: View {
 
     private var historyTabLabel: String {
         let count = engine.historyLibrary.records.count
-        return count == 0 ? "Geçmiş" : "Geçmiş (\(count))"
+        return count == 0 ? String(localized: "History") : String(localized: "History (\(count))")
     }
 
     private var headerSubtitle: String {
         let active = queue.activeCount
         let waiting = queue.waitingCount
         let total = queue.items.count
-        if total == 0 { return "Kuyruk boş" }
-        if active == 0 && waiting == 0 { return "\(total) aktarım tamamlandı" }
+        if total == 0 { return String(localized: "Queue is empty") }
+        // TODO(plural)
+        if active == 0 && waiting == 0 { return String(localized: "\(total) transfers completed") }
         var parts: [String] = []
-        if active > 0 { parts.append("\(active) aktarılıyor") }
-        if waiting > 0 { parts.append("\(waiting) bekliyor") }
+        // TODO(plural)
+        if active > 0 { parts.append(String(localized: "\(active) transferring")) }
+        // TODO(plural)
+        if waiting > 0 { parts.append(String(localized: "\(waiting) waiting")) }
         return parts.joined(separator: ", ")
     }
 
@@ -98,7 +101,7 @@ struct TransferQueueView: View {
             Image(systemName: "tray")
                 .font(.largeTitle)
                 .foregroundStyle(.tertiary)
-            Text("Kuyrukta aktarım yok")
+            Text("No transfers in queue")
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -178,7 +181,7 @@ private struct TransferItemRow: View {
     private var stateLabel: some View {
         switch item.state {
         case .waiting:
-            Text("Bekliyor")
+            Text("Waiting")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         case .active:
@@ -195,7 +198,7 @@ private struct TransferItemRow: View {
             .foregroundStyle(.secondary)
         case .succeeded:
             HStack(spacing: 6) {
-                Label("Tamamlandı", systemImage: "checkmark.circle.fill")
+                Label("Completed", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                 if let checksumState = item.checksumState {
                     ChecksumStatusLabel(state: checksumState)
@@ -209,7 +212,7 @@ private struct TransferItemRow: View {
                 .lineLimit(2)
                 .help(message)
         case .cancelled:
-            Text("İptal edildi")
+            Text("Cancelled")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -235,8 +238,8 @@ private struct TransferItemRow: View {
                 Image(systemName: "xmark.circle")
             }
             .buttonStyle(.borderless)
-            .help("İptal et")
-            .accessibilityLabel("\(item.displayName) aktarımını iptal et")
+            .help("Cancel transfer")
+            .accessibilityLabel("Cancel \(item.displayName) transfer")
         case .failed, .cancelled:
             Button {
                 engine.retry(itemID: item.id)
@@ -244,8 +247,8 @@ private struct TransferItemRow: View {
                 Image(systemName: "arrow.clockwise.circle")
             }
             .buttonStyle(.borderless)
-            .help("Yeniden dene")
-            .accessibilityLabel("\(item.displayName) aktarımını yeniden dene")
+            .help("Retry")
+            .accessibilityLabel("Retry \(item.displayName) transfer")
         case .succeeded:
             EmptyView()
         }
@@ -263,16 +266,16 @@ struct ChecksumStatusLabel: View {
     var body: some View {
         switch state {
         case .verifying:
-            Label("Checksum doğrulanıyor", systemImage: "arrow.triangle.2.circlepath")
+            Label("Verifying checksum", systemImage: "arrow.triangle.2.circlepath")
                 .foregroundStyle(.secondary)
         case .verified:
-            Label("Checksum doğrulandı", systemImage: "checkmark.seal.fill")
+            Label("Checksum verified", systemImage: "checkmark.seal.fill")
                 .foregroundStyle(.green)
         case .mismatch:
-            Label("Checksum uyuşmadı", systemImage: "exclamationmark.triangle.fill")
+            Label("Checksum mismatch", systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.red)
         case let .unavailable(reason):
-            Label("Checksum doğrulanamadı", systemImage: "questionmark.circle")
+            Label("Checksum could not be verified", systemImage: "questionmark.circle")
                 .foregroundStyle(.secondary)
                 .help(reason ?? "")
         }

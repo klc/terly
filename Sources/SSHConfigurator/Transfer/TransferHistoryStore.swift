@@ -107,7 +107,7 @@ enum TransferHistoryRetryError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case let .missingLocalSource(path):
-            return "Yerel kaynak dosya artık mevcut değil: \(path)"
+            return String(localized: "Local source file no longer exists: \(path)")
         }
     }
 }

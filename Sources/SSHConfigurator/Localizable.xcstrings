@@ -1510,6 +1510,1396 @@
           }
         }
       }
+    },
+    "Select a specific SSH alias to list remote files.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak dosyaları listelemek için somut bir SSH alias'ı seç."
+          }
+        }
+      }
+    },
+    "The remote folder path isn't valid.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak klasör yolu geçerli değil."
+          }
+        }
+      }
+    },
+    "Name can't be empty, can't contain \"/\", and can't be \".\" or \"..\".": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ad boş olamaz, \"/\" içeremez ve \".\" ya da \"..\" olamaz."
+          }
+        }
+      }
+    },
+    "Couldn't list remote files.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak dosyalar listelenemedi."
+          }
+        }
+      }
+    },
+    "Couldn't read the SFTP folder output.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SFTP klasör çıktısı okunamadı."
+          }
+        }
+      }
+    },
+    "Upload": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yükle"
+          }
+        }
+      }
+    },
+    "Download": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İndir"
+          }
+        }
+      }
+    },
+    "A new transfer can't start until the current one finishes.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devam eden aktarım bitmeden yeni bir aktarım başlatılamaz."
+          }
+        }
+      }
+    },
+    "Save your changes before starting the transfer. SCP uses the ~/.ssh/config file on disk.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarımı başlatmadan önce değişiklikleri kaydet. SCP diskteki ~/.ssh/config dosyasını kullanır."
+          }
+        }
+      }
+    },
+    "Select a specific SSH alias for the file transfer.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya aktarımı için somut bir SSH alias'ı seç."
+          }
+        }
+      }
+    },
+    "The selected local file could not be found.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçilen yerel dosya bulunamadı."
+          }
+        }
+      }
+    },
+    "Only a single file can be transferred in this version; folders aren't supported.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu sürümde yalnızca tek bir dosya aktarılabilir; klasör seçilemez."
+          }
+        }
+      }
+    },
+    "The local destination folder could not be found.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel hedef klasör bulunamadı."
+          }
+        }
+      }
+    },
+    "The remote file path can't be empty or contain a line break.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak dosya yolu boş olamaz ve satır sonu içeremez."
+          }
+        }
+      }
+    },
+    "The SCP transfer could not complete.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SCP aktarımı tamamlanamadı."
+          }
+        }
+      }
+    },
+    "Local checksum could not be computed.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel checksum hesaplanamadı."
+          }
+        }
+      }
+    },
+    "Remote checksum could not be computed.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak checksum hesaplanamadı."
+          }
+        }
+      }
+    },
+    "shasum or sha256sum was not found on the server.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucuda shasum veya sha256sum bulunamadı."
+          }
+        }
+      }
+    },
+    "Remote checksum output could not be parsed.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak checksum çıktısı ayrıştırılamadı."
+          }
+        }
+      }
+    },
+    "Local source file no longer exists: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel kaynak dosya artık mevcut değil: %@"
+          }
+        }
+      }
+    },
+    "Waiting": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekliyor"
+          }
+        }
+      }
+    },
+    "Transferring": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarılıyor"
+          }
+        }
+      }
+    },
+    "Completed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamamlandı"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başarısız"
+          }
+        }
+      }
+    },
+    "Cancelled": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İptal edildi"
+          }
+        }
+      }
+    },
+    "%llds remaining": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%llds kaldı"
+          }
+        }
+      }
+    },
+    "Failed to start.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlatılamadı."
+          }
+        }
+      }
+    },
+    "Transfer queue": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarım Kuyruğu"
+          }
+        }
+      }
+    },
+    "Tab": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekme"
+          }
+        }
+      }
+    },
+    "Queue": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuyruk"
+          }
+        }
+      }
+    },
+    "Cancel all": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tümünü iptal et"
+          }
+        }
+      }
+    },
+    "Clear list": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listeyi temizle"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçmiş"
+          }
+        }
+      }
+    },
+    "History (%lld)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçmiş (%lld)"
+          }
+        }
+      }
+    },
+    "Queue is empty": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuyruk boş"
+          }
+        }
+      }
+    },
+    "%lld transfers completed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld aktarım tamamlandı"
+          }
+        }
+      }
+    },
+    "%lld transferring": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld aktarılıyor"
+          }
+        }
+      }
+    },
+    "%lld waiting": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bekliyor"
+          }
+        }
+      }
+    },
+    "No transfers in queue": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuyrukta aktarım yok"
+          }
+        }
+      }
+    },
+    "Cancel transfer": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İptal et"
+          }
+        }
+      }
+    },
+    "Cancel %@ transfer": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ aktarımını iptal et"
+          }
+        }
+      }
+    },
+    "Retry": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden dene"
+          }
+        }
+      }
+    },
+    "Retry %@ transfer": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ aktarımını yeniden dene"
+          }
+        }
+      }
+    },
+    "Verifying checksum": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checksum doğrulanıyor"
+          }
+        }
+      }
+    },
+    "Checksum verified": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checksum doğrulandı"
+          }
+        }
+      }
+    },
+    "Checksum mismatch": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checksum uyuşmadı"
+          }
+        }
+      }
+    },
+    "Checksum could not be verified": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checksum doğrulanamadı"
+          }
+        }
+      }
+    },
+    "Mask paths": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yolları maskele"
+          }
+        }
+      }
+    },
+    "Shortens the home directory to \"~\" and hides the username in this list. Display only — \"Transfer again\" still uses the real path.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu listede ana dizini \"~\" ile kısaltır ve kullanıcı adını gizler. Yalnızca görünümü etkiler; \"Yeniden aktar\" gerçek yolu kullanmaya devam eder."
+          }
+        }
+      }
+    },
+    "Clear history": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçmişi Temizle"
+          }
+        }
+      }
+    },
+    "Clear transfer history?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarım geçmişi temizlensin mi?"
+          }
+        }
+      }
+    },
+    "This only deletes the history record; transferred or partially transferred files are left untouched.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yalnızca geçmiş kaydını siler; aktarılan veya kısmi kalan dosyalara dokunulmaz."
+          }
+        }
+      }
+    },
+    "Transfer history is empty": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarım geçmişi boş"
+          }
+        }
+      }
+    },
+    "Local: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel: %@"
+          }
+        }
+      }
+    },
+    "Remote: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak: %@"
+          }
+        }
+      }
+    },
+    "Transfer again": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden aktar"
+          }
+        }
+      }
+    },
+    "Folder transfer was cancelled; leftover partial files at the destination must be cleaned up manually (this app doesn't recursively delete folders).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör aktarımı iptal edildi; hedefte kalan kısmi dosyalar elle temizlenmeli (bu uygulama klasörleri özyinelemeli silmez)."
+          }
+        }
+      }
+    },
+    "Folder transfer failed; leftover partial files at the destination must be cleaned up manually (this app doesn't recursively delete folders).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör aktarımı başarısız oldu; hedefte kalan kısmi dosyalar elle temizlenmeli (bu uygulama klasörleri özyinelemeli silmez)."
+          }
+        }
+      }
+    },
+    "Partial file deleted": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kısmi dosya silindi"
+          }
+        }
+      }
+    },
+    "Delete partial file…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kısmi dosyayı sil…"
+          }
+        }
+      }
+    },
+    "Delete partial file?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kısmi dosya silinsin mi?"
+          }
+        }
+      }
+    },
+    "The remote file on %@ will be permanently deleted:\n%@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ üzerinde uzak dosya kalıcı olarak silinecek:\n%@"
+          }
+        }
+      }
+    },
+    "The local file will be permanently deleted:\n%@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel dosya kalıcı olarak silinecek:\n%@"
+          }
+        }
+      }
+    },
+    "New Folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni Klasör"
+          }
+        }
+      }
+    },
+    "Folder name": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör adı"
+          }
+        }
+      }
+    },
+    "Create": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oluştur"
+          }
+        }
+      }
+    },
+    "A new folder will be added inside %@.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ içine yeni klasör eklenecek."
+          }
+        }
+      }
+    },
+    "Folder could not be created": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Rename": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden Adlandır"
+          }
+        }
+      }
+    },
+    "New name": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni ad"
+          }
+        }
+      }
+    },
+    "Enter a new name for \"%@\".": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%@\" için yeni ad gir."
+          }
+        }
+      }
+    },
+    "Could not rename": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden adlandırılamadı"
+          }
+        }
+      }
+    },
+    "Could not delete": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silinemedi"
+          }
+        }
+      }
+    },
+    "\"%@\" (%@) will be permanently deleted. This action cannot be undone. Only an empty folder can be deleted; this app doesn't delete folders recursively.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%@\" (%@) kalıcı olarak silinecek. Bu işlem geri alınamaz. Klasör yalnızca boşsa silinebilir; bu uygulama klasörleri özyinelemeli (recursive) silmez."
+          }
+        }
+      }
+    },
+    "\"%@\" (%@) will be permanently deleted. This action cannot be undone.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%@\" (%@) kalıcı olarak silinecek. Bu işlem geri alınamaz."
+          }
+        }
+      }
+    },
+    "Select remote folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak klasör seç"
+          }
+        }
+      }
+    },
+    "Select remote file": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak dosya seç"
+          }
+        }
+      }
+    },
+    "Home folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana klasör"
+          }
+        }
+      }
+    },
+    "Go to remote home folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak ana klasöre git"
+          }
+        }
+      }
+    },
+    "Parent folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Üst klasör"
+          }
+        }
+      }
+    },
+    "Go to parent folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Üst klasöre git"
+          }
+        }
+      }
+    },
+    "Refresh remote folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak klasörü yenile"
+          }
+        }
+      }
+    },
+    "Create a new folder at this location": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu konumda yeni klasör oluştur"
+          }
+        }
+      }
+    },
+    "Create new folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni klasör oluştur"
+          }
+        }
+      }
+    },
+    "Enter path manually": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yolu elle gir"
+          }
+        }
+      }
+    },
+    "Remote folder path": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak klasör yolu"
+          }
+        }
+      }
+    },
+    "e.g. /var/www": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. /var/www"
+          }
+        }
+      }
+    },
+    "Go": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git"
+          }
+        }
+      }
+    },
+    "Remote folder could not be opened": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak klasör açılamadı"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekrar dene"
+          }
+        }
+      }
+    },
+    "Folder is empty": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör boş"
+          }
+        }
+      }
+    },
+    "No files to show in this remote folder.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu uzak klasörde gösterilecek dosya bulunamadı."
+          }
+        }
+      }
+    },
+    "Actions for %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ için işlemler"
+          }
+        }
+      }
+    },
+    "Loading remote folder…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak klasör yükleniyor…"
+          }
+        }
+      }
+    },
+    "Select this folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu klasörü seç"
+          }
+        }
+      }
+    },
+    "Select file": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosyayı seç"
+          }
+        }
+      }
+    },
+    "Rename…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden Adlandır…"
+          }
+        }
+      }
+    },
+    "Delete…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sil…"
+          }
+        }
+      }
+    },
+    "%@, folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, klasör"
+          }
+        }
+      }
+    },
+    "%@, file": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, dosya"
+          }
+        }
+      }
+    },
+    "%@, symbolic link": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, sembolik bağlantı"
+          }
+        }
+      }
+    },
+    "Overwrite the local file?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel dosyanın üzerine yazılsın mı?"
+          }
+        }
+      }
+    },
+    "Overwrite and download": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Üzerine yaz ve indir"
+          }
+        }
+      }
+    },
+    "The selected local file already exists and will be replaced by the downloaded file.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçilen yerel dosya zaten var ve indirilen dosyayla değiştirilecek."
+          }
+        }
+      }
+    },
+    "Transfer file": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya aktar"
+          }
+        }
+      }
+    },
+    "New Transfer": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni Aktarım"
+          }
+        }
+      }
+    },
+    "Queue (%lld)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuyruk (%lld)"
+          }
+        }
+      }
+    },
+    "Direction": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İşlem"
+          }
+        }
+      }
+    },
+    "Advanced": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelişmiş"
+          }
+        }
+      }
+    },
+    "Protocol": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protokol"
+          }
+        }
+      }
+    },
+    "SFTP must be enabled on the server (sftp-server subsystem).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SFTP sunucuda etkin olmalıdır (sftp-server alt sistemi)."
+          }
+        }
+      }
+    },
+    "Concurrent transfers: %lld": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eşzamanlı aktarım: %lld"
+          }
+        }
+      }
+    },
+    "Verify checksum after transfer": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarım sonrası checksum doğrula"
+          }
+        }
+      }
+    },
+    "Checksum verification is skipped for folder transfers.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör aktarımlarında checksum doğrulaması atlanır."
+          }
+        }
+      }
+    },
+    "Add new transfer": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni Aktarım Ekle"
+          }
+        }
+      }
+    },
+    "Total progress: %lld%%": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toplam ilerleme: %%%lld"
+          }
+        }
+      }
+    },
+    "Clear completed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamamlananları Temizle"
+          }
+        }
+      }
+    },
+    "Continue in Background": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arkaplanda Devam Et"
+          }
+        }
+      }
+    },
+    "Add to queue": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuyruğa Ekle"
+          }
+        }
+      }
+    },
+    "Local files and folders": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel dosya ve klasörler"
+          }
+        }
+      }
+    },
+    "No file or folder selected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya veya klasör seçilmedi"
+          }
+        }
+      }
+    },
+    "Add file or folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya veya Klasör Ekle"
+          }
+        }
+      }
+    },
+    "Destination folder on server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucudaki hedef klasör"
+          }
+        }
+      }
+    },
+    "No folder selected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör seçilmedi"
+          }
+        }
+      }
+    },
+    "Choose the remote folder to upload files to": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosyaların yükleneceği uzak klasörü seç"
+          }
+        }
+      }
+    },
+    "Choose folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör seç"
+          }
+        }
+      }
+    },
+    "Change": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değiştir"
+          }
+        }
+      }
+    },
+    "File on server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucudaki dosya"
+          }
+        }
+      }
+    },
+    "No file selected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya seçilmedi"
+          }
+        }
+      }
+    },
+    "Browse folders on the server to choose the file to download": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucudaki klasörleri gezerek indirilecek dosyayı seç"
+          }
+        }
+      }
+    },
+    "Choose file": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya seç"
+          }
+        }
+      }
+    },
+    "Local save location": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel kayıt yeri"
+          }
+        }
+      }
+    },
+    "No save location selected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kayıt yeri seçilmedi"
+          }
+        }
+      }
+    },
+    "Select the remote file first": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önce uzak dosyayı seç"
+          }
+        }
+      }
+    },
+    "The filename will be pre-filled": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya adı hazır olarak getirilecek"
+          }
+        }
+      }
+    },
+    "Choose save location": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kayıt yeri seç"
+          }
+        }
+      }
+    },
+    "Starting…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlatılıyor…"
+          }
+        }
+      }
+    },
+    "%lld%%": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%%%lld"
+          }
+        }
+      }
+    },
+    "%lldm %llds remaining": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldd %llds kaldı"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -190,12 +190,12 @@ final class TransferHistoryStoreTests: XCTestCase {
     func testRecordFromFailedItemStoresFailureMessage() {
         var item = makeItem()
         item.markActive()
-        item.markFailed("bağlantı zaman aşımına uğradı")
+        item.markFailed("connection timed out")
 
-        let record = TransferHistoryRecord(item: item, outcome: .failed, failureMessage: "bağlantı zaman aşımına uğradı")
+        let record = TransferHistoryRecord(item: item, outcome: .failed, failureMessage: "connection timed out")
 
         XCTAssertEqual(record.outcome, .failed)
-        XCTAssertEqual(record.failureMessage, "bağlantı zaman aşımına uğradı")
+        XCTAssertEqual(record.failureMessage, "connection timed out")
     }
 
     func testRecordFromCancelledItemHasNoFailureMessage() {

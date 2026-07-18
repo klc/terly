@@ -9,9 +9,9 @@ enum SCPTransferDirection: String, CaseIterable, Identifiable, Codable, Sendable
     var label: String {
         switch self {
         case .upload:
-            return "Yükle"
+            return String(localized: "Upload")
         case .download:
-            return "İndir"
+            return String(localized: "Download")
         }
     }
 }
@@ -81,21 +81,21 @@ enum SCPTransferError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .transferAlreadyInProgress:
-            return "Devam eden aktarım bitmeden yeni bir aktarım başlatılamaz."
+            return String(localized: "A new transfer can't start until the current one finishes.")
         case .unsavedChanges:
-            return "Aktarımı başlatmadan önce değişiklikleri kaydet. SCP diskteki ~/.ssh/config dosyasını kullanır."
+            return String(localized: "Save your changes before starting the transfer. SCP uses the ~/.ssh/config file on disk.")
         case .noConcreteAlias:
-            return "Dosya aktarımı için somut bir SSH alias'ı seç."
+            return String(localized: "Select a specific SSH alias for the file transfer.")
         case .missingLocalFile:
-            return "Seçilen yerel dosya bulunamadı."
+            return String(localized: "The selected local file could not be found.")
         case .localFileIsDirectory:
-            return "Bu sürümde yalnızca tek bir dosya aktarılabilir; klasör seçilemez."
+            return String(localized: "Only a single file can be transferred in this version; folders aren't supported.")
         case .missingDestinationDirectory:
-            return "Yerel hedef klasör bulunamadı."
+            return String(localized: "The local destination folder could not be found.")
         case .invalidRemotePath:
-            return "Uzak dosya yolu boş olamaz ve satır sonu içeremez."
+            return String(localized: "The remote file path can't be empty or contain a line break.")
         case let .processFailed(_, output):
-            return output.isEmpty ? "SCP aktarımı tamamlanamadı." : output
+            return output.isEmpty ? String(localized: "The SCP transfer could not complete.") : output
         }
     }
 }

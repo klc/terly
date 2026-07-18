@@ -101,11 +101,11 @@ struct TransferItem: Identifiable, Sendable {
 
     var stateLabel: String {
         switch state {
-        case .waiting: return "Bekliyor"
-        case .active: return "Aktarılıyor"
-        case .succeeded: return "Tamamlandı"
-        case .failed: return "Başarısız"
-        case .cancelled: return "İptal edildi"
+        case .waiting: return String(localized: "Waiting")
+        case .active: return String(localized: "Transferring")
+        case .succeeded: return String(localized: "Completed")
+        case .failed: return String(localized: "Failed")
+        case .cancelled: return String(localized: "Cancelled")
         }
     }
 
@@ -171,10 +171,12 @@ struct TransferItem: Identifiable, Sendable {
     private func formatETA(_ seconds: TimeInterval) -> String {
         guard seconds.isFinite, seconds > 0 else { return "" }
         let total = Int(seconds.rounded())
-        if total < 60 { return "\(total)s kaldı" }
+        // TODO(plural)
+        if total < 60 { return String(localized: "\(total)s remaining") }
         let minutes = total / 60
         let secs = total % 60
-        return "\(minutes)d \(secs)s kaldı"
+        // TODO(plural)
+        return String(localized: "\(minutes)m \(secs)s remaining")
     }
 }
 

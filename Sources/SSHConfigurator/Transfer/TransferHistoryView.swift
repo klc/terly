@@ -37,11 +37,11 @@ struct TransferHistoryView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Toggle("Yolları maskele", isOn: $redactPaths)
+            Toggle("Mask paths", isOn: $redactPaths)
                 .toggleStyle(.checkbox)
-                .help("Bu listede ana dizini \"~\" ile kısaltır ve kullanıcı adını gizler. Yalnızca görünümü etkiler; \"Yeniden aktar\" gerçek yolu kullanmaya devam eder.")
+                .help("Shortens the home directory to \"~\" and hides the username in this list. Display only — \"Transfer again\" still uses the real path.")
             Spacer()
-            Button("Geçmişi Temizle", role: .destructive) {
+            Button("Clear history", role: .destructive) {
                 showingClearConfirmation = true
             }
             .controlSize(.small)
@@ -50,21 +50,21 @@ struct TransferHistoryView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .confirmationDialog(
-            "Aktarım geçmişi temizlensin mi?",
+            "Clear transfer history?",
             isPresented: $showingClearConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Geçmişi Temizle", role: .destructive) {
+            Button("Clear history", role: .destructive) {
                 historyLibrary.clear()
             }
         } message: {
-            Text("Bu yalnızca geçmiş kaydını siler; aktarılan veya kısmi kalan dosyalara dokunulmaz.")
+            Text("This only deletes the history record; transferred or partially transferred files are left untouched.")
         }
     }
 
     private var emptyState: some View {
         ContentUnavailableView(
-            "Aktarım geçmişi boş",
+            "Transfer history is empty",
             systemImage: "clock.arrow.circlepath"
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -121,12 +121,12 @@ private struct TransferHistoryRow: View {
                         outcomeLabel
                     }
 
-                    Text("Yerel: \(displayPath(record.localPath))")
+                    Text("Local: \(displayPath(record.localPath))")
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
-                    Text("Uzak: \(displayPath(record.remotePath))")
+                    Text("Remote: \(displayPath(record.remotePath))")
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -155,7 +155,7 @@ private struct TransferHistoryRow: View {
 
                 Spacer(minLength: 0)
 
-                Button("Yeniden aktar") {
+                Button("Transfer again") {
                     retryErrorMessage = nil
                     if case let .failure(error) = onRetry(record) {
                         retryErrorMessage = error.errorDescription
@@ -180,15 +180,12 @@ private struct TransferHistoryRow: View {
     @ViewBuilder
     private var partialFileSection: some View {
         if record.isDirectory, record.outcome != .completed {
-            Text(
-                "Klasör aktarımı \(record.outcome == .cancelled ? "iptal edildi" : "başarısız oldu"); " +
-                "hedefte kalan kısmi dosyalar elle temizlenmeli (bu uygulama klasörleri özyinelemeli silmez)."
-            )
-            .font(.caption)
-            .foregroundStyle(.orange)
+            Text(folderPartialCleanupMessage)
+                .font(.caption)
+                .foregroundStyle(.orange)
         } else if record.offersPartialFileCleanup {
             if partialFileDeleted {
-                Label("Kısmi dosya silindi", systemImage: "checkmark.circle")
+                Label("Partial file deleted", systemImage: "checkmark.circle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -199,7 +196,7 @@ private struct TransferHistoryRow: View {
                         if isDeletingPartialFile {
                             ProgressView().controlSize(.mini)
                         } else {
-                            Text("Kısmi dosyayı sil…")
+                            Text("Delete partial file…")
                         }
                     }
                     .controlSize(.small)
@@ -212,11 +209,11 @@ private struct TransferHistoryRow: View {
                     }
                 }
                 .confirmationDialog(
-                    "Kısmi dosya silinsin mi?",
+                    "Delete partial file?",
                     isPresented: $showingDeleteConfirmation,
                     titleVisibility: .visible
                 ) {
-                    Button("Sil", role: .destructive) { deletePartialFile() }
+                    Button("Delete", role: .destructive) { deletePartialFile() }
                 } message: {
                     Text(partialFileConfirmationMessage)
                 }
@@ -224,10 +221,18 @@ private struct TransferHistoryRow: View {
         }
     }
 
+    private var folderPartialCleanupMessage: String {
+        record.outcome == .cancelled
+            ? String(localized: "Folder transfer was cancelled; leftover partial files at the destination must be cleaned up manually (this app doesn't recursively delete folders).")
+            : String(localized: "Folder transfer failed; leftover partial files at the destination must be cleaned up manually (this app doesn't recursively delete folders).")
+    }
+
     private var partialFileConfirmationMessage: String {
         let target = record.partialFileTarget
-        let location = target.isRemote ? "\(record.alias) üzerinde uzak" : "Yerel"
-        return "\(location) dosya kalıcı olarak silinecek:\n\(target.path)"
+        if target.isRemote {
+            return String(localized: "The remote file on \(record.alias) will be permanently deleted:\n\(target.path)")
+        }
+        return String(localized: "The local file will be permanently deleted:\n\(target.path)")
     }
 
     private func deletePartialFile() {
@@ -274,9 +279,9 @@ private struct TransferHistoryRow: View {
     private var outcomeLabel: some View {
         let (text, icon, color): (String, String, Color) = {
             switch record.outcome {
-            case .completed: return ("Tamamlandı", "checkmark.circle.fill", .green)
-            case .failed: return ("Başarısız", "exclamationmark.circle.fill", .red)
-            case .cancelled: return ("İptal edildi", "xmark.circle", .secondary)
+            case .completed: return (String(localized: "Completed"), "checkmark.circle.fill", .green)
+            case .failed: return (String(localized: "Failed"), "exclamationmark.circle.fill", .red)
+            case .cancelled: return (String(localized: "Cancelled"), "xmark.circle", .secondary)
             }
         }()
         return Label(text, systemImage: icon)

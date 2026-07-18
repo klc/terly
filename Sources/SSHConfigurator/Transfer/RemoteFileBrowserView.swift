@@ -224,22 +224,22 @@ struct RemoteFileBrowserSheet: View {
             model.loadInitialPath()
         }
         // "Yeni Klasör" ad girişi alert
-        .alert("Yeni Klasör", isPresented: $showingCreateFolder) {
-            TextField("Klasör adı", text: $newFolderName)
-            Button("Oluştur") {
+        .alert("New Folder", isPresented: $showingCreateFolder) {
+            TextField("Folder name", text: $newFolderName)
+            Button("Create") {
                 model.createDirectory(name: newFolderName)
                 newFolderName = ""
             }
             .disabled(!RemoteFileNameValidator.isValid(newFolderName))
-            Button("Vazgeç", role: .cancel) { newFolderName = "" }
+            Button("Cancel", role: .cancel) { newFolderName = "" }
         } message: {
             if let currentPath = model.snapshot?.path {
-                Text("\(currentPath) içine yeni klasör eklenecek.")
+                Text("A new folder will be added inside \(currentPath).")
             }
         }
         // Oluşturma hatası alert — düzgün dismiss edilebilen binding
-        .alert("Klasör oluşturulamadı", isPresented: $showingCreateError) {
-            Button("Tamam") { model.clearCreateError() }
+        .alert("Folder could not be created", isPresented: $showingCreateError) {
+            Button("OK") { model.clearCreateError() }
         } message: {
             Text(model.createError ?? "")
         }
@@ -248,14 +248,14 @@ struct RemoteFileBrowserSheet: View {
         }
         // "Yeniden Adlandır" ad girişi alert
         .alert(
-            "Yeniden Adlandır",
+            "Rename",
             isPresented: Binding(
                 get: { renamingEntry != nil },
                 set: { isPresented in if !isPresented { renamingEntry = nil } }
             )
         ) {
-            TextField("Yeni ad", text: $renameText)
-            Button("Yeniden Adlandır") {
+            TextField("New name", text: $renameText)
+            Button("Rename") {
                 if let entry = renamingEntry {
                     model.rename(entry: entry, to: renameText)
                 }
@@ -263,17 +263,17 @@ struct RemoteFileBrowserSheet: View {
                 renameText = ""
             }
             .disabled(!RemoteFileNameValidator.isValid(renameText))
-            Button("Vazgeç", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 renamingEntry = nil
                 renameText = ""
             }
         } message: {
             if let entry = renamingEntry {
-                Text("\"\(entry.name)\" için yeni ad gir.")
+                Text("Enter a new name for \"\(entry.name)\".")
             }
         }
-        .alert("Yeniden adlandırılamadı", isPresented: $showingRenameError) {
-            Button("Tamam") { model.clearRenameError() }
+        .alert("Could not rename", isPresented: $showingRenameError) {
+            Button("OK") { model.clearRenameError() }
         } message: {
             Text(model.renameError ?? "")
         }
@@ -282,27 +282,27 @@ struct RemoteFileBrowserSheet: View {
         }
         // Silme onayı — dosya adı ve tam uzak yol gösterilir.
         .confirmationDialog(
-            "Sil",
+            "Delete",
             isPresented: Binding(
                 get: { deletingEntry != nil },
                 set: { isPresented in if !isPresented { deletingEntry = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Sil", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let entry = deletingEntry {
                     model.delete(entry: entry)
                 }
                 deletingEntry = nil
             }
-            Button("Vazgeç", role: .cancel) { deletingEntry = nil }
+            Button("Cancel", role: .cancel) { deletingEntry = nil }
         } message: {
             if let entry = deletingEntry {
                 Text(deleteConfirmationMessage(for: entry))
             }
         }
-        .alert("Silinemedi", isPresented: $showingDeleteError) {
-            Button("Tamam") { model.clearDeleteError() }
+        .alert("Could not delete", isPresented: $showingDeleteError) {
+            Button("OK") { model.clearDeleteError() }
         } message: {
             Text(model.deleteError ?? "")
         }
@@ -312,55 +312,56 @@ struct RemoteFileBrowserSheet: View {
     }
 
     private func deleteConfirmationMessage(for entry: RemoteFileEntry) -> String {
-        let base = "\"\(entry.name)\" (\(entry.path)) kalıcı olarak silinecek. Bu işlem geri alınamaz."
-        guard entry.kind == .directory else { return base }
-        return base + " Klasör yalnızca boşsa silinebilir; bu uygulama klasörleri özyinelemeli (recursive) silmez."
+        if entry.kind == .directory {
+            return String(localized: "\"\(entry.name)\" (\(entry.path)) will be permanently deleted. This action cannot be undone. Only an empty folder can be deleted; this app doesn't delete folders recursively.")
+        }
+        return String(localized: "\"\(entry.name)\" (\(entry.path)) will be permanently deleted. This action cannot be undone.")
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(mode == .directory ? "Uzak klasör seç" : "Uzak dosya seç")
+                    Text(mode == .directory ? "Select remote folder" : "Select remote file")
                         .font(.title2.weight(.semibold))
                     Text(model.alias)
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("Ana klasör", systemImage: "house") {
+                Button("Home folder", systemImage: "house") {
                     model.loadHome()
                 }
                 .labelStyle(.iconOnly)
-                .help("Uzak ana klasöre git")
-                .accessibilityLabel("Uzak ana klasöre git")
+                .help("Go to remote home folder")
+                .accessibilityLabel("Go to remote home folder")
 
-                Button("Üst klasör", systemImage: "arrow.up") {
+                Button("Parent folder", systemImage: "arrow.up") {
                     model.loadParent()
                 }
                 .labelStyle(.iconOnly)
-                .help("Üst klasöre git")
-                .accessibilityLabel("Üst klasöre git")
+                .help("Go to parent folder")
+                .accessibilityLabel("Go to parent folder")
                 .disabled(model.snapshot?.path == "/" || model.snapshot == nil)
 
-                Button("Yenile", systemImage: "arrow.clockwise") {
+                Button("Refresh", systemImage: "arrow.clockwise") {
                     model.refresh()
                 }
                 .labelStyle(.iconOnly)
-                .help("Uzak klasörü yenile")
-                .accessibilityLabel("Uzak klasörü yenile")
+                .help("Refresh remote folder")
+                .accessibilityLabel("Refresh remote folder")
 
                 if mode == .directory {
                     Divider()
                         .padding(.horizontal, 2)
 
-                    Button("Yeni Klasör", systemImage: "folder.badge.plus") {
+                    Button("New Folder", systemImage: "folder.badge.plus") {
                         newFolderName = ""
                         showingCreateFolder = true
                     }
                     .labelStyle(.iconOnly)
-                    .help("Bu konumda yeni klasör oluştur")
-                    .accessibilityLabel("Yeni klasör oluştur")
+                    .help("Create a new folder at this location")
+                    .accessibilityLabel("Create new folder")
                     .disabled(model.snapshot == nil || model.isLoading || model.isCreatingDirectory)
                 }
             }
@@ -383,12 +384,12 @@ struct RemoteFileBrowserSheet: View {
                 .font(.callout.monospaced())
             }
 
-            DisclosureGroup("Yolu elle gir", isExpanded: $showingManualPath) {
+            DisclosureGroup("Enter path manually", isExpanded: $showingManualPath) {
                 HStack {
-                    TextField("Uzak klasör yolu", text: $model.manualPath, prompt: Text("örn. /var/www"))
+                    TextField("Remote folder path", text: $model.manualPath, prompt: Text("e.g. /var/www"))
                         .textFieldStyle(.roundedBorder)
                         .onSubmit { model.loadManualPath() }
-                    Button("Git") {
+                    Button("Go") {
                         model.loadManualPath()
                     }
                     .disabled(model.manualPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -405,17 +406,17 @@ struct RemoteFileBrowserSheet: View {
         ZStack {
             if let error = model.errorMessage {
                 ContentUnavailableView {
-                    Label("Uzak klasör açılamadı", systemImage: "exclamationmark.triangle")
+                    Label("Remote folder could not be opened", systemImage: "exclamationmark.triangle")
                 } description: {
                     Text(error)
                 } actions: {
-                    Button("Tekrar dene") { model.refresh() }
+                    Button("Try again") { model.refresh() }
                 }
             } else if let entries = model.snapshot?.entries, entries.isEmpty, !model.isLoading {
                 ContentUnavailableView(
-                    "Klasör boş",
+                    "Folder is empty",
                     systemImage: "folder",
-                    description: Text("Bu uzak klasörde gösterilecek dosya bulunamadı.")
+                    description: Text("No files to show in this remote folder.")
                 )
             } else {
                 List {
@@ -455,8 +456,8 @@ struct RemoteFileBrowserSheet: View {
                             }
                             .menuStyle(.borderlessButton)
                             .frame(width: 22)
-                            .help("\(entry.name) için işlemler")
-                            .accessibilityLabel("\(entry.name) için işlemler")
+                            .help("Actions for \(entry.name)")
+                            .accessibilityLabel("Actions for \(entry.name)")
 
                             if entry.kind == .directory {
                                 Image(systemName: "chevron.right")
@@ -484,7 +485,7 @@ struct RemoteFileBrowserSheet: View {
                     // chain, and this List has no `selection:` binding (rows are plain Buttons) — its
                     // actual focus behavior couldn't be verified without a live SFTP host, so the
                     // always-fires `.keyboardShortcut(.delete)` hack is kept per plan's fallback rule.
-                    Button("Sil") {
+                    Button("Delete") {
                         if let entry = model.selectedFile {
                             deletingEntry = entry
                         }
@@ -496,7 +497,7 @@ struct RemoteFileBrowserSheet: View {
             }
 
             if model.isLoading {
-                ProgressView("Uzak klasör yükleniyor…")
+                ProgressView("Loading remote folder…")
                     .padding(18)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
             }
@@ -518,10 +519,10 @@ struct RemoteFileBrowserSheet: View {
                     .lineLimit(1)
             }
             Spacer()
-            Button("Vazgeç", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 dismiss()
             }
-            Button(mode == .directory ? "Bu klasörü seç" : "Dosyayı seç") {
+            Button(mode == .directory ? "Select this folder" : "Select file") {
                 selectCurrentItem()
             }
             .buttonStyle(.borderedProminent)
@@ -556,11 +557,11 @@ struct RemoteFileBrowserSheet: View {
     /// context menu and the trailing ellipsis menu button on each row.
     @ViewBuilder
     private func rowActions(for entry: RemoteFileEntry) -> some View {
-        Button("Yeniden Adlandır…") {
+        Button("Rename…") {
             renamingEntry = entry
             renameText = entry.name
         }
-        Button("Sil…", role: .destructive) {
+        Button("Delete…", role: .destructive) {
             deletingEntry = entry
         }
     }
@@ -579,11 +580,11 @@ struct RemoteFileBrowserSheet: View {
     private func accessibilityLabel(for entry: RemoteFileEntry) -> String {
         switch entry.kind {
         case .directory:
-            return "\(entry.name), klasör"
+            return String(localized: "\(entry.name), folder")
         case .file:
-            return "\(entry.name), dosya"
+            return String(localized: "\(entry.name), file")
         case .symbolicLink:
-            return "\(entry.name), sembolik bağlantı"
+            return String(localized: "\(entry.name), symbolic link")
         }
     }
 }

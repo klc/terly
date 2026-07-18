@@ -48,15 +48,15 @@ enum RemoteFileBrowserError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .invalidAlias:
-            return "Uzak dosyaları listelemek için somut bir SSH alias'ı seç."
+            return String(localized: "Select a specific SSH alias to list remote files.")
         case .invalidPath:
-            return "Uzak klasör yolu geçerli değil."
+            return String(localized: "The remote folder path isn't valid.")
         case .invalidName:
-            return "Ad boş olamaz, \"/\" içeremez ve \".\" ya da \"..\" olamaz."
+            return String(localized: "Name can't be empty, can't contain \"/\", and can't be \".\" or \"..\".")
         case let .processFailed(message):
-            return message.isEmpty ? "Uzak dosyalar listelenemedi." : message
+            return message.isEmpty ? String(localized: "Couldn't list remote files.") : message
         case .unreadableListing:
-            return "SFTP klasör çıktısı okunamadı."
+            return String(localized: "Couldn't read the SFTP folder output.")
         }
     }
 }
