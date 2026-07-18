@@ -1,0 +1,424 @@
+import Foundation
+
+enum TerminalEngineIdentifier: String, Sendable {
+    case swiftTerm = "swiftterm"
+    case ghostty = "ghostty"
+}
+
+struct TerminalProcessConfiguration: Equatable, Sendable {
+    let executableURL: URL
+    let arguments: [String]
+    let environment: [String: String]
+    let currentDirectoryURL: URL?
+}
+
+enum TerminalSplitAxis: String, Equatable, Sendable, Codable {
+    case vertical
+    case horizontal
+}
+
+struct TerminalPane: Identifiable, Equatable, Sendable {
+    enum Status: Equatable, Sendable {
+        case running
+        case exited(Int32?)
+    }
+
+    let id: UUID
+    let alias: String
+    let process: TerminalProcessConfiguration
+    var status: Status
+    let startupExecution: StartupFlowExecution?
+    var startupState: StartupFlowRunState?
+
+    init(
+        id: UUID = UUID(),
+        alias: String,
+        process: TerminalProcessConfiguration,
+        status: Status = .running,
+        startupExecution: StartupFlowExecution? = nil,
+        startupState: StartupFlowRunState? = nil
+    ) {
+        self.id = id
+        self.alias = alias
+        self.process = process
+        self.status = status
+        self.startupExecution = startupExecution
+        self.startupState = startupState
+    }
+}
+
+indirect enum TerminalPaneLayout: Equatable, Sendable {
+    case pane(TerminalPane)
+    case split(
+        id: UUID,
+        axis: TerminalSplitAxis,
+        first: TerminalPaneLayout,
+        second: TerminalPaneLayout
+    )
+
+    var panes: [TerminalPane] {
+        switch self {
+        case let .pane(pane):
+            return [pane]
+        case let .split(_, _, first, second):
+            return first.panes + second.panes
+        }
+    }
+
+    static func tiled(_ panes: [TerminalPane], depth: Int = 0) -> TerminalPaneLayout? {
+        guard !panes.isEmpty else { return nil }
+        guard panes.count > 1 else { return .pane(panes[0]) }
+
+        let midpoint = (panes.count + 1) / 2
+        guard let first = tiled(Array(panes[..<midpoint]), depth: depth + 1),
+              let second = tiled(Array(panes[midpoint...]), depth: depth + 1) else {
+            return nil
+        }
+
+        return .split(
+            id: UUID(),
+            axis: depth.isMultiple(of: 2) ? .vertical : .horizontal,
+            first: first,
+            second: second
+        )
+    }
+
+    func pane(id: TerminalPane.ID) -> TerminalPane? {
+        switch self {
+        case let .pane(pane):
+            return pane.id == id ? pane : nil
+        case let .split(_, _, first, second):
+            return first.pane(id: id) ?? second.pane(id: id)
+        }
+    }
+
+    func splitting(
+        paneID: TerminalPane.ID,
+        with newPane: TerminalPane,
+        axis: TerminalSplitAxis
+    ) -> TerminalPaneLayout? {
+        switch self {
+        case let .pane(pane):
+            guard pane.id == paneID else { return nil }
+            return .split(
+                id: UUID(),
+                axis: axis,
+                first: .pane(pane),
+                second: .pane(newPane)
+            )
+
+        case let .split(id, currentAxis, first, second):
+            if let updatedFirst = first.splitting(paneID: paneID, with: newPane, axis: axis) {
+                return .split(id: id, axis: currentAxis, first: updatedFirst, second: second)
+            }
+            if let updatedSecond = second.splitting(paneID: paneID, with: newPane, axis: axis) {
+                return .split(id: id, axis: currentAxis, first: first, second: updatedSecond)
+            }
+            return nil
+        }
+    }
+
+    func removing(paneID: TerminalPane.ID) -> TerminalPaneLayout? {
+        switch self {
+        case let .pane(pane):
+            return pane.id == paneID ? nil : self
+
+        case let .split(id, axis, first, second):
+            let updatedFirst = first.removing(paneID: paneID)
+            let updatedSecond = second.removing(paneID: paneID)
+
+            switch (updatedFirst, updatedSecond) {
+            case let (.some(first), .some(second)):
+                return .split(id: id, axis: axis, first: first, second: second)
+            case let (.some(remaining), .none), let (.none, .some(remaining)):
+                return remaining
+            case (.none, .none):
+                return nil
+            }
+        }
+    }
+
+    func updatingPaneStatus(
+        paneID: TerminalPane.ID,
+        status: TerminalPane.Status
+    ) -> TerminalPaneLayout {
+        switch self {
+        case .pane(var pane):
+            if pane.id == paneID {
+                pane.status = status
+            }
+            return .pane(pane)
+
+        case let .split(id, axis, first, second):
+            return .split(
+                id: id,
+                axis: axis,
+                first: first.updatingPaneStatus(paneID: paneID, status: status),
+                second: second.updatingPaneStatus(paneID: paneID, status: status)
+            )
+        }
+    }
+
+    func updatingStartupState(
+        paneID: TerminalPane.ID,
+        state: StartupFlowRunState
+    ) -> TerminalPaneLayout {
+        switch self {
+        case .pane(var pane):
+            if pane.id == paneID {
+                pane.startupState = state
+            }
+            return .pane(pane)
+
+        case let .split(id, axis, first, second):
+            return .split(
+                id: id,
+                axis: axis,
+                first: first.updatingStartupState(paneID: paneID, state: state),
+                second: second.updatingStartupState(paneID: paneID, state: state)
+            )
+        }
+    }
+
+    func replacing(
+        paneID: TerminalPane.ID,
+        with newPane: TerminalPane
+    ) -> TerminalPaneLayout {
+        switch self {
+        case let .pane(pane):
+            return pane.id == paneID ? .pane(newPane) : self
+
+        case let .split(id, axis, first, second):
+            return .split(
+                id: id,
+                axis: axis,
+                first: first.replacing(paneID: paneID, with: newPane),
+                second: second.replacing(paneID: paneID, with: newPane)
+            )
+        }
+    }
+}
+
+struct TerminalSession: Identifiable, Equatable, Sendable {
+    let id: UUID
+    let hostID: Int
+    let alias: String
+    let groupID: UUID?
+    var layout: TerminalPaneLayout
+    var activePaneID: TerminalPane.ID
+    var synchronizedPaneIDs: Set<TerminalPane.ID>
+
+    init(
+        id: UUID = UUID(),
+        hostID: Int,
+        alias: String,
+        initialPane: TerminalPane,
+        groupID: UUID? = nil
+    ) {
+        self.id = id
+        self.hostID = hostID
+        self.alias = alias
+        self.groupID = groupID
+        layout = .pane(initialPane)
+        activePaneID = initialPane.id
+        synchronizedPaneIDs = []
+    }
+
+    init(
+        id: UUID = UUID(),
+        hostID: Int,
+        alias: String,
+        groupID: UUID? = nil,
+        layout: TerminalPaneLayout,
+        activePaneID: TerminalPane.ID
+    ) {
+        self.id = id
+        self.hostID = hostID
+        self.alias = alias
+        self.groupID = groupID
+        self.layout = layout
+        self.activePaneID = activePaneID
+        synchronizedPaneIDs = []
+    }
+
+    var panes: [TerminalPane] { layout.panes }
+    var activePane: TerminalPane? { layout.pane(id: activePaneID) }
+    var isStartupRunning: Bool {
+        panes.contains {
+            if case .running = $0.startupState { return true }
+            return false
+        }
+    }
+
+    var status: TerminalPane.Status {
+        if panes.contains(where: { $0.status == .running }) {
+            return .running
+        }
+        return activePane?.status ?? panes.first?.status ?? .exited(nil)
+    }
+}
+
+enum TerminalWorkspaceError: LocalizedError, Equatable {
+    case unsavedChanges
+    case noConcreteAlias
+    case noConnections
+
+    var errorDescription: String? {
+        switch self {
+        case .unsavedChanges:
+            return "Bağlantıyı açmadan önce değişiklikleri kaydet. SSH diskteki ~/.ssh/config dosyasını kullanır."
+        case .noConcreteAlias:
+            return "Wildcard veya olumsuz Host desenleri doğrudan bağlantı olarak açılamaz. Somut bir alias seç."
+        case .noConnections:
+            return "Açılacak bir SSH bağlantısı bulunamadı."
+        }
+    }
+}
+
+struct SSHLaunchPlanBuilder: Sendable {
+    let sshURL: URL
+    let baseEnvironment: [String: String]
+    let currentDirectoryURL: URL?
+    let startupBuilder: StartupFlowBootstrapBuilder
+
+    init(
+        sshURL: URL = URL(fileURLWithPath: "/usr/bin/ssh"),
+        baseEnvironment: [String: String] = ProcessInfo.processInfo.environment,
+        currentDirectoryURL: URL? = FileManager.default.homeDirectoryForCurrentUser,
+        startupBuilder: StartupFlowBootstrapBuilder = StartupFlowBootstrapBuilder()
+    ) {
+        self.sshURL = sshURL
+        self.baseEnvironment = baseEnvironment
+        self.currentDirectoryURL = currentDirectoryURL
+        self.startupBuilder = startupBuilder
+    }
+
+    func makeSession(
+        hostID: Int,
+        alias: String,
+        startupProfile: StartupFlowProfile? = nil,
+        skipStartup: Bool = false
+    ) throws -> TerminalSession {
+        let normalizedAlias = try Self.normalizedAlias(alias)
+        let pane = try makePane(
+            alias: normalizedAlias,
+            startupProfile: startupProfile,
+            skipStartup: skipStartup
+        )
+        return TerminalSession(hostID: hostID, alias: normalizedAlias, initialPane: pane)
+    }
+
+    func makePane(
+        id: UUID = UUID(),
+        alias: String,
+        startupProfile: StartupFlowProfile? = nil,
+        skipStartup: Bool = false
+    ) throws -> TerminalPane {
+        if alias == "Yerel Terminal" || alias == "Local Terminal" {
+            let shellPath = baseEnvironment["SHELL"] ?? "/bin/zsh"
+            let shellURL = URL(fileURLWithPath: shellPath)
+            var environment = SSHProcessEnvironment.interactive(base: baseEnvironment)
+            environment["TERM"] = "xterm-256color"
+            environment["COLORTERM"] = "truecolor"
+            
+            return TerminalPane(
+                id: id,
+                alias: alias,
+                process: TerminalProcessConfiguration(
+                    executableURL: shellURL,
+                    // Login shell: /etc/zprofile (path_helper) ve ~/.zprofile
+                    // çalışsın diye — GUI'den başlayan app'in PATH'inde
+                    // /opt/homebrew/bin yok. Terminal.app da böyle yapar.
+                    arguments: ["-l"],
+                    environment: environment,
+                    currentDirectoryURL: currentDirectoryURL
+                ),
+                startupExecution: nil,
+                startupState: nil
+            )
+        }
+
+        let normalizedAlias = try Self.normalizedAlias(alias)
+
+        var environment = SSHProcessEnvironment.interactive(base: baseEnvironment)
+        environment["TERM"] = "xterm-256color"
+        environment["COLORTERM"] = "truecolor"
+
+        let execution = try startupProfile.flatMap { profile in
+            profile.steps.isEmpty ? nil : try startupBuilder.build(profile: profile)
+        }
+        let shouldRunStartup = execution != nil && startupProfile?.automaticallyRun == true && !skipStartup
+        let arguments = shouldRunStartup
+            ? [
+                "-tt",
+                "-o", "RemoteCommand=none",
+                "-o", "SessionType=default",
+                "--", normalizedAlias, execution!.command,
+            ]
+            : ["--", normalizedAlias]
+        let startupState: StartupFlowRunState? = execution.map { _ in
+            if skipStartup && startupProfile?.automaticallyRun == true { return .skipped }
+            return shouldRunStartup ? .running(stepIndex: nil) : .ready
+        }
+
+        return TerminalPane(
+            id: id,
+            alias: normalizedAlias,
+            process: TerminalProcessConfiguration(
+                executableURL: sshURL,
+                arguments: arguments,
+                environment: environment,
+                currentDirectoryURL: currentDirectoryURL
+            ),
+            startupExecution: execution,
+            startupState: startupState
+        )
+    }
+
+    func makeGroupedSession(
+        groupID: UUID,
+        title: String,
+        targets: [SSHConnectionTarget],
+        startupProfiles: [String: StartupFlowProfile] = [:],
+        skipAllStartups: Bool = false
+    ) throws -> TerminalSession {
+        guard let firstTarget = targets.first else {
+            throw TerminalWorkspaceError.noConnections
+        }
+
+        let panes = try targets.map {
+            try makePane(
+                alias: $0.alias,
+                startupProfile: startupProfiles[$0.alias],
+                skipStartup: skipAllStartups
+            )
+        }
+        guard let layout = TerminalPaneLayout.tiled(panes) else {
+            throw TerminalWorkspaceError.noConnections
+        }
+
+        let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return TerminalSession(
+            hostID: firstTarget.hostID,
+            alias: normalizedTitle.isEmpty ? firstTarget.alias : normalizedTitle,
+            groupID: groupID,
+            layout: layout,
+            activePaneID: panes[0].id
+        )
+    }
+
+    static func isConcreteAlias(_ alias: String) -> Bool {
+        !alias.isEmpty &&
+            !alias.hasPrefix("!") &&
+            !alias.contains("*") &&
+            !alias.contains("?")
+    }
+
+    private static func normalizedAlias(_ alias: String) throws -> String {
+        let normalizedAlias = alias.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard isConcreteAlias(normalizedAlias) else {
+            throw TerminalWorkspaceError.noConcreteAlias
+        }
+        return normalizedAlias
+    }
+}

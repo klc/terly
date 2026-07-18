@@ -1,0 +1,114 @@
+name: SSHConfigurator
+options:
+  minimumXcodeGenVersion: 2.40.0
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    MACOSX_DEPLOYMENT_TARGET: 14.0
+packages:
+  # Fork of upstream 1.14.0 carrying the Metal BufferPool memory-growth fix
+  # (unbounded IOAccelerator regions under htop-like workloads).
+  # Drop back to upstream once the fix lands there. Package.swift pins the same revision.
+  SwiftTerm:
+    url: https://github.com/klc/SwiftTerm.git
+    revision: 63fc5c88c6572e319481f59733d8e6f85b7b6e73
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle.git
+    majorVersion: 2.0.0
+targets:
+  SSHConfigCore:
+    type: framework
+    platform: macOS
+    sources:
+      - Sources/SSHConfigCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.mkilic.Terly.SSHConfigCore
+  SSHConfigurator:
+    type: application
+    platform: macOS
+    productName: Terly
+    sources:
+      - Sources/SSHConfigurator
+    dependencies:
+      - target: SSHConfigCore
+      - package: SwiftTerm
+      - package: Sparkle
+    # NOT: Bu target GENERATE_INFOPLIST_FILE KULLANMAZ — SUFeedURL/SUPublicEDKey/
+    # SUEnableAutomaticChecks Apple'ın bilinen INFOPLIST_KEY_* anahtar tablosunda
+    # olmadığından o mekanizma bu özel anahtarları sessizce yok sayar (test edildi).
+    # Bunun yerine xcodegen'in `info:` bloğu gerçek bir Info.plist dosyası üretir.
+    info:
+      path: Sources/SSHConfigurator/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.utilities
+        # Sparkle appcast/EdDSA anahtarları: gerçek anahtarlar Mustafa'nın `generate_keys`
+        # çıktısından gelecek (bkz. docs/RELEASING.md). Şimdilik placeholder — güncelleme
+        # denetimi bu haliyle çalışmaz, Ayarlar > Güncellemeler bunu algılayıp uyarır.
+        SUFeedURL: https://klc.github.io/terly/appcast.xml
+        SUPublicEDKey: REPLACE_WITH_SPARKLE_PUBLIC_KEY
+        SUEnableAutomaticChecks: false
+    settings:
+      base:
+        # Bundle ID bilinçli olarak eski kaldı: değişirse UserDefaults (@AppStorage)
+        # ve Keychain'deki snippet sırlarına erişim kopar.
+        PRODUCT_BUNDLE_IDENTIFIER: com.mkilic.Terly
+        PRODUCT_NAME: Terly
+        PRODUCT_MODULE_NAME: SSHConfigurator
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+        ENABLE_HARDENED_RUNTIME: YES
+        # Yerel/geliştirme imzası ad-hoc kalır (takım/kimlik gerekmez); gerçek Developer ID
+        # imzası WP9 release.yml içinde xcodebuild -exportOptionsPlist / CODE_SIGN_IDENTITY
+        # komut satırı parametreleriyle CI'da verilir — bu ayar orada override edilir.
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+  SSHConfigCoreTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/SSHConfigCoreTests
+    dependencies:
+      - target: SSHConfigCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  SSHConfiguratorTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/SSHConfiguratorTests
+    dependencies:
+      - target: SSHConfigurator
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Terly.app/Contents/MacOS/Terly"
+  SSHConfiguratorUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - Tests/SSHConfiguratorUITests
+    dependencies:
+      - target: SSHConfigurator
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: SSHConfigurator
+schemes:
+  SSHConfigurator:
+    build:
+      targets:
+        SSHConfigurator: all
+        SSHConfigCoreTests: [test]
+        SSHConfiguratorTests: [test]
+        SSHConfiguratorUITests: [test]
+    test:
+      targets:
+        - SSHConfigCoreTests
+        - SSHConfiguratorTests
+        - SSHConfiguratorUITests

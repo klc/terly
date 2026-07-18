@@ -1,0 +1,236 @@
+name: Release
+
+# Tag push (`v1.0.0`, `v1.2.3`, ...) tetikler. Bkz. docs/RELEASING.md için
+# tüm secret'ların listesi ve Mustafa'nın tek seferlik yapması gerekenler
+# (Developer ID sertifikası, notarytool kimlik bilgisi, Sparkle EdDSA anahtar
+# çifti, gh-pages barındırma). Bu workflow o secret'lar girilmeden de
+# çalışır ama codesign/notarize/appcast adımlarında hata verir — bu
+# beklenen davranıştır (placeholder anahtarlarla "gerçek" bir imzalı/notarize
+# sürüm üretilemez).
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  # Sparkle CLI araçlarının (generate_appcast) indirileceği sürüm. Package.swift
+  # ve project.yml'deki Sparkle SPM paket sürümüyle senkron tutulmalı.
+  SPARKLE_VERSION: "2.9.4"
+
+jobs:
+  release:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      # --- Codesign: Developer ID Application sertifikası ---
+      # MACOS_CERTIFICATE_P12: .p12 dosyasının base64'ü (`base64 -i cert.p12 | pbcopy`)
+      # MACOS_CERTIFICATE_PASSWORD: .p12 parolası
+      - name: Import signing certificate
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -z "$MACOS_CERTIFICATE_P12" ]; then
+            echo "::error::MACOS_CERTIFICATE_P12 secret'ı ayarlanmamış — bkz. docs/RELEASING.md"
+            exit 1
+          fi
+          KEYCHAIN_PATH="$RUNNER_TEMP/release-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          CERT_PATH="$RUNNER_TEMP/certificate.p12"
+
+          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > "$CERT_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          EXISTING_KEYCHAINS="$(security list-keychains -d user | sed 's/"//g')"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_KEYCHAINS
+
+          rm -f "$CERT_PATH"
+
+      - name: Archive (Release, Developer ID signed)
+        env:
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+        run: |
+          xcodebuild \
+            -project SSHConfigurator.xcodeproj \
+            -scheme SSHConfigurator \
+            -configuration Release \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            DEVELOPMENT_TEAM="$NOTARY_TEAM_ID" \
+            -archivePath build/Terly.xcarchive \
+            archive
+
+      - name: Write export options plist
+        env:
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/exportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>developer-id</string>
+            <key>teamID</key>
+            <string>$NOTARY_TEAM_ID</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>Developer ID Application</string>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Export archive
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/Terly.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist"
+
+      # --- Notarization ---
+      # NOTARY_APPLE_ID: notarize yetkisi olan Apple ID e-postası
+      # NOTARY_TEAM_ID: Apple Developer Team ID (10 karakter)
+      # NOTARY_PASSWORD: bu Apple ID için app-specific password
+      - name: Zip app for notarization submission
+        run: |
+          mkdir -p build/notarize
+          ditto -c -k --keepParent "build/export/Terly.app" "build/notarize/Terly-notarize.zip"
+
+      - name: Submit for notarization and wait
+        env:
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+        run: |
+          xcrun notarytool submit "build/notarize/Terly-notarize.zip" \
+            --apple-id "$NOTARY_APPLE_ID" \
+            --team-id "$NOTARY_TEAM_ID" \
+            --password "$NOTARY_PASSWORD" \
+            --wait
+
+      - name: Staple notarization ticket
+        run: xcrun stapler staple "build/export/Terly.app"
+
+      - name: Create release archive (post-staple)
+        run: |
+          mkdir -p build/release-assets
+          ditto -c -k --keepParent "build/export/Terly.app" "build/release-assets/Terly-$VERSION.zip"
+
+      - name: Install create-dmg (best effort)
+        run: brew install create-dmg || true
+
+      - name: Create DMG
+        run: |
+          DMG_PATH="build/release-assets/Terly-$VERSION.dmg"
+          if command -v create-dmg >/dev/null 2>&1; then
+            create-dmg \
+              --volname "Terly $VERSION" \
+              --app-drop-link 600 185 \
+              "$DMG_PATH" \
+              "build/export/Terly.app" || rm -f "$DMG_PATH"
+          fi
+          if [ ! -f "$DMG_PATH" ]; then
+            echo "create-dmg kullanılamadı veya başarısız oldu, hdiutil ile devam ediliyor"
+            hdiutil create -volname "Terly" -srcfolder "build/export/Terly.app" -ov -format UDZO "$DMG_PATH"
+          fi
+
+      # --- Sparkle appcast: gh-pages branch'inde appcast.xml + update arşivleri ---
+      # SUFeedURL (project.yml) https://klc.github.io/terly/appcast.xml
+      # gösterdiği için appcast.xml gh-pages kökünde, arşivler updates/ altında durur.
+      - name: Prepare gh-pages worktree
+        run: |
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git worktree add gh-pages-publish origin/gh-pages
+          else
+            git worktree add --detach gh-pages-publish
+            (cd gh-pages-publish && git checkout --orphan gh-pages && git rm -rf . >/dev/null 2>&1 || true)
+          fi
+          mkdir -p gh-pages-publish/updates
+
+      - name: Copy new update archive into appcast folder
+        run: cp "build/release-assets/Terly-$VERSION.zip" gh-pages-publish/updates/
+
+      - name: Download Sparkle CLI tools
+        run: |
+          curl -L -o "$RUNNER_TEMP/sparkle-tools.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          mkdir -p "$RUNNER_TEMP/sparkle-tools"
+          tar -xJf "$RUNNER_TEMP/sparkle-tools.tar.xz" -C "$RUNNER_TEMP/sparkle-tools"
+
+      # SPARKLE_ED_PRIVATE_KEY: `generate_keys` çıktısındaki base64 private key.
+      # generate_appcast hem imzalar hem appcast.xml + delta güncellemelerini üretir
+      # (Sparkle'ın önerdiği, sign_update'i manuel çağırmaktan daha güvenilir yol).
+      - name: Sign updates and generate appcast
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SPARKLE_ED_PRIVATE_KEY" ]; then
+            echo "::error::SPARKLE_ED_PRIVATE_KEY secret'ı ayarlanmamış — bkz. docs/RELEASING.md"
+            exit 1
+          fi
+          KEY_FILE="$RUNNER_TEMP/sparkle_ed_key.txt"
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" > "$KEY_FILE"
+          "$RUNNER_TEMP/sparkle-tools/bin/generate_appcast" \
+            --ed-key-file "$KEY_FILE" \
+            --download-url-prefix "https://klc.github.io/terly/updates/" \
+            gh-pages-publish/updates
+          rm -f "$KEY_FILE"
+          cp gh-pages-publish/updates/appcast.xml gh-pages-publish/appcast.xml
+
+      - name: Publish appcast to gh-pages
+        run: |
+          cd gh-pages-publish
+          git add -A
+          git \
+            -c user.name="github-actions[bot]" \
+            -c user.email="github-actions[bot]@users.noreply.github.com" \
+            commit -m "release: publish appcast for ${{ github.ref_name }}" || echo "Değişiklik yok, commit atlanıyor"
+          git push origin HEAD:gh-pages
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          awk -v ver="$VERSION" '
+            /^## / { if (found) exit; if ($0 == "## " ver) { found=1; next } }
+            found { print }
+          ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
+          if [ ! -s "$RUNNER_TEMP/release-notes.md" ]; then
+            echo "Terly $VERSION" > "$RUNNER_TEMP/release-notes.md"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            "build/release-assets/Terly-$VERSION.dmg" \
+            "build/release-assets/Terly-$VERSION.zip" \
+            --title "Terly $VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
