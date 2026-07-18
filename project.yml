@@ -49,7 +49,7 @@ targets:
         # çıktısından gelecek (bkz. docs/RELEASING.md). Şimdilik placeholder — güncelleme
         # denetimi bu haliyle çalışmaz, Ayarlar > Güncellemeler bunu algılayıp uyarır.
         SUFeedURL: https://klc.github.io/terly/appcast.xml
-        SUPublicEDKey: REPLACE_WITH_SPARKLE_PUBLIC_KEY
+        SUPublicEDKey: ktDoBjl4FjOjtayFm+65Efioe+cPONn+s5xXw8lvPo4=
         SUEnableAutomaticChecks: false
     settings:
       base:
