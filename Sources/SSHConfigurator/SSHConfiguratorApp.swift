@@ -50,10 +50,10 @@ struct SSHConfiguratorApp: App {
         .commands {
             CommandGroup(after: .newItem) {
                 Divider()
-                Button("Ham Config Editörü…") {
+                Button("Raw Config Editor…") {
                     NotificationCenter.default.post(name: .showRawConfigEditorRequested, object: nil)
                 }
-                Button("Değişiklik Geçmişi/Önizleme…") {
+                Button("Change History/Preview…") {
                     NotificationCenter.default.post(name: .showChangePreviewRequested, object: nil)
                 }
             }
@@ -68,11 +68,11 @@ struct SSHConfiguratorApp: App {
                 SyncSettingsView()
                     .environmentObject(syncCoordinator)
                     .tabItem {
-                        Label("Senkronizasyon", systemImage: "arrow.triangle.2.circlepath.circle")
+                        Label("Sync", systemImage: "arrow.triangle.2.circlepath.circle")
                     }
                 UpdateSettingsView()
                     .tabItem {
-                        Label("Güncellemeler", systemImage: "arrow.triangle.2.circlepath")
+                        Label("Updates", systemImage: "arrow.triangle.2.circlepath")
                     }
             }
             .frame(width: 520)

@@ -1,7 +1,1516 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-
+  "sourceLanguage": "en",
+  "strings": {
+    "Quick access": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hızlı erişim"
+          }
+        }
+      }
+    },
+    "Quick access (⌘K)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hızlı erişim (⌘K)"
+          }
+        }
+      }
+    },
+    "Delete the selected host?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçili Host silinsin mi?"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sil"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vazgeç"
+          }
+        }
+      }
+    },
+    "The host is permanently removed from ~/.ssh/config. The previous version is kept as a backup.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host, ~/.ssh/config dosyasından kalıcı olarak silinir. Önceki sürüm yedek olarak saklanır."
+          }
+        }
+      }
+    },
+    "Operation failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İşlem tamamlanamadı"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamam"
+          }
+        }
+      }
+    },
+    "Terminal could not be opened": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal açılamadı"
+          }
+        }
+      }
+    },
+    "Startup flow could not be saved": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı kaydedilemedi"
+          }
+        }
+      }
+    },
+    "Quick access metadata could not be saved": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hızlı erişim metadata'sı kaydedilemedi"
+          }
+        }
+      }
+    },
+    "Match exec detected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match exec algılandı"
+          }
+        }
+      }
+    },
+    "Validate by running the command": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komutu çalıştırarak doğrula"
+          }
+        }
+      }
+    },
+    "ssh -G can run the local command inside Match exec. Make sure you want to continue.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh -G, Match exec içindeki yerel komutu çalıştırabilir. Devam etmek istediğinden emin ol."
+          }
+        }
+      }
+    },
+    "Workspace": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalışma Alanı"
+          }
+        }
+      }
+    },
+    "Global settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global ayarlar"
+          }
+        }
+      }
+    },
+    "Include files": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include dosyaları"
+          }
+        }
+      }
+    },
+    "OpenSSH includes the files in these lines in the config read flow.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH, bu satırlardaki dosyaları config okuma akışına dahil eder."
+          }
+        }
+      }
+    },
+    "Backup history": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yedek geçmişi"
+          }
+        }
+      }
+    },
+    "Tunnels": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tüneller"
+          }
+        }
+      }
+    },
+    "Snippets": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snippet'ler"
+          }
+        }
+      }
+    },
+    "Runbooks": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook'lar"
+          }
+        }
+      }
+    },
+    "Local terminal": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel terminal"
+          }
+        }
+      }
+    },
+    "Connections": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantılar"
+          }
+        }
+      }
+    },
+    "Add new SSH connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni SSH bağlantısı ekle"
+          }
+        }
+      }
+    },
+    "Create your first group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İlk grubu oluştur"
+          }
+        }
+      }
+    },
+    "Connection groups": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grupları"
+          }
+        }
+      }
+    },
+    "Create new connection group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni bağlantı grubu oluştur"
+          }
+        }
+      }
+    },
+    "Match rules": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match kuralları"
+          }
+        }
+      }
+    },
+    "Open sync settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkronizasyon ayarlarını aç"
+          }
+        }
+      }
+    },
+    "Synced": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkronize"
+          }
+        }
+      }
+    },
+    "Change pending…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değişiklik bekleniyor…"
+          }
+        }
+      }
+    },
+    "Syncing…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkronize ediliyor…"
+          }
+        }
+      }
+    },
+    "There's a change waiting for your review": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İncelemeni bekleyen değişiklik var"
+          }
+        }
+      }
+    },
+    "Conflict — resolution needed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çakışma — çözüm gerekiyor"
+          }
+        }
+      }
+    },
+    "Sync error": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkronizasyon hatası"
+          }
+        }
+      }
+    },
+    "Add your first server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İlk Sunucunuzu Ekleyin"
+          }
+        }
+      }
+    },
+    "Tap the + button in the left menu to create a new SSH connection.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sol menüdeki + butonuna tıklayarak yeni bir SSH bağlantısı oluşturabilirsiniz."
+          }
+        }
+      }
+    },
+    "Config could not be loaded": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config yüklenemedi"
+          }
+        }
+      }
+    },
+    "Waiting for SSH config": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH config bekleniyor"
+          }
+        }
+      }
+    },
+    "Loading the ~/.ssh/config file.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/.ssh/config dosyası yükleniyor."
+          }
+        }
+      }
+    },
+    "This block only applies when the selected Match condition is met.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu blok yalnızca seçilen Match koşulu sağlandığında uygulanır."
+          }
+        }
+      }
+    },
+    "These lines appear before the first Host or Match block.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu satırlar ilk Host veya Match bloğundan önce yer alır."
+          }
+        }
+      }
+    },
+    "Open all SSH connections in the group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gruptaki tüm SSH bağlantılarını aç"
+          }
+        }
+      }
+    },
+    "Open %lld SSH connections in %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ grubundaki %1$lld SSH bağlantısını aç"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlan"
+          }
+        }
+      }
+    },
+    "Open settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayarları aç"
+          }
+        }
+      }
+    },
+    "Open %@ SSH connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ SSH bağlantısını aç"
+          }
+        }
+      }
+    },
+    "Test connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıyı test et"
+          }
+        }
+      }
+    },
+    "Transfer files": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya aktar"
+          }
+        }
+      }
+    },
+    "Key setup…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar Kurulumu…"
+          }
+        }
+      }
+    },
+    "Duplicate connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıyı kopyala"
+          }
+        }
+      }
+    },
+    "Delete Host": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host'u Sil"
+          }
+        }
+      }
+    },
+    "Group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grup"
+          }
+        }
+      }
+    },
+    "%@ connection group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ bağlantı grubu"
+          }
+        }
+      }
+    },
+    "%lld connections": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bağlantı"
+          }
+        }
+      }
+    },
+    "Create connection group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu oluştur"
+          }
+        }
+      }
+    },
+    "Edit connection group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubunu düzenle"
+          }
+        }
+      }
+    },
+    "Opening the group starts all selected connections together.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grubu açtığında seçili bağlantıların tümü birlikte başlar."
+          }
+        }
+      }
+    },
+    "Group name": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grup adı"
+          }
+        }
+      }
+    },
+    "Window layout": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pencere düzeni"
+          }
+        }
+      }
+    },
+    "Open connections": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıları aç"
+          }
+        }
+      }
+    },
+    "Each connection opens in its own terminal tab.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her bağlantı kendi terminal sekmesinde açılır."
+          }
+        }
+      }
+    },
+    "All connections open in one tab, carrying the group name, in separate panes.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tüm bağlantılar grup adını taşıyan tek sekmede, ayrı bölmelerde açılır."
+          }
+        }
+      }
+    },
+    "No concrete SSH alias found to add to the group.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gruba eklenebilecek somut bir SSH alias'ı bulunamadı."
+          }
+        }
+      }
+    },
+    "Not found in config": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config içinde bulunamayanlar"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaldır"
+          }
+        }
+      }
+    },
+    "Remove connections that no longer exist to save the group.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grubu kaydetmek için artık bulunmayan bağlantıları kaldır."
+          }
+        }
+      }
+    },
+    "Delete Group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grubu Sil"
+          }
+        }
+      }
+    },
+    "%lld connections selected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bağlantı seçildi"
+          }
+        }
+      }
+    },
+    "Create Group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grubu Oluştur"
+          }
+        }
+      }
+    },
+    "Save Changes": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değişiklikleri Kaydet"
+          }
+        }
+      }
+    },
+    "Delete the connection group?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu silinsin mi?"
+          }
+        }
+      }
+    },
+    "SSH connections and the config file are unchanged; only this group is deleted.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH bağlantıları ve config dosyası değişmez; yalnızca bu grup silinir."
+          }
+        }
+      }
+    },
+    "SSH connection settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH bağlantı ayarları"
+          }
+        }
+      }
+    },
+    "Identity": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kimlik"
+          }
+        }
+      }
+    },
+    "Alias / pattern": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alias / desen"
+          }
+        }
+      }
+    },
+    "e.g. web-prod": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. web-prod"
+          }
+        }
+      }
+    },
+    "e.g. 192.168.1.10": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. 192.168.1.10"
+          }
+        }
+      }
+    },
+    "e.g. root": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. root"
+          }
+        }
+      }
+    },
+    "e.g. 22": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. 22"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı"
+          }
+        }
+      }
+    },
+    "e.g. ~/.ssh/id_ed25519": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. ~/.ssh/id_ed25519"
+          }
+        }
+      }
+    },
+    "e.g. bastion": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. bastion"
+          }
+        }
+      }
+    },
+    "Key Setup": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar Kurulumu"
+          }
+        }
+      }
+    },
+    "Generates a new ed25519 key, optionally adds it to the SSH agent, and copies it to the server's authorized_keys file.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni bir ed25519 anahtarı üretir, isteğe bağlı olarak SSH agent'a ekler ve sunucudaki authorized_keys dosyasına kopyalar."
+          }
+        }
+      }
+    },
+    "Startup Flow": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç Akışı"
+          }
+        }
+      }
+    },
+    "Preparing startup flow for %@.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ için başlangıç akışı hazırlanıyor."
+          }
+        }
+      }
+    },
+    "Apply Changes": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değişiklikleri Uygula"
+          }
+        }
+      }
+    },
+    "Empty base fields are removed from this Host block. You can edit all other OpenSSH directives from the Raw Config screen.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boş bırakılan temel alanlar bu Host bloğundan kaldırılır. Diğer tüm OpenSSH direktiflerini Ham config ekranından düzenleyebilirsin."
+          }
+        }
+      }
+    },
+    "Applying writes the change to ~/.ssh/config immediately; the previous content is backed up.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygulandığında değişiklik hemen ~/.ssh/config dosyasına yazılır; önceki içerik yedeklenir."
+          }
+        }
+      }
+    },
+    "Apply and save": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygula ve kaydet"
+          }
+        }
+      }
+    },
+    "e.g. ~/.ssh/config.d/*": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. ~/.ssh/config.d/*"
+          }
+        }
+      }
+    },
+    "New include path": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni Include yolu"
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekle"
+          }
+        }
+      }
+    },
+    "Restoring first saves the current config as a new backup.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geri yükleme, mevcut config'i önce yeni bir yedek olarak saklar."
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yenile"
+          }
+        }
+      }
+    },
+    "Selected backup": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçili yedek"
+          }
+        }
+      }
+    },
+    "Restore this backup": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yedeği geri yükle"
+          }
+        }
+      }
+    },
+    "Current config": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mevcut config"
+          }
+        }
+      }
+    },
+    "Backup": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yedek"
+          }
+        }
+      }
+    },
+    "Restore this backup?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yedek geri yüklensin mi?"
+          }
+        }
+      }
+    },
+    "Restore": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geri Yükle"
+          }
+        }
+      }
+    },
+    "The current config is saved as a new backup first; the restore is applied atomically.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mevcut config önce yeni bir yedek olarak kaydedilir; geri yükleme atomik uygulanır."
+          }
+        }
+      }
+    },
+    "No backup selected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yedek seçilmedi"
+          }
+        }
+      }
+    },
+    "No backups yet. It'll show up here after your first save.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz yedek oluşmadı. İlk kaydetmeden sonra burada görünür."
+          }
+        }
+      }
+    },
+    "Select a backup to compare or restore.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karşılaştırmak veya geri yüklemek için bir yedek seç."
+          }
+        }
+      }
+    },
+    "Include path": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include yolu"
+          }
+        }
+      }
+    },
+    "Apply": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygula"
+          }
+        }
+      }
+    },
+    "Remove this include line": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu Include satırını kaldır"
+          }
+        }
+      }
+    },
+    "Compare the file on disk with the working copy": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diskteki dosya ile çalışma kopyasını karşılaştır"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapat"
+          }
+        }
+      }
+    },
+    "Current file": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mevcut dosya"
+          }
+        }
+      }
+    },
+    "Working copy": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalışma kopyası"
+          }
+        }
+      }
+    },
+    "(empty config)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(boş config)"
+          }
+        }
+      }
+    },
+    "Config loaded.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config yüklendi."
+          }
+        }
+      }
+    },
+    "Config file not found yet; you can create a new one.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config dosyası henüz bulunamadı; yeni dosya oluşturabilirsin."
+          }
+        }
+      }
+    },
+    "Unsaved changes were discarded.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydedilmemiş değişiklikler geri alındı."
+          }
+        }
+      }
+    },
+    "Host settings saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host düzenlemesi kaydedildi."
+          }
+        }
+      }
+    },
+    "New host added; fill in the alias and connection fields.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni Host eklendi; alias ve bağlantı alanlarını doldur."
+          }
+        }
+      }
+    },
+    "%@ connection duplicated and saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ bağlantısı kopyalandı ve kaydedildi."
+          }
+        }
+      }
+    },
+    "Host deleted and ~/.ssh/config updated.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host silindi ve ~/.ssh/config güncellendi."
+          }
+        }
+      }
+    },
+    "Raw config change saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ham config değişikliği kaydedildi."
+          }
+        }
+      }
+    },
+    "Global settings saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global ayarlar kaydedildi."
+          }
+        }
+      }
+    },
+    "Match block saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match bloğu kaydedildi."
+          }
+        }
+      }
+    },
+    "Include line added and saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include satırı eklendi ve kaydedildi."
+          }
+        }
+      }
+    },
+    "Include line updated and saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include satırı güncellendi ve kaydedildi."
+          }
+        }
+      }
+    },
+    "Include line removed and saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include satırı kaldırıldı ve kaydedildi."
+          }
+        }
+      }
+    },
+    "Connection group created.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu oluşturuldu."
+          }
+        }
+      }
+    },
+    "Connection group updated.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu güncellendi."
+          }
+        }
+      }
+    },
+    "Connection group deleted.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu silindi."
+          }
+        }
+      }
+    },
+    "Backup restored. Previous version kept as a new backup: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yedek geri yüklendi. Önceki sürüm yeni yedek olarak korundu: %@"
+          }
+        }
+      }
+    },
+    "Backup restored.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yedek geri yüklendi."
+          }
+        }
+      }
+    },
+    "Saved. Backup: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydedildi. Yedek: %@"
+          }
+        }
+      }
+    },
+    "Saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydedildi."
+          }
+        }
+      }
+    },
+    "No host selected to validate.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doğrulanacak bir Host seçilmedi."
+          }
+        }
+      }
+    },
+    "Wildcard host blocks require a concrete alias.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wildcard Host blokları için somut bir alias gerekli."
+          }
+        }
+      }
+    },
+    "OpenSSH validation succeeded: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH doğrulaması başarılı: %@"
+          }
+        }
+      }
+    },
+    "Save your changes before testing the connection. Diagnostics use the ~/.ssh/config file on disk.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıyı test etmeden önce değişiklikleri kaydet. Tanılama diskteki ~/.ssh/config dosyasını kullanır."
+          }
+        }
+      }
+    },
+    "Separate tabs": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayrı sekmeler"
+          }
+        }
+      }
+    },
+    "Split panes in one tab": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tek sekmede bölmeler"
+          }
+        }
+      }
+    },
+    "Enter a name for the connection group.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu için bir ad gir."
+          }
+        }
+      }
+    },
+    "Add at least one connection to the group.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubuna en az bir bağlantı ekle."
+          }
+        }
+      }
+    },
+    "Connections in the group not found in the current SSH config: %@. Update the group settings.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gruptaki bağlantılar güncel SSH config içinde bulunamadı: %@. Grup ayarlarını güncelle."
+          }
+        }
+      }
+    },
+    "Raw Config Editor…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ham Config Editörü…"
+          }
+        }
+      }
+    },
+    "Change History/Preview…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değişiklik Geçmişi/Önizleme…"
+          }
+        }
+      }
+    },
+    "Sync": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkronizasyon"
+          }
+        }
+      }
+    },
+    "Updates": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Güncellemeler"
+          }
+        }
+      }
+    },
+    "SSH tool failed to launch: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH aracı başlatılamadı: %@"
+          }
+        }
+      }
+    },
+    "Operation did not complete within %@ seconds.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İşlem %@ saniye içinde tamamlanmadı."
+          }
+        }
+      }
+    },
+    "Operation was cancelled.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İşlem iptal edildi."
+          }
+        }
+      }
+    }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

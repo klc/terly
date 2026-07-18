@@ -64,90 +64,90 @@ struct ContentView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
-                Button("Hızlı erişim", systemImage: "magnifyingglass") {
+                Button("Quick access", systemImage: "magnifyingglass") {
                     showingQuickAccess = true
                 }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(model.document == nil)
-                .help("Hızlı erişim (⌘K)")
-                .accessibilityLabel("Hızlı erişim")
+                .help("Quick access (⌘K)")
+                .accessibilityLabel("Quick access")
             }
         }
         .alert(
-            "Seçili Host silinsin mi?",
+            "Delete the selected host?",
             isPresented: $showingDeleteConfirmation
         ) {
-            Button("Sil", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 model.deleteSelectedHost()
             }
-            Button("Vazgeç", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Host, ~/.ssh/config dosyasından kalıcı olarak silinir. Önceki sürüm yedek olarak saklanır.")
+            Text("The host is permanently removed from ~/.ssh/config. The previous version is kept as a backup.")
         }
         .alert(
-            "İşlem tamamlanamadı",
+            "Operation failed",
             isPresented: Binding(
                 get: { model.errorMessage != nil },
                 set: { if !$0 { model.dismissError() } }
             )
         ) {
-            Button("Tamam", role: .cancel) {
+            Button("OK", role: .cancel) {
                 model.dismissError()
             }
         } message: {
             Text(model.errorMessage ?? "")
         }
         .alert(
-            "Terminal açılamadı",
+            "Terminal could not be opened",
             isPresented: Binding(
                 get: { terminalWorkspace.errorMessage != nil },
                 set: { if !$0 { terminalWorkspace.dismissError() } }
             )
         ) {
-            Button("Tamam", role: .cancel) {
+            Button("OK", role: .cancel) {
                 terminalWorkspace.dismissError()
             }
         } message: {
             Text(terminalWorkspace.errorMessage ?? "")
         }
         .alert(
-            "Başlangıç akışı kaydedilemedi",
+            "Startup flow could not be saved",
             isPresented: Binding(
                 get: { startupFlows.errorMessage != nil },
                 set: { if !$0 { startupFlows.dismissError() } }
             )
         ) {
-            Button("Tamam", role: .cancel) { startupFlows.dismissError() }
+            Button("OK", role: .cancel) { startupFlows.dismissError() }
         } message: {
             Text(startupFlows.errorMessage ?? "")
         }
         .alert(
-            "Hızlı erişim metadata'sı kaydedilemedi",
+            "Quick access metadata could not be saved",
             isPresented: Binding(
                 get: { quickAccess.errorMessage != nil },
                 set: { if !$0 { quickAccess.dismissError() } }
             )
         ) {
-            Button("Tamam", role: .cancel) { quickAccess.dismissError() }
+            Button("OK", role: .cancel) { quickAccess.dismissError() }
         } message: {
             Text(quickAccess.errorMessage ?? "")
         }
         .alert(
-            "Match exec algılandı",
+            "Match exec detected",
             isPresented: Binding(
                 get: { model.requiresMatchExecConfirmation },
                 set: { if !$0 { model.dismissMatchExecConfirmation() } }
             )
         ) {
-            Button("Komutu çalıştırarak doğrula") {
+            Button("Validate by running the command") {
                 model.dismissMatchExecConfirmation()
                 model.validateSelectedHost(allowingMatchExec: true)
             }
-            Button("Vazgeç", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 model.dismissMatchExecConfirmation()
             }
         } message: {
-            Text("ssh -G, Match exec içindeki yerel komutu çalıştırabilir. Devam etmek istediğinden emin ol.")
+            Text("ssh -G can run the local command inside Match exec. Make sure you want to continue.")
         }
         .sheet(item: $editingHostSelection, onDismiss: discardUnsavedWorkingCopy) { selection in
             hostSettingsSheet(for: selection)
@@ -637,24 +637,24 @@ private struct ContentSidebarView: View {
 
     var body: some View {
         List(selection: $model.selectedItem) {
-            Section("Çalışma Alanı") {
-                Label("Global ayarlar", systemImage: "slider.horizontal.3")
+            Section("Workspace") {
+                Label("Global settings", systemImage: "slider.horizontal.3")
                     .tag(ConfigNavigationItem.global)
-                Label("Include dosyaları", systemImage: "folder")
+                Label("Include files", systemImage: "folder")
                     .tag(ConfigNavigationItem.includes)
-                Label("Yedek geçmişi", systemImage: "clock.arrow.circlepath")
+                Label("Backup history", systemImage: "clock.arrow.circlepath")
                     .tag(ConfigNavigationItem.backups)
-                Label("Tüneller", systemImage: "network")
+                Label("Tunnels", systemImage: "network")
                     .tag(ConfigNavigationItem.tunnels)
-                Label("Snippet'ler", systemImage: "text.badge.plus")
+                Label("Snippets", systemImage: "text.badge.plus")
                     .tag(ConfigNavigationItem.snippets)
-                Label("Runbook'lar", systemImage: "list.bullet.rectangle")
+                Label("Runbooks", systemImage: "list.bullet.rectangle")
                     .tag(ConfigNavigationItem.runbooks)
                 Button {
                     onOpenLocalTerminal()
                     model.selectedItem = .localTerminal
                 } label: {
-                    Label("Yerel terminal", systemImage: "terminal")
+                    Label("Local terminal", systemImage: "terminal")
                 }
                 .buttonStyle(.plain)
                 .tag(ConfigNavigationItem.localTerminal)
@@ -694,7 +694,7 @@ private struct ContentSidebarView: View {
                 }
             } header: {
                 HStack {
-                    Text("Bağlantılar")
+                    Text("Connections")
                     Spacer()
                     Button {
                         onNewHost()
@@ -706,8 +706,8 @@ private struct ContentSidebarView: View {
                     }
                     .buttonStyle(.borderless)
                     .foregroundStyle(.secondary)
-                    .help("Yeni SSH bağlantısı ekle")
-                    .accessibilityLabel("Yeni SSH bağlantısı ekle")
+                    .help("Add new SSH connection")
+                    .accessibilityLabel("Add new SSH connection")
                     .disabled(model.document == nil)
                     .padding(.trailing, 4)
                 }
@@ -718,7 +718,7 @@ private struct ContentSidebarView: View {
                     Button {
                         onNewConnectionGroup()
                     } label: {
-                        Label("İlk grubu oluştur", systemImage: "folder.badge.plus")
+                        Label("Create your first group", systemImage: "folder.badge.plus")
                     }
                     .buttonStyle(.plain)
                 } else {
@@ -732,7 +732,7 @@ private struct ContentSidebarView: View {
                 }
             } header: {
                 HStack {
-                    Text("Bağlantı grupları")
+                    Text("Connection groups")
                     Spacer()
                     Button {
                         onNewConnectionGroup()
@@ -744,8 +744,8 @@ private struct ContentSidebarView: View {
                     }
                     .buttonStyle(.borderless)
                     .foregroundStyle(.secondary)
-                    .help("Yeni bağlantı grubu oluştur")
-                    .accessibilityLabel("Yeni bağlantı grubu oluştur")
+                    .help("Create new connection group")
+                    .accessibilityLabel("Create new connection group")
                     .disabled(model.availableConnections.isEmpty)
                     .padding(.trailing, 4)
                 }
@@ -760,7 +760,7 @@ private struct ContentSidebarView: View {
             )
 
             if !model.matches.isEmpty {
-                Section("Match kuralları") {
+                Section("Match rules") {
                     ForEach(model.matches) { match in
                         Label(match.displayName, systemImage: "arrow.triangle.branch")
                             .tag(ConfigNavigationItem.match(match.id))
@@ -802,7 +802,7 @@ private struct SyncStatusFooter: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Senkronizasyon ayarlarını aç")
+        .help("Open sync settings")
     }
 
     @ViewBuilder
@@ -825,12 +825,12 @@ private struct SyncStatusFooter: View {
 
     private var label: String {
         switch status {
-        case .idle: return "Senkronize"
-        case .pendingCommit: return "Değişiklik bekleniyor…"
-        case .syncing: return "Senkronize ediliyor…"
-        case .pendingApply: return "İncelemeni bekleyen değişiklik var"
-        case .diverged: return "Çakışma — çözüm gerekiyor"
-        case .error: return "Senkronizasyon hatası"
+        case .idle: return String(localized: "Synced")
+        case .pendingCommit: return String(localized: "Change pending…")
+        case .syncing: return String(localized: "Syncing…")
+        case .pendingApply: return String(localized: "There's a change waiting for your review")
+        case .diverged: return String(localized: "Conflict — resolution needed")
+        case .error: return String(localized: "Sync error")
         }
     }
 
@@ -878,9 +878,9 @@ private struct ContentDetailView: View {
                     if model.selectedHost == nil && model.selectedItem != .localTerminal {
                         if model.hosts.isEmpty && model.selectedItem == nil {
                             ContentUnavailableView(
-                                "İlk Sunucunuzu Ekleyin",
+                                "Add your first server",
                                 systemImage: "server.rack",
-                                description: Text("Sol menüdeki + butonuna tıklayarak yeni bir SSH bağlantısı oluşturabilirsiniz.")
+                                description: Text("Tap the + button in the left menu to create a new SSH connection.")
                             )
                         } else {
                             nonHostDetail(document: document)
@@ -890,15 +890,15 @@ private struct ContentDetailView: View {
             }
         } else if let errorMessage = model.errorMessage {
             ContentUnavailableView(
-                "Config yüklenemedi",
+                "Config could not be loaded",
                 systemImage: "exclamationmark.triangle",
                 description: Text(errorMessage)
             )
         } else {
             ContentUnavailableView(
-                "SSH config bekleniyor",
+                "Waiting for SSH config",
                 systemImage: "terminal",
-                description: Text("~/.ssh/config dosyası yükleniyor."))
+                description: Text("Loading the ~/.ssh/config file."))
         }
     }
 
@@ -908,16 +908,16 @@ private struct ContentDetailView: View {
             SectionSourceEditor(
                 title: match.displayName,
                 source: document.source(for: match),
-                message: "Bu blok yalnızca seçilen Match koşulu sağlandığında uygulanır."
+                message: String(localized: "This block only applies when the selected Match condition is met.")
             ) { source in
                 model.replaceMatchSource(match, with: source)
             }
             .id(match.id)
         } else if model.selectedItem == .global {
             SectionSourceEditor(
-                title: "Global ayarlar",
+                title: String(localized: "Global settings"),
                 source: document.globalSource,
-                message: "Bu satırlar ilk Host veya Match bloğundan önce yer alır."
+                message: String(localized: "These lines appear before the first Host or Match block.")
             ) { source in
                 model.replaceGlobalSource(with: source)
             }
@@ -1014,13 +1014,14 @@ private struct ConnectionGroupRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help("Gruptaki tüm SSH bağlantılarını aç")
-            .accessibilityLabel("\(group.name) grubundaki \(group.aliases.count) SSH bağlantısını aç")
+            .help("Open all SSH connections in the group")
+            // TODO(plural)
+            .accessibilityLabel("Open \(group.aliases.count) SSH connections in \(group.name)")
         }
         .padding(.vertical, 2)
         .contextMenu {
-            Button("Bağlan", systemImage: "play", action: onConnect)
-            Button("Ayarları aç", systemImage: "gearshape", action: onShowSettings)
+            Button("Connect", systemImage: "play", action: onConnect)
+            Button("Open settings", systemImage: "gearshape", action: onShowSettings)
         }
     }
 }
@@ -1044,20 +1045,20 @@ private struct HostNavigationRow: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("\(host.displayName) SSH bağlantısını aç")
+            .accessibilityLabel("Open \(host.displayName) SSH connection")
         }
         .padding(.vertical, 2)
         .listRowBackground(isSelected ? Color.accentColor.opacity(0.16) : Color.clear)
         .contextMenu {
             if host.patterns.contains(where: SSHLaunchPlanBuilder.isConcreteAlias) {
-                Button("Bağlantıyı test et", systemImage: "stethoscope", action: onDiagnose)
-                Button("Dosya aktar", systemImage: "arrow.left.arrow.right", action: onTransfer)
-                Button("Anahtar Kurulumu…", systemImage: "key", action: onKeySetup)
+                Button("Test connection", systemImage: "stethoscope", action: onDiagnose)
+                Button("Transfer files", systemImage: "arrow.left.arrow.right", action: onTransfer)
+                Button("Key setup…", systemImage: "key", action: onKeySetup)
             }
-            Button("Bağlantıyı kopyala", systemImage: "plus.square.on.square", action: onDuplicate)
-            Button("Ayarları aç", systemImage: "gearshape", action: onShowSettings)
+            Button("Duplicate connection", systemImage: "plus.square.on.square", action: onDuplicate)
+            Button("Open settings", systemImage: "gearshape", action: onShowSettings)
             Divider()
-            Button("Host'u Sil", systemImage: "trash", role: .destructive, action: onDelete)
+            Button("Delete Host", systemImage: "trash", role: .destructive, action: onDelete)
         }
     }
 }
@@ -1108,15 +1109,16 @@ private struct HostGroupDisclosure: View {
             }
         } label: {
             HStack(spacing: 8) {
-                Label(group.label ?? "Grup", systemImage: "folder.fill")
+                Label(group.label ?? "Group", systemImage: "folder.fill")
                 Spacer()
                 Text("\(group.hosts.count + group.children.reduce(0) { $0 + hostCount(in: $1) })")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
         }
-        .accessibilityLabel("\(group.label ?? "SSH") bağlantı grubu")
-        .accessibilityValue("\(hostCount(in: group)) bağlantı")
+        .accessibilityLabel("\(group.label ?? "SSH") connection group")
+        // TODO(plural)
+        .accessibilityValue("\(hostCount(in: group)) connections")
     }
 
     private func hostCount(in group: SSHConfigHostGroup) -> Int {
@@ -1171,21 +1173,21 @@ private struct ConnectionGroupEditorSheet: View {
         VStack(spacing: 0) {
             SheetHeader(
                 systemImage: group == nil ? "folder.badge.plus" : "folder.fill",
-                title: group == nil ? "Bağlantı grubu oluştur" : "Bağlantı grubunu düzenle",
-                subtitle: Text("Grubu açtığında seçili bağlantıların tümü birlikte başlar.").font(.caption),
+                title: group == nil ? String(localized: "Create connection group") : String(localized: "Edit connection group"),
+                subtitle: Text("Opening the group starts all selected connections together.").font(.caption),
                 onClose: { dismiss() }
             )
 
             Divider()
 
             Form {
-                Section("Grup") {
-                    TextField("Grup adı", text: $name, prompt: Text("Prod Servers"))
+                Section("Group") {
+                    TextField("Group name", text: $name, prompt: Text("Prod Servers"))
                         .editorFieldStyle()
                 }
 
-                Section("Pencere düzeni") {
-                    Picker("Bağlantıları aç", selection: $openMode) {
+                Section("Window layout") {
+                    Picker("Open connections", selection: $openMode) {
                         ForEach(SSHConnectionGroupOpenMode.allCases, id: \.self) { mode in
                             Text(mode.label).tag(mode)
                         }
@@ -1194,16 +1196,16 @@ private struct ConnectionGroupEditorSheet: View {
 
                     Text(
                         openMode == .separateTabs
-                            ? "Her bağlantı kendi terminal sekmesinde açılır."
-                            : "Tüm bağlantılar grup adını taşıyan tek sekmede, ayrı bölmelerde açılır."
+                            ? String(localized: "Each connection opens in its own terminal tab.")
+                            : String(localized: "All connections open in one tab, carrying the group name, in separate panes.")
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 }
 
-                Section("Bağlantılar") {
+                Section("Connections") {
                     if connections.isEmpty {
-                        Text("Gruba eklenebilecek somut bir SSH alias'ı bulunamadı.")
+                        Text("No concrete SSH alias found to add to the group.")
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(connections) { connection in
@@ -1216,18 +1218,18 @@ private struct ConnectionGroupEditorSheet: View {
                 }
 
                 if !unavailableAliases.isEmpty {
-                    Section("Config içinde bulunamayanlar") {
+                    Section("Not found in config") {
                         ForEach(unavailableAliases, id: \.self) { alias in
                             HStack {
                                 Label(alias, systemImage: "exclamationmark.triangle.fill")
                                     .foregroundStyle(.orange)
                                 Spacer()
-                                Button("Kaldır") {
+                                Button("Remove") {
                                     selectedAliases.remove(alias)
                                 }
                             }
                         }
-                        Text("Grubu kaydetmek için artık bulunmayan bağlantıları kaldır.")
+                        Text("Remove connections that no longer exist to save the group.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -1239,21 +1241,22 @@ private struct ConnectionGroupEditorSheet: View {
 
             HStack {
                 if onDelete != nil {
-                    Button("Grubu Sil", role: .destructive) {
+                    Button("Delete Group", role: .destructive) {
                         showingDeleteConfirmation = true
                     }
                 }
 
-                Text("\(selectedAliases.count) bağlantı seçildi")
+                // TODO(plural)
+                Text("\(selectedAliases.count) connections selected")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
-                Button("Vazgeç") {
+                Button("Cancel") {
                     dismiss()
                 }
-                Button(group == nil ? "Grubu Oluştur" : "Değişiklikleri Kaydet") {
+                Button(group == nil ? "Create Group" : "Save Changes") {
                     let aliases = connections
                         .map(\.alias)
                         .filter(selectedAliases.contains)
@@ -1268,17 +1271,17 @@ private struct ConnectionGroupEditorSheet: View {
         }
         .frame(minWidth: 560, minHeight: 560)
         .confirmationDialog(
-            "Bağlantı grubu silinsin mi?",
+            "Delete the connection group?",
             isPresented: $showingDeleteConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Grubu Sil", role: .destructive) {
+            Button("Delete Group", role: .destructive) {
                 if onDelete?() == true {
                     dismiss()
                 }
             }
         } message: {
-            Text("SSH bağlantıları ve config dosyası değişmez; yalnızca bu grup silinir.")
+            Text("SSH connections and the config file are unchanged; only this group is deleted.")
         }
     }
 
@@ -1310,7 +1313,7 @@ private struct HostSettingsSheet: View {
             SheetHeader(
                 systemImage: "gearshape.fill",
                 title: host.displayName,
-                subtitle: Text("SSH bağlantı ayarları").font(.caption),
+                subtitle: Text("SSH connection settings").font(.caption),
                 onClose: { dismiss() }
             )
 
@@ -1356,30 +1359,30 @@ private struct HostEditorView: View {
 
     var body: some View {
         Form {
-            Section("Kimlik") {
-                TextField("Alias / desen", text: $draft.patterns, prompt: Text("örn. web-prod"))
+            Section("Identity") {
+                TextField("Alias / pattern", text: $draft.patterns, prompt: Text("e.g. web-prod"))
                     .editorFieldStyle()
-                TextField("HostName", text: $draft.hostName, prompt: Text("örn. 192.168.1.10"))
+                TextField("HostName", text: $draft.hostName, prompt: Text("e.g. 192.168.1.10"))
                     .editorFieldStyle()
-                TextField("User", text: $draft.user, prompt: Text("örn. root"))
+                TextField("User", text: $draft.user, prompt: Text("e.g. root"))
                     .editorFieldStyle()
-                TextField("Port", text: $draft.port, prompt: Text("örn. 22"))
-                    .editorFieldStyle()
-            }
-
-            Section("Bağlantı") {
-                TextField("IdentityFile", text: $draft.identityFile, prompt: Text("örn. ~/.ssh/id_ed25519"))
-                    .editorFieldStyle()
-                TextField("ProxyJump", text: $draft.proxyJump, prompt: Text("örn. bastion"))
+                TextField("Port", text: $draft.port, prompt: Text("e.g. 22"))
                     .editorFieldStyle()
             }
 
-            Section("Anahtar Kurulumu") {
-                Button("Anahtar Kurulumu…", systemImage: "key") {
+            Section("Connection") {
+                TextField("IdentityFile", text: $draft.identityFile, prompt: Text("e.g. ~/.ssh/id_ed25519"))
+                    .editorFieldStyle()
+                TextField("ProxyJump", text: $draft.proxyJump, prompt: Text("e.g. bastion"))
+                    .editorFieldStyle()
+            }
+
+            Section("Key Setup") {
+                Button("Key setup…", systemImage: "key") {
                     showingKeySetupWizard = true
                 }
                 .disabled(currentAlias == nil)
-                Text("Yeni bir ed25519 anahtarı üretir, isteğe bağlı olarak SSH agent'a ekler ve sunucudaki authorized_keys dosyasına kopyalar.")
+                Text("Generates a new ed25519 key, optionally adds it to the SSH agent, and copies it to the server's authorized_keys file.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -1388,14 +1391,14 @@ private struct HostEditorView: View {
                case .available = currentStartupAvailability {
                 StartupFlowOptionalEditorView(profile: $startupProfile)
             } else if case let .unavailable(message) = currentStartupAvailability {
-                Section("Başlangıç Akışı") {
+                Section("Startup Flow") {
                     Label(message, systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.secondary)
                 }
             } else if case let .available(alias) = currentStartupAvailability {
-                Section("Başlangıç Akışı") {
+                Section("Startup Flow") {
                     Label(
-                        "\(alias) için başlangıç akışı hazırlanıyor.",
+                        "Preparing startup flow for \(alias).",
                         systemImage: "hourglass"
                     )
                     .foregroundStyle(.secondary)
@@ -1403,10 +1406,10 @@ private struct HostEditorView: View {
             }
 
             Section {
-                Button("Değişiklikleri Uygula") {
+                Button("Apply Changes") {
                     _ = onApply(draft, applicableStartupProfile)
                 }
-                Text("Boş bırakılan temel alanlar bu Host bloğundan kaldırılır. Diğer tüm OpenSSH direktiflerini Ham config ekranından düzenleyebilirsin.")
+                Text("Empty base fields are removed from this Host block. You can edit all other OpenSSH directives from the Raw Config screen.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -1506,12 +1509,12 @@ private struct RawConfigEditor: View {
 
             Divider()
             HStack {
-                Text("Uygulandığında değişiklik hemen ~/.ssh/config dosyasına yazılır; önceki içerik yedeklenir.")
+                Text("Applying writes the change to ~/.ssh/config immediately; the previous content is backed up.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button("Vazgeç") { dismiss() }
-                Button("Uygula ve kaydet") {
+                Button("Cancel") { dismiss() }
+                Button("Apply and save") {
                     onApply(draft)
                     dismiss()
                 }
@@ -1557,7 +1560,7 @@ private struct SectionSourceEditor: View {
 
             HStack {
                 Spacer()
-                Button("Değişiklikleri Uygula") {
+                Button("Apply Changes") {
                     onApply(draft)
                 }
             }
@@ -1576,10 +1579,10 @@ private struct IncludesEditorView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Include dosyaları")
+            Text("Include files")
                 .font(.title2.bold())
 
-            Text("OpenSSH, bu satırlardaki dosyaları config okuma akışına dahil eder.")
+            Text("OpenSSH includes the files in these lines in the config read flow.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -1595,9 +1598,9 @@ private struct IncludesEditorView: View {
             .frame(minHeight: 220)
 
             HStack {
-                TextField("Yeni Include yolu", text: $newPath, prompt: Text("örn. ~/.ssh/config.d/*"))
+                TextField("New include path", text: $newPath, prompt: Text("e.g. ~/.ssh/config.d/*"))
                     .editorFieldStyle()
-                Button("Ekle") {
+                Button("Add") {
                     onAdd(newPath)
                     newPath = ""
                 }
@@ -1624,14 +1627,14 @@ private struct BackupHistoryView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Yedek geçmişi")
+                    Text("Backup history")
                         .font(.title2.bold())
-                    Text("Geri yükleme, mevcut config'i önce yeni bir yedek olarak saklar.")
+                    Text("Restoring first saves the current config as a new backup.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("Yenile", systemImage: "arrow.clockwise") {
+                Button("Refresh", systemImage: "arrow.clockwise") {
                     onRefresh()
                 }
             }
@@ -1656,37 +1659,37 @@ private struct BackupHistoryView: View {
                 if let previewedBackup, let previewedSource {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Text("Seçili yedek")
+                            Text("Selected backup")
                                 .font(.headline)
                             Spacer()
-                            Button("Bu yedeği geri yükle", role: .destructive) {
+                            Button("Restore this backup", role: .destructive) {
                                 showingRestoreConfirmation = true
                             }
                         }
 
                         HStack(spacing: 0) {
-                            SourceColumn(title: "Mevcut config", source: currentSource)
+                            SourceColumn(title: String(localized: "Current config"), source: currentSource)
                             Divider()
-                            SourceColumn(title: "Yedek", source: previewedSource)
+                            SourceColumn(title: String(localized: "Backup"), source: previewedSource)
                         }
                     }
                     .confirmationDialog(
-                        "Bu yedek geri yüklensin mi?",
+                        "Restore this backup?",
                         isPresented: $showingRestoreConfirmation,
                         titleVisibility: .visible
                     ) {
-                        Button("Geri Yükle", role: .destructive) {
+                        Button("Restore", role: .destructive) {
                             onRestore(previewedBackup)
                             selectedID = nil
                         }
                     } message: {
-                        Text("Mevcut config önce yeni bir yedek olarak kaydedilir; geri yükleme atomik uygulanır.")
+                        Text("The current config is saved as a new backup first; the restore is applied atomically.")
                     }
                 } else {
                     ContentUnavailableView(
-                        "Yedek seçilmedi",
+                        "No backup selected",
                         systemImage: "clock.arrow.circlepath",
-                        description: Text(backups.isEmpty ? "Henüz yedek oluşmadı. İlk kaydetmeden sonra burada görünür." : "Karşılaştırmak veya geri yüklemek için bir yedek seç.")
+                        description: Text(backups.isEmpty ? String(localized: "No backups yet. It'll show up here after your first save.") : String(localized: "Select a backup to compare or restore."))
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -1712,12 +1715,12 @@ private struct IncludeRow: View {
 
     var body: some View {
         HStack {
-            TextField("Include yolu", text: $path, prompt: Text("örn. ~/.ssh/config.d/*"))
+            TextField("Include path", text: $path, prompt: Text("e.g. ~/.ssh/config.d/*"))
                 .editorFieldStyle()
             Text(include.scope.rawValue)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Button("Uygula") {
+            Button("Apply") {
                 onUpdate(path)
             }
             Button(role: .destructive) {
@@ -1725,7 +1728,7 @@ private struct IncludeRow: View {
             } label: {
                 Image(systemName: "trash")
             }
-            .help("Bu Include satırını kaldır")
+            .help("Remove this include line")
         }
     }
 }
@@ -1739,19 +1742,19 @@ private struct ChangePreviewView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Diskteki dosya ile çalışma kopyasını karşılaştır")
+                Text("Compare the file on disk with the working copy")
                     .font(.headline)
                 Spacer()
-                Button("Kapat") { dismiss() }
+                Button("Close") { dismiss() }
             }
             .padding()
 
             Divider()
 
             HStack(spacing: 0) {
-                SourceColumn(title: "Mevcut dosya", source: original)
+                SourceColumn(title: String(localized: "Current file"), source: original)
                 Divider()
-                SourceColumn(title: "Çalışma kopyası", source: updated)
+                SourceColumn(title: String(localized: "Working copy"), source: updated)
             }
         }
         .frame(minWidth: 900, minHeight: 600)
@@ -1771,7 +1774,7 @@ private struct SourceColumn: View {
             Divider()
 
             ScrollView([.horizontal, .vertical]) {
-                Text(source.isEmpty ? "(boş config)" : source)
+                Text(source.isEmpty ? String(localized: "(empty config)") : source)
                     .font(.system(.body, design: .monospaced))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
@@ -1786,7 +1789,7 @@ private struct ConfigPreviewView: View {
 
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
-            Text(source.isEmpty ? "(boş config)" : source)
+            Text(source.isEmpty ? String(localized: "(empty config)") : source)
                 .font(.system(.body, design: .monospaced))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)

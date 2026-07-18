@@ -13,6 +13,7 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    @MainActor
     func testAppLaunchesSidebarQuickAccessAndSettingsOpenAndClose() throws {
         let app = XCUIApplication()
         app.launch()
@@ -21,10 +22,10 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
         let window = app.windows.firstMatch
         XCTAssertTrue(window.waitForExistence(timeout: 10), "Ana pencere açılmalı")
 
-        let quickAccessButton = app.buttons["Hızlı erişim"]
+        let quickAccessButton = app.buttons["Quick access"]
         XCTAssertTrue(quickAccessButton.waitForExistence(timeout: 10), "Toolbar'da Hızlı erişim düğmesi görünmeli")
 
-        let sidebarConnectionsHeader = app.staticTexts["Bağlantılar"]
+        let sidebarConnectionsHeader = app.staticTexts["Connections"]
         XCTAssertTrue(sidebarConnectionsHeader.waitForExistence(timeout: 10), "Sidebar 'Bağlantılar' bölümü görünmeli")
 
         // 2. ⌘K opens Quick Access (its search field becomes visible).
@@ -39,17 +40,36 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
             "Esc sonrası hızlı erişim kapanmalı"
         )
 
-        // 4. ⌘, opens the Settings window.
-        app.typeKey(",", modifierFlags: .command)
-        let settingsPreviewText = app.staticTexts["Önizleme"]
-        XCTAssertTrue(settingsPreviewText.waitForExistence(timeout: 10), "Ayarlar penceresi açılmalı")
+        // 4. Ayarlar penceresi menüden açılır. Bilinçli olarak ⌘, DEĞİL:
+        //    typeKey karakteri sistemin klavye düzeni üzerinden sentezler; test dili
+        //    en'e sabitlenince Türkçe-Q düzeninde "," tuşu farklı keycode'a düşüyor
+        //    ve kısayol uygulamaya ulaşmıyor (gerçek kullanıcıda sorun yok, yalnız
+        //    sentetik event). Menü tıklaması düzenden bağımsız.
+        //    İçerik yerine pencere sayısı beklenir: Ayarlar TabView'ı son seçili
+        //    sekmeyi hatırladığından sekme içeriği makine durumuna bağlıdır.
+        app.menuItems["Settings…"].click()
+        XCTAssertTrue(
+            waitForWindowCount(of: app, toBe: 2, timeout: 10),
+            "Ayarlar penceresi açılmalı"
+        )
 
         // 5. Close the Settings window again (⌘W), leaving only the main window.
         app.typeKey("w", modifierFlags: .command)
         XCTAssertTrue(
-            waitForDisappearance(of: settingsPreviewText, timeout: 10),
+            waitForWindowCount(of: app, toBe: 1, timeout: 10),
             "Ayarlar penceresi kapanmalı"
         )
+    }
+
+    /// Ayarlar penceresinin açılıp kapanmasını pencere sayısı üzerinden bekler.
+    @MainActor
+    private func waitForWindowCount(of app: XCUIApplication, toBe count: Int, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if app.windows.count == count { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        return app.windows.count == count
     }
 
     /// `XCTestExpectation` isn't as short-hand as `waitForExistence`, but there's

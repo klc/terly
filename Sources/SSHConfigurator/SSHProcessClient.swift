@@ -62,11 +62,11 @@ enum SSHProcessClientError: LocalizedError, Equatable, Sendable {
     var errorDescription: String? {
         switch self {
         case let .launchFailed(message):
-            return "SSH aracı başlatılamadı: \(message)"
+            return String(localized: "SSH tool failed to launch: \(message)")
         case let .timedOut(seconds):
-            return "İşlem \(seconds.formatted(.number.precision(.fractionLength(0 ... 1)))) saniye içinde tamamlanmadı."
+            return String(localized: "Operation did not complete within \(seconds.formatted(.number.precision(.fractionLength(0 ... 1)))) seconds.")
         case .cancelled:
-            return "İşlem iptal edildi."
+            return String(localized: "Operation was cancelled.")
         }
     }
 }

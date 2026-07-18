@@ -111,6 +111,9 @@ schemes:
         SSHConfiguratorTests: [test]
         SSHConfiguratorUITests: [test]
     test:
+      # Testler EN kaynak stringlere assert eder; makine dili ne olursa olsun
+      # deterministik koşsun diye test dili sabitlenir.
+      language: en
       targets:
         - SSHConfigCoreTests
         - SSHConfiguratorTests

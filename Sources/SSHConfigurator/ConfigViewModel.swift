@@ -128,7 +128,7 @@ final class ConfigViewModel: ObservableObject {
             document = loadedDocument
             selectedItem = loadedDocument.hostBlocks.first.map { .host($0.id) } ?? .global
             refreshBackups()
-            statusMessage = loadedSnapshot.exists ? "Config yüklendi." : "Config dosyası henüz bulunamadı; yeni dosya oluşturabilirsin."
+            statusMessage = loadedSnapshot.exists ? String(localized: "Config loaded.") : String(localized: "Config file not found yet; you can create a new one.")
             errorMessage = connectionGroupLoadError?.localizedDescription
         } catch {
             document = nil
@@ -146,7 +146,7 @@ final class ConfigViewModel: ObservableObject {
         guard let snapshot else { return }
         document = SSHConfigDocument(source: snapshot.source)
         selectedItem = document?.hostBlocks.first.map { .host($0.id) } ?? .global
-        statusMessage = "Kaydedilmemiş değişiklikler geri alındı."
+        statusMessage = String(localized: "Unsaved changes were discarded.")
     }
 
     @discardableResult
@@ -171,7 +171,7 @@ final class ConfigViewModel: ObservableObject {
     func applyPreparedHostDocument(_ prepared: SSHConfigDocument) {
         document = prepared
         errorMessage = nil
-        persistWorkingCopy(successMessage: "Host düzenlemesi kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Host settings saved."))
     }
 
     /// Updates only the `IdentityFile` directive for `host`, going through
@@ -207,7 +207,7 @@ final class ConfigViewModel: ObservableObject {
             let updated = try document.appendingHost(patterns: ["new-host"])
             self.document = updated
             selectedItem = updated.hostBlocks.last.map { .host($0.id) }
-            statusMessage = "Yeni Host eklendi; alias ve bağlantı alanlarını doldur."
+            statusMessage = String(localized: "New host added; fill in the alias and connection fields.")
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -221,7 +221,7 @@ final class ConfigViewModel: ObservableObject {
             self.document = updated
             selectedItem = updated.hostBlocks.last.map { .host($0.id) }
             errorMessage = nil
-            persistWorkingCopy(successMessage: "\(host.displayName) bağlantısı kopyalandı ve kaydedildi.")
+            persistWorkingCopy(successMessage: String(localized: "\(host.displayName) connection duplicated and saved."))
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -233,7 +233,7 @@ final class ConfigViewModel: ObservableObject {
             let updated = try document.deletingHostBlock(selectedHost)
             self.document = updated
             selectedItem = updated.hostBlocks.first.map { .host($0.id) } ?? .global
-            persistWorkingCopy(successMessage: "Host silindi ve ~/.ssh/config güncellendi.")
+            persistWorkingCopy(successMessage: String(localized: "Host deleted and ~/.ssh/config updated."))
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -256,21 +256,21 @@ final class ConfigViewModel: ObservableObject {
     func replaceSource(with source: String) {
         document = SSHConfigDocument(source: source)
         selectedItem = document?.hostBlocks.first.map { .host($0.id) } ?? .global
-        persistWorkingCopy(successMessage: "Ham config değişikliği kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Raw config change saved."))
     }
 
     func replaceGlobalSource(with source: String) {
         guard let document else { return }
         self.document = document.replacingGlobalSource(with: source)
         selectedItem = .global
-        persistWorkingCopy(successMessage: "Global ayarlar kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Global settings saved."))
     }
 
     func replaceMatchSource(_ match: SSHConfigMatchBlock, with source: String) {
         guard let document else { return }
         self.document = document.replacingSource(in: match.lineRange, with: source)
         selectedItem = .match(match.id)
-        persistWorkingCopy(successMessage: "Match bloğu kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Match block saved."))
     }
 
     func addInclude(path: String) {
@@ -278,21 +278,21 @@ final class ConfigViewModel: ObservableObject {
         guard !trimmedPath.isEmpty, let document else { return }
         self.document = document.appendingGlobalDirective(SSHConfigDirective(keyword: "Include", value: trimmedPath))
         selectedItem = .includes
-        persistWorkingCopy(successMessage: "Include satırı eklendi ve kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Include line added and saved."))
     }
 
     func updateInclude(_ include: SSHConfigInclude, path: String) {
         guard let document else { return }
         self.document = document.updatingDirective(atLine: include.line, to: path)
         selectedItem = .includes
-        persistWorkingCopy(successMessage: "Include satırı güncellendi ve kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Include line updated and saved."))
     }
 
     func removeInclude(_ include: SSHConfigInclude) {
         guard let document else { return }
         self.document = document.removingDirective(atLine: include.line)
         selectedItem = .includes
-        persistWorkingCopy(successMessage: "Include satırı kaldırıldı ve kaydedildi.")
+        persistWorkingCopy(successMessage: String(localized: "Include line removed and saved."))
     }
 
     @discardableResult
@@ -318,7 +318,7 @@ final class ConfigViewModel: ObservableObject {
 
             try connectionGroupStore.save(updatedGroups)
             connectionGroups = updatedGroups
-            statusMessage = id == nil ? "Bağlantı grubu oluşturuldu." : "Bağlantı grubu güncellendi."
+            statusMessage = id == nil ? String(localized: "Connection group created.") : String(localized: "Connection group updated.")
             errorMessage = nil
             return true
         } catch {
@@ -333,7 +333,7 @@ final class ConfigViewModel: ObservableObject {
             let updatedGroups = connectionGroups.filter { $0.id != group.id }
             try connectionGroupStore.save(updatedGroups)
             connectionGroups = updatedGroups
-            statusMessage = "Bağlantı grubu silindi."
+            statusMessage = String(localized: "Connection group deleted.")
             errorMessage = nil
             return true
         } catch {
@@ -397,7 +397,7 @@ final class ConfigViewModel: ObservableObject {
             previewedBackup = nil
             previewedBackupSource = nil
             selectedItem = .backups
-            statusMessage = result.backupURL.map { "Yedek geri yüklendi. Önceki sürüm yeni yedek olarak korundu: \($0.lastPathComponent)" } ?? "Yedek geri yüklendi."
+            statusMessage = result.backupURL.map { String(localized: "Backup restored. Previous version kept as a new backup: \($0.lastPathComponent)") } ?? String(localized: "Backup restored.")
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -410,7 +410,7 @@ final class ConfigViewModel: ObservableObject {
             let result = try store.save(document, expectedSnapshot: snapshot)
             self.snapshot = try store.snapshot(at: configURL)
             refreshBackups()
-            statusMessage = result.backupURL.map { "Kaydedildi. Yedek: \($0.lastPathComponent)" } ?? "Kaydedildi."
+            statusMessage = result.backupURL.map { String(localized: "Saved. Backup: \($0.lastPathComponent)") } ?? String(localized: "Saved.")
             errorMessage = nil
             return true
         } catch {
@@ -421,18 +421,18 @@ final class ConfigViewModel: ObservableObject {
 
     func validateSelectedHost(allowingMatchExec: Bool = false) {
         guard let document, let selectedHost else {
-            errorMessage = "Doğrulanacak bir Host seçilmedi."
+            errorMessage = String(localized: "No host selected to validate.")
             return
         }
 
         guard let host = selectedHost.patterns.first(where: { !$0.contains("*") && !$0.contains("?") && !$0.contains("!") }) else {
-            errorMessage = "Wildcard Host blokları için somut bir alias gerekli."
+            errorMessage = String(localized: "Wildcard host blocks require a concrete alias.")
             return
         }
 
         switch validator.validate(document, forHost: host, allowingMatchExec: allowingMatchExec) {
         case .valid:
-            statusMessage = "OpenSSH doğrulaması başarılı: \(host)"
+            statusMessage = String(localized: "OpenSSH validation succeeded: \(host)")
         case .requiresMatchExecConfirmation:
             requiresMatchExecConfirmation = true
         case let .invalid(message):
@@ -442,7 +442,7 @@ final class ConfigViewModel: ObservableObject {
 
     func prepareForDiagnostics() -> Bool {
         guard !hasChanges else {
-            errorMessage = "Bağlantıyı test etmeden önce değişiklikleri kaydet. Tanılama diskteki ~/.ssh/config dosyasını kullanır."
+            errorMessage = String(localized: "Save your changes before testing the connection. Diagnostics use the ~/.ssh/config file on disk.")
             return false
         }
         errorMessage = nil
