@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Terly</title>
+        <item>
+            <title>1.0.0</title>
+            <pubDate>Sat, 18 Jul 2026 12:57:04 +0000</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://klc.github.io/terly/updates/Terly-1.0.0.zip" length="5310565" type="application/octet-stream" sparkle:edSignature="g8SwV9TlCSpljh0oYhjtOyEn8q5Vk4Rk267wl5w4LnSKbf6B2j7nUyMqiQxPwDJNKxzrkmxXl+2ShWGEOSVSCw=="/>
+        </item>
+    </channel>
+</rss>
