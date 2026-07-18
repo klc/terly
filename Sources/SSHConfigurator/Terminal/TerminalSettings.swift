@@ -1,5 +1,30 @@
 import AppKit
 import SwiftUI
+@preconcurrency import SwiftTerm
+
+/// Identifies the shape of the terminal text cursor, independent of whether it
+/// blinks. Mirrors the shape half of SwiftTerm's `CursorStyle` enum so it can be
+/// stored/persisted without pulling SwiftTerm's blink variants into the picker.
+enum TerminalCursorShape: String, CaseIterable {
+    case block
+    case bar
+    case underline
+}
+
+/// Combines a cursor shape with the blink toggle to resolve SwiftTerm's own
+/// `CursorStyle` enum, which encodes shape and blink as a single case. Kept as a
+/// free function (not a `TerminalSettings` method) so it is testable without
+/// touching the `@MainActor` singleton.
+func resolveCursorStyle(shape: TerminalCursorShape, blinks: Bool) -> CursorStyle {
+    switch (shape, blinks) {
+    case (.block, true): return .blinkBlock
+    case (.block, false): return .steadyBlock
+    case (.bar, true): return .blinkBar
+    case (.bar, false): return .steadyBar
+    case (.underline, true): return .blinkUnderline
+    case (.underline, false): return .steadyUnderline
+    }
+}
 
 @MainActor
 final class TerminalSettings: ObservableObject {
@@ -26,6 +51,20 @@ final class TerminalSettings: ObservableObject {
         }
     }
 
+    @Published var cursorStyleID: String {
+        didSet {
+            UserDefaults.standard.set(cursorStyleID, forKey: "terminal.cursorStyle")
+            invalidateResolvedCursorStyle()
+        }
+    }
+
+    @Published var cursorBlinks: Bool {
+        didSet {
+            UserDefaults.standard.set(cursorBlinks, forKey: "terminal.cursorBlinks")
+            invalidateResolvedCursorStyle()
+        }
+    }
+
     /// Cached `NSFont` for the current `fontName`/`fontSize`. `NSFont(name:)` lookups
     /// are not free, so terminal surfaces should read this instead of resolving a
     /// font on every `updateNSView`. Recomputed lazily whenever the underlying
@@ -37,11 +76,19 @@ final class TerminalSettings: ObservableObject {
     /// on every `updateNSView`.
     private(set) lazy var resolvedTheme: TerminalTheme = TerminalThemeCatalog.theme(withID: themeID)
 
+    /// Cached SwiftTerm `CursorStyle` combining `cursorStyleID`/`cursorBlinks`,
+    /// following the same pattern as `resolvedFont`/`resolvedTheme`.
+    private(set) lazy var resolvedCursorStyle: CursorStyle = Self.makeCursorStyle(
+        cursorStyleID: cursorStyleID, blinks: cursorBlinks
+    )
+
     private init() {
         let savedSize = UserDefaults.standard.double(forKey: "terminal.fontSize")
         self.fontSize = savedSize > 0 ? savedSize : 13.0
         self.fontName = UserDefaults.standard.string(forKey: "terminal.fontName") ?? "SF Mono"
         self.themeID = UserDefaults.standard.string(forKey: "terminal.themeID") ?? TerminalThemeCatalog.system.id
+        self.cursorStyleID = UserDefaults.standard.string(forKey: "terminal.cursorStyle") ?? TerminalCursorShape.block.rawValue
+        self.cursorBlinks = UserDefaults.standard.object(forKey: "terminal.cursorBlinks") as? Bool ?? true
     }
 
     private func invalidateResolvedFont() {
@@ -52,6 +99,10 @@ final class TerminalSettings: ObservableObject {
         resolvedTheme = TerminalThemeCatalog.theme(withID: themeID)
     }
 
+    private func invalidateResolvedCursorStyle() {
+        resolvedCursorStyle = Self.makeCursorStyle(cursorStyleID: cursorStyleID, blinks: cursorBlinks)
+    }
+
     private static func makeFont(name: String, size: Double) -> NSFont {
         if name == "SF Mono" {
             return .monospacedSystemFont(ofSize: CGFloat(size), weight: .regular)
@@ -59,30 +110,34 @@ final class TerminalSettings: ObservableObject {
             return NSFont(name: name, size: CGFloat(size)) ?? .monospacedSystemFont(ofSize: CGFloat(size), weight: .regular)
         }
     }
+
+    private static func makeCursorStyle(cursorStyleID: String, blinks: Bool) -> CursorStyle {
+        let shape = TerminalCursorShape(rawValue: cursorStyleID) ?? .block
+        return resolveCursorStyle(shape: shape, blinks: blinks)
+    }
 }
 
 struct TerminalSettingsView: View {
     @ObservedObject var settings = TerminalSettings.shared
-    
-    let availableFonts = [
-        "SF Mono",
-        "Menlo",
-        "Monaco",
-        "Courier New",
-        "Courier",
-        "Andale Mono"
-    ]
-    
+
+    /// Installed monospace font families, computed once per view instance
+    /// rather than on every `body` evaluation (`NSFontManager` family/trait
+    /// lookups aren't free). "SF Mono" is handled separately as the special
+    /// first picker entry mapping to `.monospacedSystemFont`, so it is
+    /// excluded here even if a family with that exact name happens to be
+    /// installed.
+    let availableFonts: [String] = Self.installedMonospaceFontFamilies()
+
     var body: some View {
         Form {
             Section {
                 Picker("Yazı Tipi:", selection: $settings.fontName) {
                     Text("Sistem (SF Mono)").tag("SF Mono")
-                    ForEach(availableFonts.filter { $0 != "SF Mono" }, id: \.self) { font in
+                    ForEach(availableFonts, id: \.self) { font in
                         Text(font).tag(font)
                     }
                 }
-                
+
                 HStack {
                     Slider(value: $settings.fontSize, in: 9...24, step: 1) {
                         Text("Yazı Boyutu:")
@@ -97,6 +152,14 @@ struct TerminalSettingsView: View {
                         Text(theme.displayName).tag(theme.id)
                     }
                 }
+
+                Picker("İmleç:", selection: $settings.cursorStyleID) {
+                    Text("Blok").tag(TerminalCursorShape.block.rawValue)
+                    Text("Dikey Çizgi").tag(TerminalCursorShape.bar.rawValue)
+                    Text("Alt Çizgi").tag(TerminalCursorShape.underline.rawValue)
+                }
+
+                Toggle("Yanıp sönme", isOn: $settings.cursorBlinks)
             } header: {
                 Text("Görünüm")
             }
@@ -147,7 +210,35 @@ struct TerminalSettingsView: View {
         )
     }
 
-    private func color(_ themeColor: TerminalThemeColor) -> Color {
-        Color(nsColor: themeColor.nsColor)
+    private func color(_ themeColor: TerminalThemeColor) -> SwiftUI.Color {
+        SwiftUI.Color(nsColor: themeColor.nsColor)
+    }
+
+    /// Scans installed font families for fixed-pitch (monospace) ones, using
+    /// each family's regular member to decide — a family can mix fixed- and
+    /// proportional-pitch faces, but its regular face is representative enough
+    /// for a font picker. "SF Mono" is excluded since it's already offered as
+    /// the special system entry above. Sorted alphabetically for a stable,
+    /// predictable picker order.
+    private static func installedMonospaceFontFamilies() -> [String] {
+        let fontManager = NSFontManager.shared
+        let families = fontManager.availableFontFamilies
+        let monospaceFamilies = families.filter { family in
+            guard family != "SF Mono" else { return false }
+            guard let members = fontManager.availableMembers(ofFontFamily: family) else { return false }
+            // Prefer the regular weight (NSFontManager encodes it as weight 5)
+            // so families that mix fixed- and proportional-pitch faces (e.g. a
+            // "Regular" that's monospace alongside a decorative "Italic" that
+            // isn't) are judged by the face a user would actually pick by
+            // default; fall back to the first listed member otherwise.
+            let regularMember = members.first { ($0[2] as? Int) == 5 } ?? members.first
+            guard let fontName = regularMember?[0] as? String else { return false }
+            if let font = NSFont(name: fontName, size: 12), font.isFixedPitch {
+                return true
+            }
+            let traits = NSFontDescriptor(name: fontName, size: 12).symbolicTraits
+            return traits.contains(.monoSpace)
+        }
+        return monospaceFamilies.sorted()
     }
 }
