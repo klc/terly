@@ -65,6 +65,15 @@ final class TerminalSettings: ObservableObject {
         }
     }
 
+    /// Scroll speed multiplier passed to SwiftTerm's `scrollSensitivity`. `1.0`
+    /// is the system-native rate; lower is slower. Defaults below 1.0 because
+    /// native trackpad momentum feels too fast for line-based terminal scrolling.
+    @Published var scrollSensitivity: Double {
+        didSet {
+            UserDefaults.standard.set(scrollSensitivity, forKey: "terminal.scrollSensitivity")
+        }
+    }
+
     /// Cached `NSFont` for the current `fontName`/`fontSize`. `NSFont(name:)` lookups
     /// are not free, so terminal surfaces should read this instead of resolving a
     /// font on every `updateNSView`. Recomputed lazily whenever the underlying
@@ -89,6 +98,8 @@ final class TerminalSettings: ObservableObject {
         self.themeID = UserDefaults.standard.string(forKey: "terminal.themeID") ?? TerminalThemeCatalog.system.id
         self.cursorStyleID = UserDefaults.standard.string(forKey: "terminal.cursorStyle") ?? TerminalCursorShape.block.rawValue
         self.cursorBlinks = UserDefaults.standard.object(forKey: "terminal.cursorBlinks") as? Bool ?? true
+        let savedSensitivity = UserDefaults.standard.object(forKey: "terminal.scrollSensitivity") as? Double
+        self.scrollSensitivity = savedSensitivity ?? 0.5
     }
 
     private func invalidateResolvedFont() {
@@ -160,6 +171,15 @@ struct TerminalSettingsView: View {
                 }
 
                 Toggle("Yanıp sönme", isOn: $settings.cursorBlinks)
+
+                HStack {
+                    Slider(value: $settings.scrollSensitivity, in: 0.2...2.0, step: 0.1) {
+                        Text("Kaydırma Hızı:")
+                    }
+                    Text(String(format: "%.1fx", settings.scrollSensitivity))
+                        .font(.body.monospacedDigit())
+                        .frame(width: 45, alignment: .trailing)
+                }
             } header: {
                 Text("Görünüm")
             }

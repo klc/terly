@@ -1,5 +1,5 @@
 {
-  "originHash" : "f38877ee231ee3935ac8f5324c9be3fe50f8f548f4002fa1419fade44e13b894",
+  "originHash" : "5b3033c31ddf831ac688ea790689a8425ad12276e635ec7535a7aafc29cd20df",
   "pins" : [
     {
       "identity" : "sparkle",
@@ -24,7 +24,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/klc/SwiftTerm.git",
       "state" : {
-        "revision" : "63fc5c88c6572e319481f59733d8e6f85b7b6e73"
+        "revision" : "99f1bc935fd9937cf7361fd56d3cf89b082e0112"
       }
     }
   ],

@@ -33,6 +33,7 @@ indirect enum PersistedPaneLayout: Codable, Equatable {
     case split(
         id: UUID,
         axis: TerminalSplitAxis,
+        ratio: Double,
         first: PersistedPaneLayout,
         second: PersistedPaneLayout
     )
@@ -42,6 +43,7 @@ indirect enum PersistedPaneLayout: Codable, Equatable {
         case pane
         case id
         case axis
+        case ratio
         case first
         case second
     }
@@ -56,9 +58,10 @@ indirect enum PersistedPaneLayout: Codable, Equatable {
         case "split":
             let id = try container.decode(UUID.self, forKey: .id)
             let axis = try container.decode(TerminalSplitAxis.self, forKey: .axis)
+            let ratio = try container.decodeIfPresent(Double.self, forKey: .ratio) ?? 0.5
             let first = try container.decode(PersistedPaneLayout.self, forKey: .first)
             let second = try container.decode(PersistedPaneLayout.self, forKey: .second)
-            self = .split(id: id, axis: axis, first: first, second: second)
+            self = .split(id: id, axis: axis, ratio: ratio, first: first, second: second)
         default:
             throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown layout type")
         }
@@ -70,10 +73,11 @@ indirect enum PersistedPaneLayout: Codable, Equatable {
         case let .pane(pane):
             try container.encode("pane", forKey: .type)
             try container.encode(pane, forKey: .pane)
-        case let .split(id, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
             try container.encode("split", forKey: .type)
             try container.encode(id, forKey: .id)
             try container.encode(axis, forKey: .axis)
+            try container.encode(ratio, forKey: .ratio)
             try container.encode(first, forKey: .first)
             try container.encode(second, forKey: .second)
         }
@@ -158,8 +162,8 @@ extension TerminalPaneLayout {
                 alias: pane.alias,
                 skippedAutomaticStartup: pane.startupState == .skipped
             ))
-        case let .split(id, axis, first, second):
-            return .split(id: id, axis: axis, first: first.persisted, second: second.persisted)
+        case let .split(id, axis, ratio, first, second):
+            return .split(id: id, axis: axis, ratio: ratio, first: first.persisted, second: second.persisted)
         }
     }
 }
@@ -179,10 +183,10 @@ extension PersistedPaneLayout {
                 skipStartup: persistedPane.skippedAutomaticStartup
             )
             return .pane(pane)
-        case let .split(id, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
             let restoredFirst = try first.restore(builder: builder, startupProfiles: startupProfiles)
             let restoredSecond = try second.restore(builder: builder, startupProfiles: startupProfiles)
-            return .split(id: id, axis: axis, first: restoredFirst, second: restoredSecond)
+            return .split(id: id, axis: axis, ratio: ratio, first: restoredFirst, second: restoredSecond)
         }
     }
 }
