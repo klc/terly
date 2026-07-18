@@ -1,6 +1,20 @@
 import AppKit
 import SwiftUI
 
+/// Normalized (0–1) geometry for one split boundary, produced alongside pane
+/// frames by `layoutGeometry(for:in:)` so dividers can be drawn/dragged.
+private struct SplitDividerGeometry: Identifiable {
+    let id: UUID              // split node id
+    let axis: TerminalSplitAxis
+    let containerFrame: CGRect // split node's own normalized frame (for ratio math during drag)
+    let lineFrame: CGRect      // zero-thickness normalized rect on the boundary
+}
+
+private struct PaneLayoutGeometry {
+    var frames: [TerminalPane.ID: CGRect] = [:]
+    var dividers: [SplitDividerGeometry] = []
+}
+
 struct TerminalWorkspaceView: View {
     @ObservedObject var model: TerminalWorkspaceModel
     @ObservedObject var startupLibrary: StartupFlowLibrary
@@ -13,6 +27,8 @@ struct TerminalWorkspaceView: View {
     @State private var searchSummary: TerminalSearchSummary?
     @State private var searchTask: Task<Void, Never>?
     @FocusState private var searchFieldFocused: Bool
+    @State private var transientRatios: [UUID: Double] = [:]
+    @State private var hoveredDividerID: UUID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -191,11 +207,11 @@ struct TerminalWorkspaceView: View {
 
     private func sessionSurface(_ session: TerminalSession) -> some View {
         GeometryReader { geometry in
-            let frames = paneFrames(for: session.layout)
+            let geometryInfo = layoutGeometry(for: session.layout)
 
             ZStack(alignment: .topLeading) {
                 ForEach(session.panes) { pane in
-                    let normalizedFrame = frames[pane.id] ?? CGRect(x: 0, y: 0, width: 1, height: 1)
+                    let normalizedFrame = geometryInfo.frames[pane.id] ?? CGRect(x: 0, y: 0, width: 1, height: 1)
                     let paneIsActive = isActive &&
                         model.selectedSessionID == session.id &&
                         session.activePaneID == pane.id
@@ -210,8 +226,74 @@ struct TerminalWorkspaceView: View {
                             y: geometry.size.height * normalizedFrame.midY
                         )
                 }
+
+                ForEach(geometryInfo.dividers) { divider in
+                    splitDividerHandle(divider, in: geometry, sessionID: session.id)
+                }
             }
         }
+    }
+
+    /// A near-invisible hit strip straddling a split boundary: drag to resize,
+    /// double-click to reset to 50/50. Never touches first responder — only
+    /// writes `transientRatios`/`model.setSplitRatio`.
+    private func splitDividerHandle(
+        _ divider: SplitDividerGeometry,
+        in geometry: GeometryProxy,
+        sessionID: TerminalSession.ID
+    ) -> some View {
+        let isVertical = divider.axis == .vertical
+        let hitThickness: CGFloat = 8
+        let hitWidth = isVertical ? hitThickness : geometry.size.width * divider.lineFrame.width
+        let hitHeight = isVertical ? geometry.size.height * divider.lineFrame.height : hitThickness
+        let isHighlighted = hoveredDividerID == divider.id || transientRatios[divider.id] != nil
+
+        return ZStack {
+            Rectangle()
+                .fill(Color.clear)
+                .frame(width: hitWidth, height: hitHeight)
+                .contentShape(Rectangle())
+
+            if isHighlighted {
+                Rectangle()
+                    .fill(Color.accentColor)
+                    .frame(width: isVertical ? 1 : hitWidth, height: isVertical ? hitHeight : 1)
+            }
+        }
+        .position(
+            x: geometry.size.width * divider.lineFrame.midX,
+            y: geometry.size.height * divider.lineFrame.midY
+        )
+        .onHover { hovering in
+            if hovering {
+                hoveredDividerID = divider.id
+                (isVertical ? NSCursor.resizeLeftRight : NSCursor.resizeUpDown).push()
+            } else if hoveredDividerID == divider.id {
+                hoveredDividerID = nil
+                NSCursor.pop()
+            }
+        }
+        .onTapGesture(count: 2) {
+            model.setSplitRatio(0.5, splitID: divider.id, in: sessionID)
+        }
+        .gesture(
+            DragGesture(minimumDistance: 2)
+                .onChanged { value in
+                    let rawRatio = isVertical
+                        ? (value.location.x / geometry.size.width - divider.containerFrame.minX) / divider.containerFrame.width
+                        : (value.location.y / geometry.size.height - divider.containerFrame.minY) / divider.containerFrame.height
+                    transientRatios[divider.id] = min(
+                        max(rawRatio, TerminalPaneLayout.minimumSplitRatio),
+                        TerminalPaneLayout.maximumSplitRatio
+                    )
+                }
+                .onEnded { _ in
+                    if let finalRatio = transientRatios[divider.id] {
+                        model.setSplitRatio(finalRatio, splitID: divider.id, in: sessionID)
+                    }
+                    transientRatios.removeAll()
+                }
+        )
     }
 
     private func paneSurface(
@@ -339,29 +421,45 @@ struct TerminalWorkspaceView: View {
         }
     }
 
-    private func paneFrames(
+    /// Single recursive walk producing both normalized pane frames and the
+    /// divider geometry needed to draw/drag split boundaries. `effectiveRatio`
+    /// reads `transientRatios` first so an in-progress drag resizes panes
+    /// live without writing to the model on every tick.
+    private func layoutGeometry(
         for layout: TerminalPaneLayout,
         in frame: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-    ) -> [TerminalPane.ID: CGRect] {
+    ) -> PaneLayoutGeometry {
         switch layout {
         case let .pane(pane):
-            return [pane.id: frame]
+            return PaneLayoutGeometry(frames: [pane.id: frame], dividers: [])
 
-        case let .split(_, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
+            let effectiveRatio = transientRatios[id] ?? ratio
             let firstFrame: CGRect
             let secondFrame: CGRect
+            let lineFrame: CGRect
 
             switch axis {
             case .vertical:
-                firstFrame = CGRect(x: frame.minX, y: frame.minY, width: frame.width / 2, height: frame.height)
-                secondFrame = CGRect(x: frame.midX, y: frame.minY, width: frame.width / 2, height: frame.height)
+                let firstWidth = frame.width * effectiveRatio
+                firstFrame = CGRect(x: frame.minX, y: frame.minY, width: firstWidth, height: frame.height)
+                secondFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: frame.width - firstWidth, height: frame.height)
+                lineFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: 0, height: frame.height)
             case .horizontal:
-                firstFrame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: frame.height / 2)
-                secondFrame = CGRect(x: frame.minX, y: frame.midY, width: frame.width, height: frame.height / 2)
+                let firstHeight = frame.height * effectiveRatio
+                firstFrame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: firstHeight)
+                secondFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: frame.height - firstHeight)
+                lineFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: 0)
             }
 
-            return paneFrames(for: first, in: firstFrame)
-                .merging(paneFrames(for: second, in: secondFrame)) { current, _ in current }
+            var geometry = layoutGeometry(for: first, in: firstFrame)
+            let secondGeometry = layoutGeometry(for: second, in: secondFrame)
+            geometry.frames.merge(secondGeometry.frames) { current, _ in current }
+            geometry.dividers.append(
+                SplitDividerGeometry(id: id, axis: axis, containerFrame: frame, lineFrame: lineFrame)
+            )
+            geometry.dividers.append(contentsOf: secondGeometry.dividers)
+            return geometry
         }
     }
 

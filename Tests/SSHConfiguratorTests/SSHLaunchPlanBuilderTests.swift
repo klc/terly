@@ -79,7 +79,7 @@ final class SSHLaunchPlanBuilderTests: XCTestCase {
             ["--", "prod-worker"],
             ["--", "prod-db"],
         ])
-        guard case let .split(_, axis, _, _) = session.layout else {
+        guard case let .split(_, axis, _, _, _) = session.layout else {
             return XCTFail("Çoklu bağlantı için split layout bekleniyordu")
         }
         XCTAssertEqual(axis, .vertical)

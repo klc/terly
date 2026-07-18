@@ -340,6 +340,11 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
 
+    func setSplitRatio(_ ratio: Double, splitID: UUID, in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
+        sessions[index].layout = sessions[index].layout.updatingRatio(splitID: splitID, ratio: ratio)
+    }
+
     func selectPane(
         _ paneID: TerminalPane.ID,
         in sessionID: TerminalSession.ID,

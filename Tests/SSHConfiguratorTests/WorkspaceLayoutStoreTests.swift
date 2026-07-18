@@ -27,6 +27,7 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
         let splitLayout = PersistedPaneLayout.split(
             id: UUID(),
             axis: .vertical,
+            ratio: 0.3,
             first: layout,
             second: .pane(PersistedPane(id: UUID(), alias: "db-host"))
         )
@@ -58,6 +59,32 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
         XCTAssertEqual(decodedWorkspace.sessions[0].hostID, 10)
         XCTAssertEqual(decodedWorkspace.sessions[0].activePaneID, pane.id)
         XCTAssertFalse(decodedWorkspace.sessions[0].layout.panes[0].skippedAutomaticStartup)
+        guard case let .split(_, _, ratio, _, _) = decodedWorkspace.sessions[0].layout else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+        XCTAssertEqual(ratio, 0.3)
+    }
+
+    func testLegacySplitWithoutRatioDecodesAsHalf() throws {
+        let firstPaneID = UUID()
+        let secondPaneID = UUID()
+        let splitID = UUID()
+        let data = try XCTUnwrap("""
+        {
+            "type": "split",
+            "id": "\(splitID.uuidString)",
+            "axis": "vertical",
+            "first": {"type":"pane","pane":{"id":"\(firstPaneID.uuidString)","alias":"prod-host"}},
+            "second": {"type":"pane","pane":{"id":"\(secondPaneID.uuidString)","alias":"db-host"}}
+        }
+        """.data(using: .utf8))
+
+        let layout = try JSONDecoder().decode(PersistedPaneLayout.self, from: data)
+
+        guard case let .split(_, _, ratio, _, _) = layout else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+        XCTAssertEqual(ratio, 0.5)
     }
 
     func testLegacyPersistedPaneDefaultsSkippedAutomaticStartupToFalse() throws {
@@ -288,7 +315,7 @@ private extension PersistedPaneLayout {
         switch self {
         case let .pane(pane):
             return [pane]
-        case let .split(_, _, first, second):
+        case let .split(_, _, _, first, second):
             return first.panes + second.panes
         }
     }

@@ -52,15 +52,19 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
     case split(
         id: UUID,
         axis: TerminalSplitAxis,
+        ratio: Double,
         first: TerminalPaneLayout,
         second: TerminalPaneLayout
     )
+
+    static let minimumSplitRatio = 0.15
+    static let maximumSplitRatio = 0.85
 
     var panes: [TerminalPane] {
         switch self {
         case let .pane(pane):
             return [pane]
-        case let .split(_, _, first, second):
+        case let .split(_, _, _, first, second):
             return first.panes + second.panes
         }
     }
@@ -78,6 +82,7 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
         return .split(
             id: UUID(),
             axis: depth.isMultiple(of: 2) ? .vertical : .horizontal,
+            ratio: 0.5,
             first: first,
             second: second
         )
@@ -87,7 +92,7 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
         switch self {
         case let .pane(pane):
             return pane.id == id ? pane : nil
-        case let .split(_, _, first, second):
+        case let .split(_, _, _, first, second):
             return first.pane(id: id) ?? second.pane(id: id)
         }
     }
@@ -103,16 +108,17 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
             return .split(
                 id: UUID(),
                 axis: axis,
+                ratio: 0.5,
                 first: .pane(pane),
                 second: .pane(newPane)
             )
 
-        case let .split(id, currentAxis, first, second):
+        case let .split(id, currentAxis, ratio, first, second):
             if let updatedFirst = first.splitting(paneID: paneID, with: newPane, axis: axis) {
-                return .split(id: id, axis: currentAxis, first: updatedFirst, second: second)
+                return .split(id: id, axis: currentAxis, ratio: ratio, first: updatedFirst, second: second)
             }
             if let updatedSecond = second.splitting(paneID: paneID, with: newPane, axis: axis) {
-                return .split(id: id, axis: currentAxis, first: first, second: updatedSecond)
+                return .split(id: id, axis: currentAxis, ratio: ratio, first: first, second: updatedSecond)
             }
             return nil
         }
@@ -123,13 +129,13 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
         case let .pane(pane):
             return pane.id == paneID ? nil : self
 
-        case let .split(id, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
             let updatedFirst = first.removing(paneID: paneID)
             let updatedSecond = second.removing(paneID: paneID)
 
             switch (updatedFirst, updatedSecond) {
             case let (.some(first), .some(second)):
-                return .split(id: id, axis: axis, first: first, second: second)
+                return .split(id: id, axis: axis, ratio: ratio, first: first, second: second)
             case let (.some(remaining), .none), let (.none, .some(remaining)):
                 return remaining
             case (.none, .none):
@@ -149,10 +155,11 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
             }
             return .pane(pane)
 
-        case let .split(id, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
             return .split(
                 id: id,
                 axis: axis,
+                ratio: ratio,
                 first: first.updatingPaneStatus(paneID: paneID, status: status),
                 second: second.updatingPaneStatus(paneID: paneID, status: status)
             )
@@ -170,10 +177,11 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
             }
             return .pane(pane)
 
-        case let .split(id, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
             return .split(
                 id: id,
                 axis: axis,
+                ratio: ratio,
                 first: first.updatingStartupState(paneID: paneID, state: state),
                 second: second.updatingStartupState(paneID: paneID, state: state)
             )
@@ -188,14 +196,60 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
         case let .pane(pane):
             return pane.id == paneID ? .pane(newPane) : self
 
-        case let .split(id, axis, first, second):
+        case let .split(id, axis, ratio, first, second):
             return .split(
                 id: id,
                 axis: axis,
+                ratio: ratio,
                 first: first.replacing(paneID: paneID, with: newPane),
                 second: second.replacing(paneID: paneID, with: newPane)
             )
         }
+    }
+
+    func updatingRatio(splitID: UUID, ratio: Double) -> TerminalPaneLayout {
+        let clamped = min(max(ratio, Self.minimumSplitRatio), Self.maximumSplitRatio)
+        switch self {
+        case .pane:
+            return self
+
+        case let .split(id, axis, currentRatio, first, second):
+            return .split(
+                id: id,
+                axis: axis,
+                ratio: id == splitID ? clamped : currentRatio,
+                first: first.updatingRatio(splitID: splitID, ratio: ratio),
+                second: second.updatingRatio(splitID: splitID, ratio: ratio)
+            )
+        }
+    }
+
+    func swappingPanes(_ a: TerminalPane.ID, _ b: TerminalPane.ID) -> TerminalPaneLayout? {
+        guard a != b, pane(id: a) != nil, pane(id: b) != nil else { return nil }
+
+        func swap(_ layout: TerminalPaneLayout) -> TerminalPaneLayout {
+            switch layout {
+            case let .pane(pane):
+                if pane.id == a, let paneB = self.pane(id: b) {
+                    return .pane(paneB)
+                }
+                if pane.id == b, let paneA = self.pane(id: a) {
+                    return .pane(paneA)
+                }
+                return layout
+
+            case let .split(id, axis, ratio, first, second):
+                return .split(
+                    id: id,
+                    axis: axis,
+                    ratio: ratio,
+                    first: swap(first),
+                    second: swap(second)
+                )
+            }
+        }
+
+        return swap(self)
     }
 }
 

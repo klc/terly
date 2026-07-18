@@ -233,7 +233,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         XCTAssertEqual(session.panes.count, 2)
         XCTAssertNotEqual(session.activePaneID, originalPaneID)
         XCTAssertTrue(session.panes.allSatisfy { $0.process.arguments == ["--", "prod"] })
-        guard case let .split(_, axis, _, _) = session.layout else {
+        guard case let .split(_, axis, _, _, _) = session.layout else {
             return XCTFail("Dikey split layout bekleniyordu")
         }
         XCTAssertEqual(axis, .vertical)
@@ -584,6 +584,125 @@ final class TerminalWorkspaceModelTests: XCTestCase {
 
         XCTAssertNil(model.paneReconnectStates[paneID])
         XCTAssertFalse(scheduler.fireOldest()) // nothing left pending for the old pane
+    }
+
+    @MainActor
+    func testSetSplitRatioUpdatesTargetSplit() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+
+        guard case let .split(splitID, _, _, _, _) = try! XCTUnwrap(model.selectedSession?.layout) else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+
+        model.setSplitRatio(0.7, splitID: splitID, in: sessionID)
+
+        guard case let .split(_, _, ratio, _, _) = try! XCTUnwrap(model.selectedSession?.layout) else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+        XCTAssertEqual(ratio, 0.7)
+    }
+
+    @MainActor
+    func testSetSplitRatioClamps() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        guard case let .split(splitID, _, _, _, _) = try! XCTUnwrap(model.selectedSession?.layout) else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+
+        model.setSplitRatio(0.05, splitID: splitID, in: sessionID)
+        guard case let .split(_, _, lowRatio, _, _) = try! XCTUnwrap(model.selectedSession?.layout) else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+        XCTAssertEqual(lowRatio, TerminalPaneLayout.minimumSplitRatio)
+
+        model.setSplitRatio(0.95, splitID: splitID, in: sessionID)
+        guard case let .split(_, _, highRatio, _, _) = try! XCTUnwrap(model.selectedSession?.layout) else {
+            return XCTFail("Split layout bekleniyordu")
+        }
+        XCTAssertEqual(highRatio, TerminalPaneLayout.maximumSplitRatio)
+    }
+
+    @MainActor
+    func testSetSplitRatioIgnoresUnknownID() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let layoutBefore = try! XCTUnwrap(model.selectedSession?.layout)
+
+        model.setSplitRatio(0.7, splitID: UUID(), in: sessionID)
+
+        XCTAssertEqual(model.selectedSession?.layout, layoutBefore)
+    }
+
+    func testSwappingPanesExchangesLeaves() {
+        let paneA = TerminalPane(
+            alias: "a",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let paneB = TerminalPane(
+            alias: "b",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let layout = TerminalPaneLayout.split(
+            id: UUID(),
+            axis: .vertical,
+            ratio: 0.5,
+            first: .pane(paneA),
+            second: .pane(paneB)
+        )
+
+        let swapped = try! XCTUnwrap(layout.swappingPanes(paneA.id, paneB.id))
+
+        XCTAssertEqual(swapped.panes.map(\.id), [paneB.id, paneA.id])
+        XCTAssertEqual(Set(swapped.panes.map(\.id)), Set([paneA.id, paneB.id]))
+    }
+
+    func testSwappingPanesReturnsNilForUnknownOrIdenticalIDs() {
+        let paneA = TerminalPane(
+            alias: "a",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let paneB = TerminalPane(
+            alias: "b",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let layout = TerminalPaneLayout.split(
+            id: UUID(),
+            axis: .vertical,
+            ratio: 0.5,
+            first: .pane(paneA),
+            second: .pane(paneB)
+        )
+
+        XCTAssertNil(layout.swappingPanes(paneA.id, paneA.id))
+        XCTAssertNil(layout.swappingPanes(paneA.id, UUID()))
     }
 
     @MainActor
