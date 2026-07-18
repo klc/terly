@@ -26,6 +26,7 @@ protocol EmbeddedTerminalEngine {
         isVisible: Bool,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
+        onActivate: @escaping @MainActor @Sendable () -> Void,
         onProcessExit: @escaping @MainActor @Sendable (Int32?) -> Void
     ) -> AnyView
 
