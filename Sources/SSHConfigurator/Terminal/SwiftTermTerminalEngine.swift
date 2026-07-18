@@ -8,6 +8,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
     let identifier = TerminalEngineIdentifier.swiftTerm
     private let inputRouter = TerminalInputRouter()
     private let searchRouter = TerminalSearchRouter()
+    private let focusCoordinator = TerminalFocusCoordinator()
 
     func makeSurface(
         for pane: TerminalPane,
@@ -16,6 +17,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
         isVisible: Bool,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
+        onActivate: @escaping @MainActor @Sendable () -> Void,
         onProcessExit: @escaping @MainActor @Sendable (Int32?) -> Void
     ) -> AnyView {
         AnyView(
@@ -27,9 +29,11 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
                 isVisible: isVisible,
                 inputRouter: inputRouter,
                 searchRouter: searchRouter,
+                focusCoordinator: focusCoordinator,
                 markerPrefix: pane.startupExecution?.markerPrefix,
                 onStartupEvent: onStartupEvent,
                 onFindCommand: onFindCommand,
+                onActivate: onActivate,
                 onProcessExit: onProcessExit
             )
             .id(pane.id)
@@ -137,6 +141,96 @@ final class TerminalSearchRouter {
     }
 }
 
+/// Single decision point for which terminal view owns keyboard focus.
+///
+/// Previously every pane's `updateNSView` independently scheduled a deferred
+/// `makeFirstResponder` with the view captured at schedule time. Two panes
+/// whose SwiftUI updates ran against momentarily inconsistent `isActive`
+/// values could then steal focus from each other indefinitely — observed as
+/// the keyboard going dead (every keystroke beeping) until switching views
+/// forced a clean render. Funneling every claim through one coalesced pass
+/// makes the most recent active pane the single winner, and re-checks every
+/// precondition at execution time instead of capture time.
+@MainActor
+final class TerminalFocusCoordinator {
+    private weak var activeView: NSView?
+    private var ensurePending = false
+    private var forceNextEnsure = false
+    // Never removed: the coordinator lives for the app's lifetime (owned by
+    // the engine, which the app owns), so there is no deinit-time cleanup to
+    // fight Swift concurrency over.
+    private var windowObserver: (any NSObjectProtocol)?
+
+    init() {
+        // AppKit restores a window's stored first responder when the window
+        // becomes key again (app switch, popover/sheet dismissal). If that
+        // restored responder is no longer the active pane, this pass corrects
+        // it — no SwiftUI update is needed to recover anymore.
+        windowObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.didBecomeKeyNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.scheduleEnsure()
+            }
+        }
+    }
+
+    /// The pane rendered with `isActive == true` claims focus. Safe to call on
+    /// every SwiftUI update; the resolution pass is coalesced and no-ops when
+    /// the view already has focus.
+    func claimFocus(for view: NSView) {
+        activeView = view
+        scheduleEnsure()
+    }
+
+    /// A pane rendered with `isActive == false` drops any claim it still
+    /// holds, so a stale claim can never outlive the pane's active state.
+    func releaseFocus(for view: NSView) {
+        if activeView === view {
+            activeView = nil
+        }
+    }
+
+    /// User-initiated focus hand-off (e.g. closing the in-terminal search
+    /// bar): bypasses the field-editor courtesy below, but still defers one
+    /// runloop turn so SwiftUI can finish resolving the field's focus loss
+    /// without clobbering a synchronous change.
+    func focusNow(_ view: NSView) {
+        activeView = view
+        forceNextEnsure = true
+        scheduleEnsure()
+    }
+
+    private func scheduleEnsure() {
+        guard !ensurePending else { return }
+        ensurePending = true
+        DispatchQueue.main.async { [weak self] in
+            self?.ensureFocus()
+        }
+    }
+
+    private func ensureFocus() {
+        ensurePending = false
+        let forced = forceNextEnsure
+        forceNextEnsure = false
+        guard let view = activeView,
+              let window = view.window,
+              !view.isHiddenOrHasHiddenAncestor,
+              window.isKeyWindow,
+              window.firstResponder !== view else { return }
+        // Don't yank focus from an in-window text field mid-edit (terminal
+        // search bar, inline rename); those give focus back explicitly.
+        if !forced,
+           let editor = window.firstResponder as? NSTextView,
+           editor.isFieldEditor {
+            return
+        }
+        window.makeFirstResponder(view)
+    }
+}
+
 @MainActor
 private struct SwiftTermTerminalSurface: NSViewRepresentable {
     let paneID: TerminalPane.ID
@@ -146,9 +240,11 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
     let isVisible: Bool
     let inputRouter: TerminalInputRouter
     let searchRouter: TerminalSearchRouter
+    let focusCoordinator: TerminalFocusCoordinator
     let markerPrefix: String?
     let onStartupEvent: @MainActor @Sendable (StartupFlowMarkerEvent) -> Void
     let onFindCommand: @MainActor @Sendable (TerminalFindCommand) -> Void
+    let onActivate: @MainActor @Sendable () -> Void
     let onProcessExit: @MainActor @Sendable (Int32?) -> Void
 
     @ObservedObject private var settings = TerminalSettings.shared
@@ -189,6 +285,15 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
         terminal.onFindCommand = { command in
             onFindCommand(command)
         }
+        // Clicking a pane's terminal area must also select that pane in the
+        // model. AppKit already hands the clicked view first responder status;
+        // without the model catching up, the still-"active" old pane would
+        // reclaim focus on the next SwiftUI update (the v1.0 "must click the
+        // pane title to switch" complaint — the SwiftUI tap gesture doesn't
+        // reliably fire over an NSViewRepresentable).
+        terminal.onMouseDownActivate = {
+            onActivate()
+        }
         inputRouter.register(paneID: paneID) { [weak terminal] bytes in
             terminal?.receiveSynchronizedInput(bytes)
         }
@@ -204,13 +309,9 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
                 clear: { [weak terminal] in
                     terminal?.clearSearch()
                 },
-                focus: { [weak terminal] in
-                    // Deferred like `focus(_:)` below: SwiftUI resolves the search
-                    // field's focus loss next cycle and would clobber a sync change.
-                    DispatchQueue.main.async {
-                        guard let terminal else { return }
-                        terminal.window?.makeFirstResponder(terminal)
-                    }
+                focus: { [weak terminal, focusCoordinator] in
+                    guard let terminal else { return }
+                    focusCoordinator.focusNow(terminal)
                 }
             )
         )
@@ -229,7 +330,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
         terminal.isHidden = !isVisible
 
         if isActive {
-            focus(terminal)
+            focusCoordinator.claimFocus(for: terminal)
         }
 
         return terminal
@@ -238,6 +339,12 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
     func updateNSView(_ terminal: LocalProcessTerminalView, context: Context) {
         if let terminal = terminal as? SynchronizableLocalProcessTerminalView {
             terminal.synchronizedPaneIDs = synchronizedPaneIDs
+            // Reassigned every update: the closure captures this render's view
+            // values (active pane, session state); the one from makeNSView
+            // would act on the first render's snapshot forever.
+            terminal.onMouseDownActivate = {
+                onActivate()
+            }
             let font = settings.resolvedFont
             if terminal.font != font {
                 terminal.font = font
@@ -265,15 +372,10 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
                 }
             }
         }
-        if isActive, terminal.window?.firstResponder !== terminal {
-            focus(terminal)
-        }
-    }
-
-    private func focus(_ terminal: LocalProcessTerminalView) {
-        DispatchQueue.main.async { [weak terminal] in
-            guard let terminal else { return }
-            terminal.window?.makeFirstResponder(terminal)
+        if isActive {
+            focusCoordinator.claimFocus(for: terminal)
+        } else {
+            focusCoordinator.releaseFocus(for: terminal)
         }
     }
 
@@ -324,6 +426,7 @@ private final class SynchronizableLocalProcessTerminalView: LocalProcessTerminal
     var synchronizedPaneIDs: Set<TerminalPane.ID> = []
     var onUserInput: (([UInt8]) -> Void)?
     var onFindCommand: ((TerminalFindCommand) -> Void)?
+    var onMouseDownActivate: (() -> Void)?
 
     private var isPasting = false
     private var didConfigureRenderer = false
@@ -412,6 +515,11 @@ private final class SynchronizableLocalProcessTerminalView: LocalProcessTerminal
         isPasting = true
         defer { isPasting = false }
         super.paste(sender)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        onMouseDownActivate?()
+        super.mouseDown(with: event)
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {

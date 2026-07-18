@@ -277,6 +277,15 @@ struct TerminalWorkspaceView: View {
                     },
                     onFindCommand: { command in
                         handleFindCommand(command, paneID: pane.id)
+                    },
+                    onActivate: {
+                        // Plain click inside the already-active pane must not
+                        // run selectPane — it would clear an in-progress
+                        // synchronized-pane selection. ⌘-click always goes
+                        // through (it toggles sync membership).
+                        guard NSEvent.modifierFlags.contains(.command)
+                                || session.activePaneID != pane.id else { return }
+                        selectPane(pane.id, in: session.id)
                     }
                 ) { exitCode in
                     model.processDidExit(sessionID: session.id, paneID: pane.id, exitCode: exitCode)
