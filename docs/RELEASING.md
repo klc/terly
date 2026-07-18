@@ -39,20 +39,22 @@ yarım bir sürüm üretmez).
 | --- | --- |
 | `MACOS_CERTIFICATE_P12` | Developer ID Application sertifikası, base64 (`base64 -i cert.p12 \| pbcopy`) |
 | `MACOS_CERTIFICATE_PASSWORD` | Yukarıdaki `.p12` dosyasının parolası |
-| `NOTARY_APPLE_ID` | Notarization yetkisi olan Apple ID e-postası |
-| `NOTARY_TEAM_ID` | Apple Developer Team ID (10 karakter); aynı zamanda codesign/export için `DEVELOPMENT_TEAM` olarak kullanılır |
-| `NOTARY_PASSWORD` | `NOTARY_APPLE_ID` için app-specific password (App Store Connect API anahtarı değil — bkz. aşağıdaki not) |
+| `NOTARY_TEAM_ID` | Apple Developer Team ID (10 karakter); codesign/export için `DEVELOPMENT_TEAM` olarak kullanılır |
+| `NOTARY_KEY_P8` | App Store Connect API anahtarının `.p8` içeriği, base64 (`base64 -i AuthKey_XXX.p8`) |
+| `NOTARY_KEY_ID` | API anahtarının Key ID'si (10 karakter) |
+| `NOTARY_ISSUER_ID` | App Store Connect Issuer ID (UUID) |
 | `SPARKLE_ED_PRIVATE_KEY` | `generate_keys` çıktısındaki base64 EdDSA private key |
 
 `GITHUB_TOKEN` GitHub tarafından otomatik sağlanır (Release oluşturma ve
 `gh-pages`'e push için `permissions: contents: write` yeterli); ayrıca bir
 secret eklemeye gerek yok.
 
-> **Not:** Apple artık notarization için App Store Connect API anahtarını da
-> destekliyor; bu workflow bilinçli olarak daha basit olan app-specific
-> password yolunu (`NOTARY_APPLE_ID`/`NOTARY_TEAM_ID`/`NOTARY_PASSWORD`)
-> kullanıyor. API anahtarına geçmek istenirse `notarytool submit` çağrısı
-> `--key`/`--key-id`/`--issuer` parametreleriyle güncellenmeli.
+> **Not:** Workflow başlangıçta app-specific password yolunu
+> (`NOTARY_APPLE_ID`/`NOTARY_PASSWORD`) kullanıyordu; bu hesapta doğru
+> kimlik bilgileriyle dahi kalıcı HTTP 401 alındığı için 2026-07-18'de
+> App Store Connect API anahtarına (`--key`/`--key-id`/`--issuer`) geçildi.
+> Anahtar: App Store Connect → Users and Access → Integrations → Team Keys,
+> "Developer" rolü yeterli. `.p8` yalnızca bir kez indirilebilir — güvenli yerde saklayın.
 
 ## Mustafa'nın tek seferlik yapması gerekenler
 

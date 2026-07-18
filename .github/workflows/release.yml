@@ -115,9 +115,11 @@ jobs:
             -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist"
 
       # --- Notarization ---
-      # NOTARY_APPLE_ID: notarize yetkisi olan Apple ID e-postası
-      # NOTARY_TEAM_ID: Apple Developer Team ID (10 karakter)
-      # NOTARY_PASSWORD: bu Apple ID için app-specific password
+      # App Store Connect API anahtarı kullanılır (app-specific password değil;
+      # ASP yolu bu hesapta açıklanamayan 401 verdiği için API anahtarına geçildi):
+      # NOTARY_KEY_P8: .p8 içeriği, base64
+      # NOTARY_KEY_ID: 10 karakterlik Key ID
+      # NOTARY_ISSUER_ID: App Store Connect Issuer ID (UUID)
       - name: Zip app for notarization submission
         run: |
           mkdir -p build/notarize
@@ -125,15 +127,22 @@ jobs:
 
       - name: Submit for notarization and wait
         env:
-          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
-          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
-          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
         run: |
+          if [ -z "$NOTARY_KEY_P8" ] || [ -z "$NOTARY_KEY_ID" ] || [ -z "$NOTARY_ISSUER_ID" ]; then
+            echo "::error::NOTARY_KEY_P8 / NOTARY_KEY_ID / NOTARY_ISSUER_ID secrets are required for notarization."
+            exit 1
+          fi
+          KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s' "$NOTARY_KEY_P8" | base64 --decode > "$KEY_PATH"
           xcrun notarytool submit "build/notarize/Terly-notarize.zip" \
-            --apple-id "$NOTARY_APPLE_ID" \
-            --team-id "$NOTARY_TEAM_ID" \
-            --password "$NOTARY_PASSWORD" \
+            --key "$KEY_PATH" \
+            --key-id "$NOTARY_KEY_ID" \
+            --issuer "$NOTARY_ISSUER_ID" \
             --wait
+          rm -f "$KEY_PATH"
 
       - name: Staple notarization ticket
         run: xcrun stapler staple "build/export/Terly.app"
