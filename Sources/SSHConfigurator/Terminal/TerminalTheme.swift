@@ -75,8 +75,11 @@ struct TerminalTheme: Identifiable, Equatable, Sendable {
 /// Built-in terminal color themes. Values are the published/reference hex
 /// colors for each theme (Solarized: ethanschoonover.com/solarized; Dracula:
 /// draculatheme.com/contribute; Nord: nordtheme.com; Gruvbox: morhetz/gruvbox;
-/// One Dark: the widely-ported Atom "One Dark" terminal palette). No import
-/// or custom-theme-file support — that is explicitly out of scope for 1.0.
+/// One Dark: the widely-ported Atom "One Dark" terminal palette; Tokyo Night:
+/// folke/tokyonight.nvim; Catppuccin: catppuccin/catppuccin; Monokai: the
+/// classic Sublime Text "Monokai" scheme as reproduced by most terminal theme
+/// collections). No import or custom-theme-file support — that is explicitly
+/// out of scope for 1.0.
 enum TerminalThemeCatalog {
     /// Matches the app's original hardcoded terminal appearance exactly:
     /// same ANSI 16 (macOS Terminal.app's default "Basic" palette, which is
@@ -269,8 +272,130 @@ enum TerminalThemeCatalog {
         )
     )
 
+    /// tokyonight.nvim's published "Night" terminal palette
+    /// (github.com/folke/tokyonight.nvim, extras/kitty & extras/alacritty).
+    static let tokyoNight = TerminalTheme(
+        id: "tokyoNight",
+        displayName: "Tokyo Night",
+        palette: TerminalColorPalette(
+            ansi: [
+                TerminalThemeColor(hex: "15161e")!,
+                TerminalThemeColor(hex: "f7768e")!,
+                TerminalThemeColor(hex: "9ece6a")!,
+                TerminalThemeColor(hex: "e0af68")!,
+                TerminalThemeColor(hex: "7aa2f7")!,
+                TerminalThemeColor(hex: "bb9af7")!,
+                TerminalThemeColor(hex: "7dcfff")!,
+                TerminalThemeColor(hex: "a9b1d6")!,
+                TerminalThemeColor(hex: "414868")!,
+                TerminalThemeColor(hex: "f7768e")!,
+                TerminalThemeColor(hex: "9ece6a")!,
+                TerminalThemeColor(hex: "e0af68")!,
+                TerminalThemeColor(hex: "7aa2f7")!,
+                TerminalThemeColor(hex: "bb9af7")!,
+                TerminalThemeColor(hex: "7dcfff")!,
+                TerminalThemeColor(hex: "c0caf5")!,
+            ],
+            background: TerminalThemeColor(hex: "1a1b26")!,
+            foreground: TerminalThemeColor(hex: "c0caf5")!,
+            cursor: TerminalThemeColor(hex: "c0caf5")!
+        )
+    )
+
+    /// Catppuccin's published "Mocha" terminal palette
+    /// (github.com/catppuccin/catppuccin, terminal color reference).
+    static let catppuccinMocha = TerminalTheme(
+        id: "catppuccinMocha",
+        displayName: "Catppuccin Mocha",
+        palette: TerminalColorPalette(
+            ansi: [
+                TerminalThemeColor(hex: "45475a")!,
+                TerminalThemeColor(hex: "f38ba8")!,
+                TerminalThemeColor(hex: "a6e3a1")!,
+                TerminalThemeColor(hex: "f9e2af")!,
+                TerminalThemeColor(hex: "89b4fa")!,
+                TerminalThemeColor(hex: "f5c2e7")!,
+                TerminalThemeColor(hex: "94e2d5")!,
+                TerminalThemeColor(hex: "bac2de")!,
+                TerminalThemeColor(hex: "585b70")!,
+                TerminalThemeColor(hex: "f38ba8")!,
+                TerminalThemeColor(hex: "a6e3a1")!,
+                TerminalThemeColor(hex: "f9e2af")!,
+                TerminalThemeColor(hex: "89b4fa")!,
+                TerminalThemeColor(hex: "f5c2e7")!,
+                TerminalThemeColor(hex: "94e2d5")!,
+                TerminalThemeColor(hex: "a6adc8")!,
+            ],
+            background: TerminalThemeColor(hex: "1e1e2e")!,
+            foreground: TerminalThemeColor(hex: "cdd6f4")!,
+            cursor: TerminalThemeColor(hex: "f5e0dc")!
+        )
+    )
+
+    /// Monokai's widely-ported terminal palette (monokai.pro / the classic
+    /// Sublime Text "Monokai" color scheme, as reproduced by most terminal
+    /// theme collections).
+    static let monokai = TerminalTheme(
+        id: "monokai",
+        displayName: "Monokai",
+        palette: TerminalColorPalette(
+            ansi: [
+                TerminalThemeColor(hex: "272822")!,
+                TerminalThemeColor(hex: "f92672")!,
+                TerminalThemeColor(hex: "a6e22e")!,
+                TerminalThemeColor(hex: "f4bf75")!,
+                TerminalThemeColor(hex: "66d9ef")!,
+                TerminalThemeColor(hex: "ae81ff")!,
+                TerminalThemeColor(hex: "a1efe4")!,
+                TerminalThemeColor(hex: "f8f8f2")!,
+                TerminalThemeColor(hex: "75715e")!,
+                TerminalThemeColor(hex: "f92672")!,
+                TerminalThemeColor(hex: "a6e22e")!,
+                TerminalThemeColor(hex: "f4bf75")!,
+                TerminalThemeColor(hex: "66d9ef")!,
+                TerminalThemeColor(hex: "ae81ff")!,
+                TerminalThemeColor(hex: "a1efe4")!,
+                TerminalThemeColor(hex: "f9f8f5")!,
+            ],
+            background: TerminalThemeColor(hex: "272822")!,
+            foreground: TerminalThemeColor(hex: "f8f8f2")!,
+            cursor: TerminalThemeColor(hex: "f8f8f2")!
+        )
+    )
+
+    /// github.com/morhetz/gruvbox's published light palette (the "medium"
+    /// contrast light background variant, matching `gruvboxDark`'s own source).
+    static let gruvboxLight = TerminalTheme(
+        id: "gruvboxLight",
+        displayName: "Gruvbox Light",
+        palette: TerminalColorPalette(
+            ansi: [
+                TerminalThemeColor(hex: "fbf1c7")!,
+                TerminalThemeColor(hex: "cc241d")!,
+                TerminalThemeColor(hex: "98971a")!,
+                TerminalThemeColor(hex: "d79921")!,
+                TerminalThemeColor(hex: "458588")!,
+                TerminalThemeColor(hex: "b16286")!,
+                TerminalThemeColor(hex: "689d6a")!,
+                TerminalThemeColor(hex: "7c6f64")!,
+                TerminalThemeColor(hex: "928374")!,
+                TerminalThemeColor(hex: "9d0006")!,
+                TerminalThemeColor(hex: "79740e")!,
+                TerminalThemeColor(hex: "b57614")!,
+                TerminalThemeColor(hex: "076678")!,
+                TerminalThemeColor(hex: "8f3f71")!,
+                TerminalThemeColor(hex: "427b58")!,
+                TerminalThemeColor(hex: "3c3836")!,
+            ],
+            background: TerminalThemeColor(hex: "fbf1c7")!,
+            foreground: TerminalThemeColor(hex: "3c3836")!,
+            cursor: TerminalThemeColor(hex: "3c3836")!
+        )
+    )
+
     static let all: [TerminalTheme] = [
         system, solarizedDark, solarizedLight, dracula, nord, oneDark, gruvboxDark,
+        tokyoNight, catppuccinMocha, monokai, gruvboxLight,
     ]
 
     static func theme(withID id: String) -> TerminalTheme {

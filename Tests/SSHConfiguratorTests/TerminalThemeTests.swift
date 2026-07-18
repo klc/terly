@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+@preconcurrency import SwiftTerm
 @testable import SSHConfigurator
 
 final class TerminalThemeCatalogTests: XCTestCase {
@@ -37,6 +38,17 @@ final class TerminalThemeCatalogTests: XCTestCase {
     func testLookupByIDReturnsTheMatchingTheme() {
         XCTAssertEqual(TerminalThemeCatalog.theme(withID: "dracula").id, "dracula")
         XCTAssertEqual(TerminalThemeCatalog.theme(withID: "nord").id, "nord")
+    }
+
+    func testCatalogContainsElevenBuiltInThemes() {
+        XCTAssertEqual(TerminalThemeCatalog.all.count, 11)
+    }
+
+    func testLookupResolvesTheFourNewlyAddedThemes() {
+        XCTAssertEqual(TerminalThemeCatalog.theme(withID: "tokyoNight").displayName, "Tokyo Night")
+        XCTAssertEqual(TerminalThemeCatalog.theme(withID: "catppuccinMocha").displayName, "Catppuccin Mocha")
+        XCTAssertEqual(TerminalThemeCatalog.theme(withID: "monokai").displayName, "Monokai")
+        XCTAssertEqual(TerminalThemeCatalog.theme(withID: "gruvboxLight").displayName, "Gruvbox Light")
     }
 
     func testLookupByUnknownIDFallsBackToSystem() {
@@ -125,5 +137,53 @@ final class TerminalSettingsThemePersistenceTests: XCTestCase {
 
         TerminalSettings.shared.themeID = "dracula"
         XCTAssertEqual(TerminalSettings.shared.resolvedTheme.displayName, "Dracula")
+    }
+}
+
+final class TerminalCursorStyleTests: XCTestCase {
+    // `resolveCursorStyle` is a free function specifically so this mapping is
+    // testable without touching the `@MainActor` TerminalSettings singleton.
+
+    func testBlockShapeMapsToBlockStyles() {
+        XCTAssertEqual(resolveCursorStyle(shape: .block, blinks: true), .blinkBlock)
+        XCTAssertEqual(resolveCursorStyle(shape: .block, blinks: false), .steadyBlock)
+    }
+
+    func testBarShapeMapsToBarStyles() {
+        XCTAssertEqual(resolveCursorStyle(shape: .bar, blinks: true), .blinkBar)
+        XCTAssertEqual(resolveCursorStyle(shape: .bar, blinks: false), .steadyBar)
+    }
+
+    func testUnderlineShapeMapsToUnderlineStyles() {
+        XCTAssertEqual(resolveCursorStyle(shape: .underline, blinks: true), .blinkUnderline)
+        XCTAssertEqual(resolveCursorStyle(shape: .underline, blinks: false), .steadyUnderline)
+    }
+}
+
+final class TerminalSettingsCursorPersistenceTests: XCTestCase {
+    // Same rationale as TerminalSettingsThemePersistenceTests above: reset the
+    // process-wide singleton back to its default after each test.
+
+    @MainActor
+    func testSettingCursorStyleIDPersistsToUserDefaults() {
+        defer {
+            TerminalSettings.shared.cursorStyleID = TerminalCursorShape.block.rawValue
+            TerminalSettings.shared.cursorBlinks = true
+        }
+
+        TerminalSettings.shared.cursorStyleID = TerminalCursorShape.bar.rawValue
+        TerminalSettings.shared.cursorBlinks = false
+
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "terminal.cursorStyle"), "bar")
+        XCTAssertEqual(UserDefaults.standard.bool(forKey: "terminal.cursorBlinks"), false)
+        XCTAssertEqual(TerminalSettings.shared.resolvedCursorStyle, .steadyBar)
+    }
+
+    @MainActor
+    func testResolvedCursorStyleFallsBackToBlockForUnknownID() {
+        defer { TerminalSettings.shared.cursorStyleID = TerminalCursorShape.block.rawValue }
+
+        TerminalSettings.shared.cursorStyleID = "not-a-real-shape"
+        XCTAssertEqual(TerminalSettings.shared.resolvedCursorStyle, .blinkBlock)
     }
 }

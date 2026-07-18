@@ -167,6 +167,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
         terminal.processDelegate = context.coordinator
         terminal.font = settings.resolvedFont
         terminal.applyTheme(settings.resolvedTheme)
+        terminal.getTerminal().setCursorStyle(settings.resolvedCursorStyle)
         terminal.optionAsMetaKey = false
         terminal.changeScrollback(10_000)
         terminal.synchronizedPaneIDs = synchronizedPaneIDs
@@ -242,6 +243,10 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
                 terminal.font = font
             }
             terminal.applyTheme(settings.resolvedTheme)
+            // Terminal.setCursorStyle already no-ops when the style hasn't
+            // changed, so this is safe to call unconditionally on every
+            // update — same reasoning as the font/theme calls above.
+            terminal.getTerminal().setCursorStyle(settings.resolvedCursorStyle)
         }
         if terminal.isHidden == isVisible {
             terminal.isHidden = !isVisible
