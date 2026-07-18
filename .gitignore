@@ -6,3 +6,6 @@ xcuserdata/
 graphify-out/
 .idea/
 Packages/SwiftTerm/
+
+# Antigravity dispatch logs
+.agy/

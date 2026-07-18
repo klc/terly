@@ -1,10 +1,12 @@
 name: SSHConfigurator
 options:
   minimumXcodeGenVersion: 2.40.0
+  developmentLanguage: en
 settings:
   base:
     SWIFT_VERSION: 6.0
     MACOSX_DEPLOYMENT_TARGET: 14.0
+    SWIFT_EMIT_LOC_STRINGS: YES
 packages:
   # Fork of upstream 1.14.0 carrying the Metal BufferPool memory-growth fix
   # plus line-accurate scroll wheel + scrollSensitivity (feature/scroll-sensitivity).
@@ -45,6 +47,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
+        CFBundleLocalizations: [en, tr]
         # Sparkle appcast/EdDSA anahtarları: gerçek anahtarlar Mustafa'nın `generate_keys`
         # çıktısından gelecek (bkz. docs/RELEASING.md). Şimdilik placeholder — güncelleme
         # denetimi bu haliyle çalışmaz, Ayarlar > Güncellemeler bunu algılayıp uyarır.
