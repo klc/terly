@@ -1,155 +1,145 @@
 # Terly
 
-macOS için yerel SwiftUI SSH çalışma alanı: `~/.ssh/config` yönetimi, gömülü terminal, dosya aktarımı, tünel ve runbook'lar. (Eski adı: SSH Configurator.)
+A native SwiftUI SSH workspace for macOS: `~/.ssh/config` management, embedded terminal, file transfers, port forwarding, and runbooks. (Formerly: SSH Configurator.)
 
-## Özellikler
+## Features
 
-- Mevcut config içeriğini kayıpsız ayrıştırır; yorumlar ve bilinmeyen direktifler korunur.
-- Host listesi ve form tabanlı `HostName`, `User`, `Port`, `IdentityFile` ve `ProxyJump` düzenleme.
-- Host alias'larını `-` bileşenlerine göre çok seviyeli, açılır/kapanır gruplama (`ams-api-prod-1` → `ams → api → prod`).
-- Global direktifler, `Match` blokları ve `Include` satırları için ayrı çalışma alanları.
-- Tüm config için ham metin editörü ve diskteki dosya ile bellekteki çalışma kopyası arasındaki farkı gösteren önizleme (ör. bir yazma çakışması sonrası); ikisine de menü çubuğundan (**Dosya → Ham Config Editörü…** / **Dosya → Değişiklik Geçmişi/Önizleme…**) erişilir.
-- Kaydedilmemiş değişiklikleri geri alma ve kaydetmeden önce çalışma kopyası modeli.
-- Harici değişiklik algılama, yedek geçmişi/geri yükleme, atomik kaydetme ve `0600` dosya izni.
-- Geçici config ile `ssh -G` doğrulaması. `Match exec` içeriyorsa yerel komut çalıştırma için açık onay ister.
-- Bağlantı Tanılama ve Güven Merkezi; çözümlenmiş `ssh -G` ayarlarını kaynak satırlarıyla gösterir, DNS, ProxyJump, IdentityFile izinleri, SSH agent, `known_hosts` fingerprint'i ve uçtan uca bağlantıyı kontrol eder.
-- Tanılama raporunu kullanıcı adı, yerel yol ve hassas komutları redakte ederek panoya kopyalar; tüm ağ adımları timeout ve iptal desteğine sahiptir.
-- Seçilen somut Host alias'ını uygulama içindeki SwiftTerm terminalinde açar.
-- Seçilen Host için SCP/SFTP ile dosya ve klasör yükleme/indirme; yerel dosya seçimi, uzak dizin tarayıcısı ve üzerine yazma onayı.
-- Her bağlantıyı ayrı bir uygulama içi terminal sekmesinde doğrudan SSH süreci olarak çalıştırır.
-- Sidebar'daki bağlantı satırı terminali doğrudan açar; satırdaki dişli bağlantı ayarlarını modal pencerede gösterir.
-- İsimlendirilmiş bağlantı grupları oluşturur; grup ayarından bağlantıların ayrı terminal sekmelerinde veya tek sekme içindeki bölmelerde birlikte açılmasını seçtirir.
-- Aktif terminal yatay veya dikey bölünebilir; yeni bölüm aynı SSH alias'ıyla ayrı bir bağlantı açar.
-- Bölmeler `⌘` tuşu basılıyken tıklanarak senkron seçilebilir; klavye girdisi ve yapıştırılan komutlar seçili terminallere aynı anda gönderilir.
-- Host ayarlarında bağlantıya özel Başlangıç Akışı oluşturur: `sudo -iu` ile kullanıcı değiştirme, uzak dizine geçme ve başarısızlık politikası olan shell komutu adımları eklenebilir, silinebilir ve sıralanabilir.
-- Otomatik başlangıç bağlantıdan önce host bazında önizlenebilir, tek bağlantı veya grubun tamamı bir kereliğine atlanabilir ve açık terminalde manuel tekrar çalıştırılabilir.
-- Grup bağlantılarında her host kendi profilini kullanır; başlangıçlar tamamlanana kadar senkron terminal girişi kapalı tutularak komutların yanlış bölmelere çoğaltılması engellenir.
-- `⌘K` ile açılan hızlı erişim penceresinde alias, `HostName`, `User` veya bağlantı grubu adına göre fuzzy arama yapılır; sonuçtan bağlanma, ayar, dosya aktarımı ve tanılama eylemleri başlatılabilir.
-- Favoriler ve son kullanılan bağlantılar hızlı erişimde öne çıkar; config uygulama içinden veya dışarıdan yenilendiğinde sonuç kataloğu da otomatik güncellenir.
-- Tekil dosyaların yanı sıra klasör yükleme/indirme; aktarımlar eşzamanlılık sınırı olan bir kuyrukta yürütülür, başarısız aktarımlar otomatik olarak yeniden denenir.
-- Local, Remote ve Dynamic Forward tipleriyle Tünel Yöneticisi; tüneller tek tek başlatılıp durdurulabilir ve bağlantıya bağlı olarak otomatik başlatılabilir.
-- `⌘S` ile açılan snippet paletiyle sık kullanılan komut/metinler terminale hızlıca eklenir; snippet'ler ayrı bir bölümden yönetilir.
-- Anahtar Kurulumu sihirbazı: bir host için ed25519 anahtar çifti üretir, isteğe bağlı olarak SSH agent'a ekler ve public key'i sunucudaki `authorized_keys` dosyasına kopyalar; sihirbaz host ayarları modalından ve sidebar sağ-tık menüsünden açılır.
-- Ayarlar penceresindeki **Güncellemeler** sekmesinden Sparkle ile manuel veya otomatik güncelleme denetimi (bkz. Sürümleme ve güncellemeler).
-- Ayarlar penceresindeki **Senkronizasyon** sekmesinden kullanıcının kendi private git reposuna config/tünel/snippet/runbook/başlangıç akışı senkronizasyonu; aracı sunucu yok, kimlik doğrulama tamamen sistem git'ine/SSH anahtarına bırakılır (bkz. Git ile senkronizasyon).
+- Parses existing config losslessly; comments and unknown directives are preserved.
+- Form-based editing for Host list, `HostName`, `User`, `Port`, `IdentityFile`, and `ProxyJump`.
+- Multi-level collapsible grouping of Host aliases based on `-` components (e.g., `ams-api-prod-1` → `ams → api → prod`).
+- Dedicated workspaces for global directives, `Match` blocks, and `Include` lines.
+- Raw text editor for the entire config, and a preview showing diffs between the disk file and the in-memory working copy (e.g., after a write conflict); both are accessible from the menu bar (**File → Raw Config Editor…** / **File → Change History/Preview…**).
+- Working copy model with undo support for unsaved changes before saving.
+- External change detection, backup history/restore, atomic saves, and `0600` file permissions.
+- `ssh -G` validation using a temporary config. Requires explicit confirmation for running local commands if it contains `Match exec`.
+- Connection Diagnostics and Trust Center; displays resolved `ssh -G` settings alongside their source lines, checking DNS, ProxyJump, IdentityFile permissions, SSH agent, `known_hosts` fingerprint, and end-to-end connectivity.
+- Copies diagnostic reports to the clipboard with usernames, local paths, and sensitive commands redacted; all network operations support timeouts and cancellation.
+- Opens the selected Host alias in the built-in SwiftTerm terminal.
+- File and folder upload/download via SCP/SFTP for the selected Host; features local file selection, a remote directory browser, and overwrite confirmations.
+- Runs each connection as a direct SSH process in separate tabs of the built-in terminal.
+- Terminal opens directly by clicking the connection row in the sidebar; gear icon on the row opens connection settings in a modal.
+- Creates named connection groups; group configuration allows opening connections in separate terminal tabs or together in split panes within a single tab.
+- Active terminal can be split horizontally or vertically; splitting opens a new connection with the same SSH alias.
+- Panes can be selected for synchronized input by holding the `⌘` key and clicking; keyboard inputs and pasted commands are sent to all selected terminals simultaneously.
+- Custom Connection Startup Flows in Host settings: steps for switching users with `sudo -iu`, navigating to a remote directory, and running shell commands with failure policies can be added, deleted, and reordered.
+- Auto-startup can be previewed per host before connecting, skipped once for a single connection or an entire group, and manually re-executed in an open terminal.
+- In group connections, each host uses its own profile; synchronized terminal input is blocked until all startup flows complete, preventing commands from duplicating to incorrect panes.
+- Fuzzy search by alias, `HostName`, `User`, or connection group name in the quick access window opened via `⌘K`; allows launching connect, settings, file transfer, and diagnostic actions directly from results.
+- Favorites and recently used connections are prioritized in quick access; catalog updates automatically when the config is refreshed internally or externally.
+- Uploads and downloads directories in addition to individual files; transfers run in a queue with a configurable concurrency limit (1-5), and failed transfers are automatically retried.
+- Tunnel Manager supporting Local (`-L`), Remote (`-R`), and Dynamic (`-D`) port forwarding; tunnels can be started/stopped individually and set to automatically start with connections.
+- Snippet palette opened via `⌘S` allows quickly inserting frequently used commands/text into the terminal; snippets are managed in a separate section.
+- SSH Key Setup Wizard: generates ed25519 key pairs for a host, optionally adds them to the SSH agent, and copies the public key to the server's `authorized_keys` file; accessible from the host settings modal and the sidebar right-click menu.
+- Manual or automatic update checking using Sparkle via the **Updates** tab in the Settings window (see Versioning and Updates).
+- Config/tunnel/snippet/runbook/startup flow synchronization to the user's private git repository via the **Sync** tab in Settings; no intermediate server is used, and authentication relies entirely on the system git/SSH keys (see Git Synchronization).
 
-## Güvenlik
+## Security
 
-- Uygulama özel anahtar dosyalarının içeriğini asla okumaz.
-- Yedekler `~/Library/Application Support/Terly/Backups` altında `0600` izinleriyle tutulur.
-- Bir yedeği geri yüklerken mevcut config önce yeni bir yedek olarak saklanır.
-- Sembolik link olan config dosyalarına doğrudan yazmayı reddeder.
-- Uygulama write-through çalışır: ayrı bir **Kaydet** eylemi yoktur, her düzenleme eylemi (host ekleme/silme/kopyalama, alan düzenleme, ham config veya bölüm editörlerinden uygulama, Include ekleme/kaldırma) tamamlanır tamamlanmaz doğrudan `~/.ssh/config` dosyasına yazılır. Her yazımdan önce mevcut içerik otomatik olarak yedeklenir; bir yazım harici çakışma nedeniyle başarısız olursa değişiklik yalnızca bellekteki çalışma kopyasında kalır ve hata gösterilir.
-- Terminal komutları shell metni birleştirilmeden ayrı process argümanlarıyla çalıştırılır.
-- SCP/SFTP aktarımları ve checksum doğrulaması parola veya passphrase isteyebilen hostlarda `SSH_ASKPASS` köprüsü üzerinden çalışır: app bundle'ına gömülü `terly-askpass.sh` yardımcısı, ssh/scp/sftp'nin `argv[1]`'den ilettiği istemi sınıflandırır — parola/passphrase istemi için gizli girişli bir diyalog, sunucu kimliği (`yes/no`) onayı için ayrı bir onay diyaloğu gösterir ve kullanıcının seçimini birebir döndürür (otomatik "yes" hiçbir zaman basılmaz). Girilen değer yalnızca yardımcının stdout'una yazılır; argv'ye, environment'a, bir log dosyasına veya diske asla yazılmaz. Kullanıcı diyaloğu iptal ederse yardımcı boş çıktı ve sıfır olmayan bir çıkış koduyla döner. Aynı anda birden çok aktarım parola isteyebileceğinden yardımcı, dosya sistemi tabanlı basit bir kilitle (mkdir) seri çalışır: bir diyalog açıkken diğer bekleyen istemler sessizce sırada bekler, aynı anda birden fazla pencere açılmaz.
-- Runbook çalıştırıcısı ve Bağlantı Tanılama merkezi bilinçli olarak `BatchMode=yes` ile çalışmaya devam eder: runbook'lar birden çok hostta aynı anda koşabildiği için parola istemi orada askıda kalan bir komut ya da eşzamanlı parola fırtınası anlamına gelir; tanılama zaten agent/anahtar durumunu ayrı ayrı raporladığı için parola istemine ihtiyaç duymaz.
-- Tanılama host key kaydını otomatik değiştirmez veya kabul etmez; uçtan uca kontrol `StrictHostKeyChecking=yes` kullanır.
-- SSH yardımcı süreçleri, SCP ve SFTP ortak timeout, iptal, çıktı toplama ve hata sınıflandırma katmanını kullanır.
-- Başlangıç profilleri `~/Library/Application Support/Terly/startup-flows.json` dosyasında atomik JSON ve `0600` izinleriyle tutulur; `~/.ssh/config` içine yazılmaz.
-- Başlangıç metadata'sı parola, token, sudo parolası veya özel anahtar içeriği için bir kasaya dönüşmez. Secret benzeri komutlarda arayüz uyarır; uygulama sudo parolasını yakalamaz ya da saklamaz.
-- Uygulama içinden alias değiştirildiğinde profil UUID'si korunur. Config dışarıdan değişip alias kaybolursa profil yetim olarak gösterilir ve güncel bir alias ile yeniden eşleştirilebilir.
-- Hızlı erişim favori/son kullanım metadata'sı `~/Library/Application Support/Terly/quick-access.json` dosyasında atomik olarak, dizin `0700` ve dosya `0600` izinleriyle saklanır; başlangıç akışı metadata'sından ayrıdır.
-- Anahtar Kurulumu sihirbazı `ssh-copy-id` kullanmaz; sunucuya kopyalama adımında yalnızca `.pub` dosyası okunur ve stdin üzerinden `ssh`'e beslenir, özel anahtarın kendisi hiçbir kod yolunda açılmaz veya okunmaz. Üzerine yazma yalnızca açık kullanıcı onayıyla mümkündür.
-- Git senkronizasyonu kendi git kimliği/credential'ını **saklamaz**: sistem git'i (`/usr/bin/git`) argv dizisiyle çağrılır (shell birleştirme yok), kimlik doğrulama tamamen kullanıcının kendi SSH anahtarı/credential helper'ına bırakılır. `GIT_TERMINAL_PROMPT=0` ile headless süreç parola isteminde asılı kalmaz, anlaşılır hatayla döner. Özel anahtarlar, `known_hosts`, transfer geçmişi, workspace düzeni ve secret snippet değerleri senkronizasyon setine hiçbir zaman girmez — snippet `isSecret` değeri zaten JSON'a hiç yazılmıyor (Keychain'de), bu nedenle sync katmanının ayrıca redakte etmesine gerek yok. Fast-forward olmayan pull hiçbir zaman otomatik merge etmez; uzaktan gelen değişiklikler önce yerel dosyalarla karşılaştırılır (diff önizleme), yalnızca açık onaydan sonra uygulanır ve öncesinde mevcut yerel durum otomatik yedeklenir. Çakışmada (diverged) satır-merge yoktur — kullanıcı üç seçimden birini yapar; "uzaktakini yerelle değiştir" seçeneği bile `git push --force` kullanmaz, yeni bir merge commit'i ile ilerler.
+- The application never reads the contents of private key files.
+- Backups are stored in `~/Library/Application Support/Terly/Backups` with `0600` permissions.
+- When restoring a backup, the current config is first backed up as a new backup.
+- Refuses to write directly to config files that are symbolic links.
+- The application operates with write-through: there is no separate **Save** action; every edit action (adding/deleting/copying hosts, field edits, applying from raw config or section editors, adding/removing Includes) is written directly to `~/.ssh/config` as soon as it is completed. Before each write, the current content is automatically backed up; if a write fails due to an external conflict, changes remain only in the in-memory working copy and an error is shown.
+- Terminal commands are executed using individual process arguments without shell concatenation.
+- SCP/SFTP transfers and checksum verification on hosts that may prompt for password/passphrase work via an `SSH_ASKPASS` bridge: the `terly-askpass.sh` helper bundled in the app classifies the prompt sent by ssh/scp/sftp via `argv[1]` — showing a secure password input dialog for passwords/passphrases, and a separate confirmation dialog for server identity (`yes/no`) host key confirmation, returning the user's choice exactly (automatic "yes" is never sent). Entered values are only written to the helper's stdout; they are never written to argv, environment, log files, or disk. If the user cancels the dialog, the helper returns empty output with a non-zero exit code. Since multiple transfers might request passwords simultaneously, the helper executes sequentially using a simple filesystem lock (mkdir): while one dialog is open, other pending prompts wait silently in line, preventing multiple windows from opening at once.
+- The Runbook executor and Connection Diagnostics center intentionally continue using `BatchMode=yes`: since runbooks can run on multiple hosts simultaneously, a password prompt would hang execution or cause a concurrent password storm; diagnostics do not require password prompts because they report agent/key status separately.
+- Diagnostics do not automatically modify or accept host key records; end-to-end checks use `StrictHostKeyChecking=yes`.
+- SSH helper processes, SCP, and SFTP share a common timeout, cancellation, output gathering, and error classification layer.
+- Startup profiles are kept in `~/Library/Application Support/Terly/startup-flows.json` as atomic JSON with `0600` permissions; they are not written to `~/.ssh/config`.
+- Startup metadata is not a vault for passwords, tokens, sudo passwords, or private key contents. The interface warns about secret-like commands; the app does not capture or store sudo passwords.
+- Profile UUIDs are preserved when changing an alias within the application. If the config changes externally and an alias disappears, the profile is displayed as orphaned and can be re-associated with a new alias.
+- Quick access favorites/recents metadata is stored atomically in `~/Library/Application Support/Terly/quick-access.json`, with the directory set to `0700` and the file set to `0600` permissions; this is separate from startup flow metadata.
+- The Key Setup Wizard does not use `ssh-copy-id`; when copying to the server, it only reads the `.pub` file and feeds it to `ssh` via stdin. The private key itself is never opened or read in any code path. Overwriting is only possible with explicit user consent.
+- Git synchronization **does not store** its own git credentials: the system git (`/usr/bin/git`) is called with an argv array (no shell parsing), and authentication is fully delegated to the user's own SSH keys/credential helper. With `GIT_TERMINAL_PROMPT=0`, headless processes will not hang on password prompts and will return with a clear error instead. Private keys, `known_hosts`, transfer history, workspace layouts, and secret snippet values are never included in the sync set — snippet `isSecret` values are already never written to JSON (kept in Keychain), so the sync layer does not need to redact them. Non-fast-forward pulls never merge automatically; remote changes are first compared to local files (diff preview), and are only applied after explicit approval, backing up the current local state beforehand. There is no line-based automatic merging on conflicts (diverged history) — the user chooses one of three options: (a) back up local and pull remote, (b) replace remote with local — which does not use `git push --force` but rather creates a new merge commit, (c) cancel. Regardless of the choice, the local state is backed up before applying.
+- **Bootstrap Paradox**: To use sync on a new machine, you must first have remote access (e.g., GitHub) — meaning an SSH key (added to agent) or HTTPS credential helper must already be set up. This cannot be solved by synchronization itself: generate/add a key using the **Key Setup Wizard** (see above), register the public key on GitHub, and then link the remote URL under the Sync tab.
 
-## Uygulama içi terminal
+## In-App Terminal
 
-Terminal yüzeyi şu anda SwiftTerm kullanır. Terminal oturumu ve SSH süreç planı render motorundan ayrıldığı için ileride `libghostty` tabanlı bir motor aynı sözleşmeye eklenebilir.
+The terminal view currently uses SwiftTerm. Since the terminal session and SSH process model are decoupled from the rendering engine, a `libghostty`-based engine can be integrated under the same contract in the future.
 
-`⌘,` ile açılan Ayarlar penceresinden yazı tipi, yazı boyutu ve bir renk teması seçilir (Sistem, Solarized Dark/Light, Dracula, Nord, One Dark, Gruvbox Dark); önizleme örnek metin ve 16 ANSI rengiyle canlı güncellenir. Tema değişikliği açık tüm terminal sekmelerine (gizli/arka plandaki sekmeler dahil) anında uygulanır ve bir sonraki açılışta korunur; tema dosyası içe/dışa aktarma bu sürümde yok.
+Font, font size, and color themes (System, Solarized Dark/Light, Dracula, Nord, One Dark, Gruvbox Dark) can be customized via the Settings window opened with `⌘,`. The preview updates live with sample text and 16 ANSI colors. Theme changes apply immediately to all open terminal tabs (including background/hidden tabs) and persist across launches; theme file import/export is not supported in this version.
 
-Başlangıç akışı olmayan veya bir kez atlanan bağlantı doğrudan `/usr/bin/ssh -- <alias>` komutuyla açılır. Otomatik akış etkinse uygulama `-tt` ile tek bir uzak bootstrap komutu gönderir; adımları PTY'ye gecikmeli olarak yazmaz. Terminal sekmesini kapatmak ilgili SSH sürecini de kapatır; uygulama kapatıldığında bağlantılar arka planda devam etmez.
+Connections without startup flows or those skipped once open directly via `/usr/bin/ssh -- <alias>`. If an automated flow is active, the app sends a single remote bootstrap command using `-tt` instead of typing steps with delays into the PTY. Closing a terminal tab terminates the associated SSH process; connections do not persist in the background when the app is closed.
 
-Bağlantı açmadan önce çalışma kopyasının kaydedilmiş olması gerekir; SSH her zaman diskteki `~/.ssh/config` dosyasını kullanır.
+The working copy must be saved before opening a connection; SSH always uses the `~/.ssh/config` file on disk.
 
-### Otomatik yeniden bağlanma
+### Auto-Reconnect
 
-Bir terminal bölmesi beklenmedik biçimde koparsa (uzak taraf kapatırsa, ağ giderse veya uzak shell'e `exit` yazılırsa — bunların hepsi aynı şekilde ele alınır) terminal yüzeyinde bir durum bandı belirir: **"Bağlantı koptu"** başlığı, **Yeniden Bağlan** düğmesi ve **Bölmeyi Kapat** düğmesi. Sekmeyi/bölmeyi sen kendin kapatırsan bu bant hiç görünmez.
+If a terminal pane disconnects unexpectedly (remote host closes connection, network drops, or `exit` is typed in the remote shell — all handled identically), a status bar appears in the terminal view: **"Connection lost"** header, **Reconnect** button, and **Close Pane** button. If you close the tab/pane manually, this bar will not appear.
 
-Bandın altındaki **"Bu sunucuda otomatik yeniden bağlan"** onay kutusu, bağlantının kurulu olduğu SSH alias'ı için host-başına bir ayardır ve varsayılan olarak **kapalıdır**; `~/Library/Application Support/Terly/auto-reconnect.json` dosyasında (atomik yazım, `0600`/dizin `0700`) saklanır. Açıkken beklenmedik her kopmada artan bekleme ile (2 sn → 4 sn → 8 sn → 16 sn → 32 sn, üst sınır 60 sn) en fazla 5 deneme otomatik olarak yeniden bağlanmayı dener; geri sayım bant üzerinde görünür ve **Vazgeç** ile her an iptal edilebilir. Yeniden bağlanan oturum 15 saniye ayakta kalırsa deneme sayacı sıfırlanır; 5 deneme de başarısız olursa otomatik mod o kopma için durur ve elle "Yeniden Bağlan" gerekir. Ağ bağlantısı geri geldiğinde otomatik modu açık bekleyen bir geri sayım hemen tetiklenir; otomatik modu kapalı bir bölmede ise yalnızca "Ağ geri geldi" önerisi gösterilir — uygulama kullanıcı onayı olmadan kendiliğinden bağlanmaz. Reconnect, mevcut manuel "Yeniden Bağlan" ile aynı başlangıç akışı davranışını kullanır. Uygulama kapatıldığında bekleyen tüm zamanlayıcılar iptal edilir; oturum geri yüklendiğinde eski bir geri sayım asla hortlamaz.
+The **"Auto-reconnect on this host"** checkbox below the bar is a per-host setting for the SSH alias and is **disabled** by default; it is stored in `~/Library/Application Support/Terly/auto-reconnect.json` (atomic write, file `0600`/directory `0700`). When enabled, it attempts to auto-reconnect up to 5 times on unexpected disconnects with incremental backoff (2s → 4s → 8s → 16s → 32s, capped at 60s); the countdown is displayed on the bar and can be canceled at any time using **Cancel**. If the reconnected session remains active for 15 seconds, the attempt counter resets; if all 5 attempts fail, auto-reconnect stops for that disconnect, requiring manual "Reconnect". When network connectivity is restored, a pending auto-reconnect countdown triggers immediately; if auto-reconnect is disabled for a pane, only a "Network restored" suggestion is shown — the app never connects on its own without user consent. Reconnection follows the same startup flow behavior as a manual "Reconnect". All pending timers are canceled when the application is closed; past countdowns never reappear upon session restore.
 
-## Bağlantı Başlangıç Akışı
+## Connection Startup Flow
 
-Bağlantı satırındaki dişliden Host ayarlarını açıp **Başlangıç Akışı** bölümünde adımları tanımlayabilirsin. Kullanıcı değiştirme adımı yalnızca ilk sırada ve bir kez kullanılabilir. Dizin ve kullanıcı alanları ayrı doğrulanır; boş veya desteklenmeyen bir sıra sessizce çalıştırılmaz. Dizinler merkezi shell quoting ile korunur, “Komut çalıştır” alanı ise bilerek uzak shell sözdizimi olarak değerlendirilir.
+You can define steps in the **Startup Flow** section of the Host settings (accessible via the gear icon on the connection row). The switch user step can only be used once and must be the first step. Directory and user fields are validated separately; empty or unsupported sequences are silently ignored. Directories are protected with centralized shell quoting, while the "Run command" field is intentionally executed as remote shell syntax.
 
-Builder tüm adımları aynı uzak shell bağlamında birleştirir ve sonunda `exec "${SHELL:-/bin/sh}" -l` ile terminali interaktif bırakır. `sudo` parola isterse istem normal terminalde görünür. Akışın çalışan adımı, tamamlanması veya çıkış koduyla başarısızlığı terminal başlığında gösterilir. Manuel tekrar eylemi yalnız aktif bölmeye gönderilir ve senkron giriş üzerinden çoğaltılmaz.
+The builder combines all steps into the same remote shell context, leaving the terminal interactive with `exec "${SHELL:-/bin/sh}" -l` at the end. If `sudo` requires a password, the prompt is shown in the terminal. The active startup step, completion, or failure (with exit code) is displayed in the terminal title. Manual re-execution actions are sent only to the active pane and are not replicated through synchronized input.
 
-## Hızlı bağlantı bulucu
+## Quick Connect Finder
 
-Uygulamanın herhangi bir yerinde `⌘K` ile hızlı erişimi açabilirsin. Yazmaya başladığında somut Host alias'ları `HostName` ve `User` alanlarıyla, bağlantı grupları ise adlarıyla aranır. `↑`/`↓` seçimi değiştirir, `Enter` varsayılan **Bağlan** eylemini çalıştırır, `Esc` pencereyi kapatır. Wildcard ve negatif Host pattern'leri doğrudan bağlantı sonucu olarak gösterilmez.
+You can open the Quick Access window from anywhere in the app using `⌘K`. As you type, concrete Host aliases are searched by their name, `HostName`, and `User` fields, while connection groups are searched by their group name. `↑`/`↓` changes selection, `Enter` performs the default **Connect** action, and `Esc` closes the window. Wildcard and negative Host patterns are not displayed as connection results.
 
-Yıldız düğmesi favoriyi değiştirir. Başarılı biçimde açılan tekil ve grup bağlantıları son kullanılanlara eklenir. Bir alias uygulama içinden yeniden adlandırıldığında hızlı erişim kimliği, favorisi ve geçmişi korunur; dışarıdan kaldırılan alias görünmez olur ve güvenli olmayan otomatik yeniden eşleştirme yapılmaz.
+The star button toggles favorites. Successfully opened single and group connections are added to the recents list. When an alias is renamed within the application, its quick access ID, favorites status, and history are preserved; aliases removed externally disappear and are not automatically re-associated.
 
-## Dosya aktarımı
+## File Transfer
 
-Bir Host seçiliyken araç çubuğundaki **Dosya aktar** eylemiyle aktarım sayfasını açabilirsin. Yüklemede yerel dosya veya klasörleri Finder'dan, uzak hedef klasörünü uygulama içindeki SFTP tarayıcısından seçersin; dosya adı otomatik doldurulur ve değiştirilebilir. İndirmede uzak dosyayı tarayıcıdan seçtikten sonra standart macOS kayıt penceresi, dosya adını hazır getirir. Son kullanılan yerel ve uzak klasörler hatırlanır.
+You can open the file transfer page using the **Transfer Files** action in the toolbar when a Host is selected. For uploads, choose local files or folders from Finder and select the remote destination folder via the in-app SFTP browser; the destination file name is pre-populated and editable. For downloads, select the remote file in the browser, and the standard macOS Save dialog will suggest the correct file name. Recently used local and remote folders are remembered.
 
-Aktarımlar bir kuyrukta yürütülür: birden fazla dosya/klasör aynı anda ayarlanabilir eşzamanlılık limitiyle (1-5) aktarılır, sırada bekleyenler ve aktif olanlar canlı yüzde/hız bilgisiyle görünür. Başarısız bir aktarım otomatik olarak birkaç kez yeniden denenir; kalıcı olarak başarısız olan veya iptal edilen aktarımlar kuyruktan elle de yeniden başlatılabilir. Klasör aktarımı SCP (`-r`) veya SFTP üzerinden yapılabilir; SFTP klasör aktarımı ayrı bir çalıştırıcı kullanır. Üzerine yazma onayı yalnızca hedefte aynı adlı dosya bulunduğunda gösterilir.
+Transfers are executed in a queue: multiple files/folders are transferred concurrently up to a configurable limit (1-5), and pending or active transfers display live percentage/speed progress. Failed transfers are automatically retried a few times; permanently failed or canceled transfers can be manually restarted from the queue. Directory transfers can be performed using SCP (`-r`) or SFTP; SFTP directory transfers use a separate worker. Overwrite confirmation is shown only when a file with the same name exists at the destination.
 
-Bu sürüm parola saklama desteklemez: SSH agent veya anahtar yoksa aktarım sırasında `SSH_ASKPASS` köprüsü üzerinden bir parola diyaloğu açılır (bkz. Güvenlik bölümü); girilen parola hiçbir yerde kalıcı tutulmaz. Aktarım iptal edilirse yerelde veya uzakta kısmi dosya kalmış olabilir; ilgili yolu kontrol et.
+This version does not support storing passwords: if no SSH agent or key is present, a password dialog will open via the `SSH_ASKPASS` bridge during transfer (see the Security section); the entered password is not stored anywhere permanently. If a transfer is canceled, partial files may remain locally or remotely; check the relevant paths.
 
-Aktarım sayfasındaki **Geçmiş** sekmesi, tamamlanan, kalıcı olarak başarısız olan ve iptal edilen her aktarımı kaydeder (bekleyen/aktif aktarımlar geçmişe yazılmaz). Kayıtlar `~/Library/Application Support/Terly/transfer-history.json` dosyasında (atomik yazım, `0600`/dizin `0700`) en fazla son 200 kayıt olacak şekilde tutulur ve uygulama yeniden başlatıldığında kalıcıdır. Her kayıttaki **"Yeniden aktar"** aynı parametrelerle kuyruğa yeni bir iş ekler; yüklemenin yerel kaynak dosyası artık yoksa bu, kuyruğa hiç girmeden anında anlaşılır bir hata gösterir (indirmelerde kaynak uzak sunucuda olduğundan önceden doğrulanamaz, normal aktarım hata sınıflandırmasına bırakılır). **"Yolları maskele"** işaretliyse yalnızca bu listenin **görünümünde** ana dizin `~` ile kısaltılır ve kullanıcı adı bileşenleri `•••` ile gizlenir — dürüst olmak gerekirse bu salt görsel bir maskeleme: `transfer-history.json` içinde ham (maskesiz) yol saklanmaya devam eder, çünkü "Yeniden aktar" gerçek yola ihtiyaç duyar. **"Geçmişi Temizle"** onay istedikten sonra yalnızca kayıt listesini siler; aktarılan veya kısmi kalan dosyalara dokunmaz.
+The **History** tab in the transfer page records every completed, permanently failed, and canceled transfer (pending/active transfers are not written to history). Up to 200 records are stored atomically in `~/Library/Application Support/Terly/transfer-history.json` (file `0600`/directory `0700`) and persist across application restarts. The **"Re-transfer"** action on each record adds a new job to the queue with the same parameters; if the local source file for an upload no longer exists, a clear error is shown immediately without queuing (for downloads, source files on the remote server cannot be pre-validated and are left to normal transfer error handling). If **"Mask Paths"** is checked, only the **visual representation** in this list shortens home directories to `~` and obscures username components with `•••` — this is purely visual; `transfer-history.json` continues to store the raw (unmasked) path since "Re-transfer" requires the actual path. **"Clear History"** prompts for confirmation before deleting the record list, leaving transferred or partial files untouched.
 
-İptal edilen veya kalıcı olarak başarısız olan **tekil dosya** aktarımlarında geçmiş kaydında **"Kısmi dosyayı sil…"** eylemi belirir; bu yalnızca o aktarımın kendi hedef yolunu hedefler (indirmede yerel dosya `FileManager` ile, yüklemede uzak dosya WP5'teki sftp `rm` ile) ve silmeden önce tam yolu göstererek onay ister. Klasör aktarımlarında bu eylem hiç teklif edilmez — yalnızca elle temizlik gerektiğini belirten bir uyarı metni gösterilir (özyinelemeli silme riski nedeniyle).
+For canceled or permanently failed **single file** transfers, a **"Delete partial file…"** action appears in the history log; this targets only the destination path of that specific transfer (using `FileManager` for local files, and sftp `rm` for remote files) and asks for confirmation by showing the full path before deleting. This option is not offered for directory transfers — instead, a warning is shown indicating that manual cleanup is required (due to recursive deletion risks).
 
-Uzak klasör tarayıcısında (aktarım hedefi seçerken) sağ tık menüsünden veya satırdaki "…" düğmesinden **Yeniden Adlandır** ve **Sil** işlemleri yapılabilir; **Yeni Klasör** araç çubuğunda ayrı bir düğmedir. Silme her zaman dosya adı ve tam uzak yol gösteren bir onay ister. Klasör silme yalnızca **boş** klasörlerde çalışır (sftp `rmdir`); bu uygulama klasörleri özyinelemeli (recursive) silmez — boş olmayan bir klasörü silmeye çalışırsan "Klasör boş değil" hatası gösterilir. Seçili bir dosya varken Delete tuşu da silme onayını açar.
+In the remote directory browser (when selecting transfer targets), you can perform **Rename** and **Delete** actions via the right-click menu or the "..." button on the row; **New Folder** is a separate button on the toolbar. Deleting always prompts for confirmation, displaying the file name and full remote path. Directory deletion works only on **empty** directories (sftp `rmdir`); the app does not delete directories recursively — attempting to delete a non-empty directory will display a "Directory not empty" error. The Delete key also opens the deletion confirmation dialog when a file is selected.
 
-## Tünel Yöneticisi
+## Tunnel Manager
 
-Sidebar'daki **Tüneller** bölümünden Local (`-L`), Remote (`-R`) ve Dynamic (`-D`) forward tanımları oluşturabilirsin. Her tünel bir hedef Host alias'ına bağlanır ve tek tek başlatılıp durdurulabilir; "Otomatik Bağlan" işaretliyse tünel ilgili bağlantı açıldığında kendiliğinden kurulur. Varsayılan yerel bind adresi `127.0.0.1`'dir; `0.0.0.0` veya `::` gibi dışa açık bir adres seçilirse arayüz güvenlik uyarısı gösterir.
+You can create Local (`-L`), Remote (`-R`), and Dynamic (`-D`) forward definitions in the **Tunnels** section of the sidebar. Each tunnel binds to a destination Host alias and can be started or stopped individually; if "Auto Connect" is checked, the tunnel is automatically established when the corresponding connection opens. The default local bind address is `127.0.0.1`; a security warning is shown in the UI if a publicly accessible address like `0.0.0.0` or `::` is selected.
 
-## Snippet'ler
+## Snippets
 
-Terminaldeyken `⌘S` ile sık kullanılan komut veya metin snippet'lerini arayıp seçili bölmeye ekleyebilirsin. Snippet'ler sidebar'daki **Snippet'ler** bölümünden key/value olarak eklenir, düzenlenir ve silinir.
+While in the terminal, you can search and insert frequently used command or text snippets into the active pane using `⌘S`. Snippets are managed (added, edited, deleted) as key/value pairs in the **Snippets** section of the sidebar.
 
-## Anahtar Kurulumu
+## Key Setup Wizard
 
-Bir host satırının sağ-tık menüsündeki veya host ayarları modalındaki **Anahtar Kurulumu…** eylemi, üç adımlı bir sihirbaz açar:
+The **Setup Key…** action in a host row's right-click menu or the host settings modal opens a three-step wizard:
 
-1. **Üret:** `/usr/bin/ssh-keygen -t ed25519 -f <yol> -C <yorum>` ayrı process argümanlarıyla çalıştırılır. Varsayılan yol `~/.ssh/id_ed25519_<alias>`dir (alias dosya adı için güvenli karakterlere indirgenir); yol ve yorum düzenlenebilir. Passphrase alanı tamamen ssh-keygen'in kendi istemine bırakılır ve `SSH_ASKPASS` köprüsü üzerinden diyalog olarak gösterilir — uygulama passphrase'i hiçbir zaman görmez veya saklamaz. Hedef yolda zaten bir dosya varsa yalnızca açık bir onay diyaloğundan sonra üzerine yazılır; onaysız üzerine yazma mümkün değildir.
-2. **Agent'a ekle (opsiyonel):** işaretliyse `/usr/bin/ssh-add <özel anahtar yolu>` çalıştırılır; `ssh-add` anahtar dosyasını kendisi okur, uygulama içeriğe erişmez.
-3. **Sunucuya kopyala:** `ssh-copy-id` KULLANILMAZ. Bunun yerine yalnızca `<yol>.pub` dosyası okunur (private key hiçbir kod yolunda okunmaz) ve içeriği `/usr/bin/ssh -- <alias> sh -c 'mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys'` komutuna stdin üzerinden beslenir. Çalıştırılmadan önce hedef host, çalışacak uzak komut ve eklenecek public key metni önizleme olarak gösterilir.
+1. **Generate**: Runs `/usr/bin/ssh-keygen -t ed25519 -f <path> -C <comment>` using individual process arguments. The default path is `~/.ssh/id_ed25519_<alias>` (alias is sanitized for safe filenames); path and comment are editable. Passphrase input is fully delegated to ssh-keygen's own prompt and displayed as a dialog via the `SSH_ASKPASS` bridge — the app never sees or stores the passphrase. If a file already exists at the target path, it is overwritten only after explicit confirmation.
+2. **Add to Agent (optional)**: If checked, runs `/usr/bin/ssh-add <private key path>`. `ssh-add` reads the key file itself; the app does not access the contents.
+3. **Copy to Server**: `ssh-copy-id` IS NOT USED. Instead, only the `<path>.pub` file is read (the private key is never read in any code path) and its content is fed via stdin to `/usr/bin/ssh -- <alias> sh -c 'mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys'`. Before running, the target host, remote command to execute, and the public key text are displayed as a preview.
 
-Kopyalama başarılı olduktan sonra `ssh -o BatchMode=yes -- <alias> true` ile parolasız girişin çalıştığını doğrulayan bir kontrol otomatik çalışır ve sonucu gösterir. Sihirbaz sonunda host'un `IdentityFile` alanını yeni anahtara güncellemeyi önerir; bu güncelleme yalnızca kullanıcı onayıyla ve mevcut write-through düzenleme yolu üzerinden uygulanır. Bağlantı Tanılama merkezi, agent'ta kullanılabilir anahtar yok ve kimlik doğrulama reddedildi durumlarını birlikte tespit ettiğinde sihirbaza yönlendiren bir öneri gösterir.
+After successful copying, a check automatically runs `ssh -o BatchMode=yes -- <alias> true` to verify that passwordless login works, displaying the result. Finally, the wizard offers to update the host's `IdentityFile` field to the new key; this update is applied only with user confirmation through the normal write-through editing flow. If the Connection Diagnostics center detects that there are no usable keys in the agent and authentication was rejected, it displays a suggestion prompting the user to launch this wizard.
 
-## Git ile senkronizasyon
+## Git Synchronization
 
-Ayarlar penceresindeki **Senkronizasyon** sekmesinden kendi private git reponu (ör. GitHub) sync backend'i olarak bağlayabilirsin. Aracı sunucu yok, geçmiş bedava: uygulama değişiklikte otomatik commit atar, sen istediğinde push edersin, yeni makinede/format sonrası aynı repoyu bağlayıp geri yüklersin.
+You can link your own private git repository (e.g., GitHub) as a sync backend from the **Sync** tab in the Settings window. No middleman servers, free history: the app automatically commits on changes, and you push when you want. On a new machine or after a clean install, you can connect the same repo to restore your settings.
 
-**⚠️ Repo private olmalı.** Buraya senkronize edilen her şey (Host tanımları, tünel/snippet/runbook/başlangıç akışı metadata'sı) uzak repoya commit edilir ve **git geçmişi kalıcıdır** — bir dosyayı sonradan repodan "silmek" geçmişteki commit'lerdeki halini otomatik temizlemez (`git filter-repo`/`BFG` gibi araçlar gerekir). Public bir repoya bağlarsan bu bilgiler herkese açık kalır.
+**⚠️ Repository must be private.** Everything synced here (Host definitions, tunnel/snippet/runbook/startup flow metadata) is committed to the remote repository, and **git history is permanent**. Deleting a file from the repository later does not automatically erase its historical revisions (which requires tools like `git filter-repo` or `BFG`). If linked to a public repository, this information will become publicly accessible.
 
-**Senkronize edilenler:** `~/.ssh/config` + içindeki `Include` edilen dosyalar (yalnızca `~/.ssh` altında kalanlar; dışına çıkan veya özel anahtar/`known_hosts` benzeri isimli olanlar sessizce atlanır, uyarı listesinde görünür), başlangıç akışları, hızlı erişim favorileri, otomatik yeniden bağlanma ayarları, tüneller, runbook'lar, snippet'ler (secret işaretli snippet **değerleri** hariç — zaten yalnızca Keychain'de tutulur, JSON'a hiç yazılmaz).
+**What is synced**: `~/.ssh/config` + any `Include`d files (only those located under `~/.ssh`; others residing outside or carrying names like private keys or `known_hosts` are silently skipped and listed in warnings), startup flows, quick access favorites, auto-reconnect settings, tunnels, runbooks, and snippets (excluding values of snippets marked as secret, which are only stored in Keychain and never written to JSON).
 
-**Senkronize edilmeyenler:** özel anahtar içerikleri (asla okunmaz/kopyalanmaz), aktarım geçmişi ve terminal workspace düzeni (makineye özgü), `known_hosts` (sürekli değişir, commit gürültüsü olurdu), yerel yedekler (`Backups/`), Keychain.
+**What is NOT synced**: private key contents (never read/copied), transfer history, terminal workspace layouts (machine-specific), `known_hosts` (changes frequently and creates commit noise), local backups (`Backups/`), and the Keychain.
 
-**Kadans:** her düzenlemede anında push atılmaz — değişiklikten 30 saniye sonra (debounce) yerel bir commit atılır. Push varsayılan olarak **manuel** ("Şimdi senkronize et"); otomatik push ayrı bir anahtarla açılabilir. Pull uygulama açılışında ve manuel olarak, yalnızca **fast-forward** ile çalışır — hiçbir zaman otomatik merge etmez.
+**Cadence**: Changes are not pushed immediately on every edit. Instead, a local commit is created after 30 seconds of inactivity (debounce). Pushing is **manual** by default ("Sync Now"); automatic pushing can be enabled via a setting. Pulls occur on application startup and manually, performing **fast-forward only** — never auto-merging.
 
-**Uzaktan gelen değişiklikler asla sessizce uygulanmaz:** pull yalnızca senkronizasyon deposunu günceller; ne değişeceği bir önizleme ekranında (mevcut/gelen içerik yan yana) gösterilir, sen onaylamadan gerçek dosyalara dokunulmaz. Onaydan önce mevcut yerel durum otomatik olarak yedeklenir. Önizlemede, gelen config'te bu makinede bulunmayan `IdentityFile` yolları varsa ayrıca listelenir (bu iyi niyetli, salt-metin bir kontrol — `ssh_config` token'ları içeren yollar atlanır; bağlantı anındaki tam çözümleme için Bağlantı Tanılama merkezine bak).
+**Remote changes are never applied silently**: Pulling only updates the local synchronization repository. What changes will be made is shown in a side-by-side preview screen (current vs. incoming content); actual files are not touched without your explicit approval. The current local state is automatically backed up before approval. The preview also flags incoming config `IdentityFile` paths that do not exist on the current machine (a basic, text-based check that skips paths containing `ssh_config` tokens; refer to the Connection Diagnostics center for full runtime resolution).
 
-**Çakışma (diverged geçmiş):** satır bazlı otomatik merge yok. Üç seçenek sunulur: (a) yereli yedekle, uzaktakini al, (b) uzaktakini yerelimle değiştir — bu seçenek bile `git push --force` **kullanmaz**, yerel içeriği koruyan yeni bir merge commit'iyle ilerler, (c) iptal. Hangisi seçilirse seçilsin, uygulanmadan önce mevcut yerel durum yedeklenir.
+**Conflict (diverged history)**: No line-based automatic merging. Three options are provided: (a) back up local and accept remote, (b) replace remote with local — this option **not using** `git push --force` but instead advances via a new merge commit, (c) cancel. Whichever is chosen, the current local state is backed up before application.
 
-**Bootstrap paradoksu:** yeni bir makinede bu özelliği kullanabilmek için önce GitHub'a (veya remote'a) erişim gerekir — yani bir SSH anahtarı (agent'a eklenmiş) veya HTTPS credential helper'ı zaten kurulu olmalı. Bu, senkronizasyonun kendisiyle çözülemez: **Anahtar Kurulumu** sihirbazını (bkz. yukarıda) kullanarak önce bir anahtar üret/ekle, GitHub hesabına public key'i tanıt, sonra Senkronizasyon sekmesinden remote URL'i bağla.
+**Bootstrap Paradox**: To use this feature on a new machine, you first need access to the remote repository (e.g., GitHub) — meaning an SSH key (added to agent) or HTTPS credential helper must already be set up. This cannot be solved by synchronization itself: generate/add a key using the **Key Setup Wizard** (see above), register the public key on GitHub, and then link the remote URL under the Sync tab.
 
-## Sürümleme ve güncellemeler
+## Versioning and Updates
 
-Uygulama sürümü `project.yml`'de `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`
-olarak tutulur; yerel geliştirme derlemesi her zaman ad-hoc (`CODE_SIGN_IDENTITY="-"`)
-imzalı kalır, gerçek Developer ID imzası yalnızca `.github/workflows/release.yml`
-içinde bir `v*` etiketi push edildiğinde CI'da uygulanır.
+The application version is tracked in `project.yml` under `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`. Local development builds remain signed ad-hoc (`CODE_SIGN_IDENTITY="-"`), while official Developer ID signing is applied in CI only when a release tag (`v*`) is pushed to `.github/workflows/release.yml`.
 
-Güncellemeler [Sparkle](https://github.com/sparkle-project/Sparkle) ile dağıtılır;
-Ayarlar penceresindeki **Güncellemeler** sekmesinden manuel denetim ve otomatik
-denetim aç/kapa yapılabilir. `project.yml` içindeki `SUFeedURL` ve `SUPublicEDKey`
-şu an **placeholder** değerler — appcast adresi gerçek yayın altyapısına göre
-(`https://klc.github.io/terly/appcast.xml`) ve public key
-`generate_keys` çıktısına göre değiştirilmesi gereken yerlerdir. Placeholder
-public key'i algılayan bir guard, gerçek anahtar girilene kadar denetim
-düğmesini "Güncelleme kanalı henüz yapılandırılmadı." uyarısıyla durdurur.
+Updates are distributed via [Sparkle](https://github.com/sparkle-project/Sparkle). Manual update checks and toggling automatic updates can be managed from the **Updates** tab in the Settings window. The `SUFeedURL` and `SUPublicEDKey` values in `project.yml` are currently **placeholders**; they must be updated with the actual appcast URL (`https://klc.github.io/terly/appcast.xml`) and the public key generated by `generate_keys`. A guard detecting placeholder public keys disables the update check button with a "Update channel not configured yet" warning until a valid key is provided.
 
-Uçtan uca release süreci, gereken GitHub secret'ları ve Mustafa'nın tek seferlik
-yapması gerekenler için bkz. **`docs/RELEASING.md`**.
+For the end-to-end release process, required GitHub secrets, and manual steps required by Mustafa, see **`docs/RELEASING.md`**.
 
-## Geliştirme
+## Development
 
 ```sh
 xcodegen generate
@@ -157,35 +147,16 @@ open SSHConfigurator.xcodeproj
 swift test
 ```
 
-`xcodegen generate` komutu, kaynakta tutulan `project.yml` dosyasından Xcode projesini yeniden oluşturur.
+The `xcodegen generate` command recreates the Xcode project from the source-controlled `project.yml` file.
 
-## Test ve CI
+## Testing and CI
 
-- Birim testleri iki şekilde çalıştırılabilir: `swift test` (SwiftPM, hızlı) veya
+- Unit tests can be run in two ways: `swift test` (SwiftPM, fast) or
   `xcodebuild -project SSHConfigurator.xcodeproj -scheme SSHConfigurator test -only-testing:SSHConfigCoreTests -only-testing:SSHConfiguratorTests`
-  (Xcode toolchain, `SSHConfiguratorTests`'in `TEST_HOST` ile gerçek `Terly.app`
-  içinde koşmasını da kapsar). Her iki test target'ı da `GENERATE_INFOPLIST_FILE: YES`
-  kullanır — bu olmadan `xcodebuild test` codesign aşamasında test bundle'ını
-  imzalayamadığı için düşer (`swift test` bundle'sız çalıştığından etkilenmez).
-- UI smoke testi (`SSHConfiguratorUITests`, `XCUITest`) tek bir senaryoyu kapsar: uygulama
-  açılır → sidebar görünür → `⌘K` hızlı erişimi açar/`Esc` kapatır → `⌘,` Ayarlar
-  penceresini açar/kapatır. SSH bağlantısı gerektirmez ve yalnızca salt-okunur
-  eylemler içerir; kullanıcının gerçek `~/.ssh/config` dosyasına yazmaz. Lokalde:
+  (Xcode toolchain, which covers running `SSHConfiguratorTests` inside the actual `Terly.app` using `TEST_HOST`). Both test targets use `GENERATE_INFOPLIST_FILE: YES` — without this, `xcodebuild test` fails during the codesign phase because it cannot sign the test bundle (`swift test` is unaffected since it runs bundleless).
+- The UI smoke test (`SSHConfiguratorUITests`, `XCUITest`) covers a single scenario: app launches → sidebar is displayed → `⌘K` opens/`Esc` closes quick access → `⌘,` opens/closes the Settings window. It requires no active SSH connection and only performs read-only actions, never writing to the user's actual `~/.ssh/config`. Locally:
   `xcodebuild -project SSHConfigurator.xcodeproj -scheme SSHConfigurator -configuration Debug CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=YES CODE_SIGNING_ALLOWED=YES test -only-testing:SSHConfiguratorUITests`.
-  UI testleri (birim testlerin aksine) `testmanagerd`'in bağlanabilmesi için gerçek
-  (ad-hoc olsa da) bir codesign imzası **ve** makinede açık "Developer Mode"
-  gerektirir; ikisi de yoksa test çalıştırıcısı "Test crashed with signal kill
-  before establishing connection" hatasıyla hemen sonlanır. Developer Mode'u
-  bir kere açmak için: `sudo /usr/sbin/DevToolsSecurity -enable`.
-- CI (`.github/workflows/ci.yml`) iki job çalıştırır: `build-and-test` (build +
-  `swift test` + yukarıdaki `xcodebuild test`) ve ayrı bir `ui-smoke` job'u
-  (Developer Mode'u etkinleştirip ad-hoc imzayla UI smoke testini koşar).
-- Sahte bir `SSHProcessExecuting`/`ReconnectScheduling` üzerinden aktarım kuyruğu
-  (`TransferQueueEngineIntegrationTests`) ve otomatik yeniden bağlanma zinciri
-  (`AutoReconnectChainIntegrationTests`) uçtan uca test edilir: gerçek `scp`/`ssh`
-  süreci hiç başlatılmadan kuyruğa ekleme → sahte başarı/başarısızlık → durum +
-  geçmiş kaydı, ve kopma → backoff → sahte başarı → sayaç sıfırlama yolları.
-- `SSHConfigDocumentPerformanceTests` 1000 host'luk sentetik bir config'i parse edip
-  gruplar; eşik (5s) CI runner yavaşlığına karşı bilinçli olarak cömerttir (yerelde
-  çalışma süresi ~25ms) — amaç mikro-performans izlemek değil, olası bir O(n²)
-  regresyonunu yakalamaktır.
+  UI tests (unlike unit tests) require a valid (even if ad-hoc) codesign signature **and** "Developer Mode" enabled on the machine for `testmanagerd` to attach; otherwise, the test runner immediately terminates with a "Test crashed with signal kill before establishing connection" error. To enable Developer Mode once: `sudo /usr/sbin/DevToolsSecurity -enable`.
+- CI (`.github/workflows/ci.yml`) runs two jobs: `build-and-test` (build + `swift test` + the `xcodebuild test` command above) and a separate `ui-smoke` job (which enables Developer Mode and runs UI smoke tests with ad-hoc signing).
+- The transfer queue (`TransferQueueEngineIntegrationTests`) and the auto-reconnect chain (`AutoReconnectChainIntegrationTests`) are tested end-to-end using mock implementations of `SSHProcessExecuting` and `ReconnectScheduling`: validating queuing → mock success/failure → status + history records, and disconnection → backoff → mock success → counter resets without starting actual `scp` or `ssh` processes.
+- `SSHConfigDocumentPerformanceTests` parses and groups a synthetic config with 1000 hosts; the threshold (5s) is intentionally generous to accommodate slow CI runners (local execution takes ~25ms) — the goal is not micro-performance tracking, but catching potential O(n²) regressions.
