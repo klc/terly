@@ -16,7 +16,7 @@ let package = Package(
         // Drop back to upstream once the fix lands there.
         .package(
             url: "https://github.com/klc/SwiftTerm.git",
-            revision: "63fc5c88c6572e319481f59733d8e6f85b7b6e73"
+            revision: "99f1bc935fd9937cf7361fd56d3cf89b082e0112"
         ),
         .package(
             url: "https://github.com/sparkle-project/Sparkle.git",
