@@ -15,6 +15,41 @@ private struct PaneLayoutGeometry {
     var dividers: [SplitDividerGeometry] = []
 }
 
+/// Transparent AppKit view that owns a cursor rect for the divider hit strip.
+/// SwiftUI `.onHover` + `NSCursor.push()` gets clobbered by the terminal
+/// NSView's own cursor rects (IBeam); `resetCursorRects` is the reliable path.
+/// `hitTest` returns nil so clicks/drags pass through to the SwiftUI gestures.
+private struct DividerCursorArea: NSViewRepresentable {
+    let cursor: NSCursor
+
+    func makeNSView(context: Context) -> CursorRectView {
+        CursorRectView(cursor: cursor)
+    }
+
+    func updateNSView(_ view: CursorRectView, context: Context) {
+        view.cursor = cursor
+        view.window?.invalidateCursorRects(for: view)
+    }
+
+    final class CursorRectView: NSView {
+        var cursor: NSCursor
+
+        init(cursor: NSCursor) {
+            self.cursor = cursor
+            super.init(frame: .zero)
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) { nil }
+
+        override func resetCursorRects() {
+            addCursorRect(bounds, cursor: cursor)
+        }
+
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    }
+}
+
 struct TerminalWorkspaceView: View {
     @ObservedObject var model: TerminalWorkspaceModel
     @ObservedObject var startupLibrary: StartupFlowLibrary
@@ -253,12 +288,14 @@ struct TerminalWorkspaceView: View {
                 .fill(Color.clear)
                 .frame(width: hitWidth, height: hitHeight)
                 .contentShape(Rectangle())
+                .background(DividerCursorArea(cursor: isVertical ? .resizeLeftRight : .resizeUpDown))
 
-            if isHighlighted {
-                Rectangle()
-                    .fill(Color.accentColor)
-                    .frame(width: isVertical ? 1 : hitWidth, height: isVertical ? hitHeight : 1)
-            }
+            Rectangle()
+                .fill(isHighlighted ? Color.accentColor : Color.secondary.opacity(0.4))
+                .frame(
+                    width: isVertical ? (isHighlighted ? 2 : 1) : hitWidth,
+                    height: isVertical ? hitHeight : (isHighlighted ? 2 : 1)
+                )
         }
         .position(
             x: geometry.size.width * divider.lineFrame.midX,
@@ -267,10 +304,8 @@ struct TerminalWorkspaceView: View {
         .onHover { hovering in
             if hovering {
                 hoveredDividerID = divider.id
-                (isVertical ? NSCursor.resizeLeftRight : NSCursor.resizeUpDown).push()
             } else if hoveredDividerID == divider.id {
                 hoveredDividerID = nil
-                NSCursor.pop()
             }
         }
         .onTapGesture(count: 2) {
