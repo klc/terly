@@ -283,7 +283,7 @@ final class KeySetupDiagnosticsSuggestionTests: XCTestCase {
             createdAt: Date(),
             checks: [
                 SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .warning, summary: "Agent boş.", detail: nil),
-                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .failed, summary: "Kimlik doğrulama reddedildi", detail: nil),
+                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .failed, summary: "Authentication rejected", detail: nil),
             ],
             resolvedSettings: []
         )
@@ -309,7 +309,7 @@ final class KeySetupDiagnosticsSuggestionTests: XCTestCase {
             createdAt: Date(),
             checks: [
                 SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .passed, summary: "1 anahtar.", detail: nil),
-                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .failed, summary: "Kimlik doğrulama reddedildi", detail: nil),
+                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .failed, summary: "Authentication rejected", detail: nil),
             ],
             resolvedSettings: []
         )

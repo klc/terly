@@ -145,7 +145,7 @@ final class SFTPDirectoryListingServiceTests: XCTestCase {
             try await service.delete(alias: "prod-api", path: "/home/deploy/uploads", kind: .directory)
             XCTFail("Expected delete to throw")
         } catch let RemoteFileBrowserError.processFailed(message) {
-            XCTAssertTrue(message.contains("boş değil"), message)
+            XCTAssertTrue(message.contains("not empty"), message)
         } catch {
             XCTFail("Unexpected error: \(error)")
         }
@@ -166,7 +166,7 @@ final class SFTPDirectoryListingServiceTests: XCTestCase {
             try await service.rename(alias: "prod-api", from: "/home/deploy/a", to: "/home/deploy/b")
             XCTFail("Expected rename to throw")
         } catch let RemoteFileBrowserError.processFailed(message) {
-            XCTAssertTrue(message.contains("zaten kullanılıyor"), message)
+            XCTAssertTrue(message.contains("already be in use"), message)
         } catch {
             XCTFail("Unexpected error: \(error)")
         }
@@ -187,7 +187,7 @@ final class SFTPDirectoryListingServiceTests: XCTestCase {
             try await service.delete(alias: "prod-api", path: "/home/deploy/gone", kind: .directory)
             XCTFail("Expected delete to throw")
         } catch let RemoteFileBrowserError.processFailed(message) {
-            XCTAssertTrue(message.contains("bulunamadı"), message)
+            XCTAssertTrue(message.contains("not found"), message)
         } catch {
             XCTFail("Unexpected error: \(error)")
         }

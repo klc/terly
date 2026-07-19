@@ -34,11 +34,11 @@ struct SSHDiagnosticsExecutionPolicy: Equatable, Sendable {
 
         switch (hasMatchExec, hasIncludes) {
         case (true, true):
-            riskDescription = "Ana config Match exec içeriyor ve Include zincirindeki dosyalar da yerel komut çalıştırabilir."
+            riskDescription = String(localized: "The main config contains Match exec, and files in the Include chain can also run local commands.")
         case (true, false):
-            riskDescription = "Ana config Match exec içeriyor; ssh -G bu yerel komutu çalıştırabilir."
+            riskDescription = String(localized: "The main config contains Match exec; ssh -G can run this local command.")
         case (false, true):
-            riskDescription = "Include zincirindeki dosyalar Match exec içerebilir; ssh -G bu yerel komutları çalıştırabilir."
+            riskDescription = String(localized: "Files in the Include chain may contain Match exec; ssh -G can run these local commands.")
         case (false, false):
             riskDescription = nil
         }
@@ -59,14 +59,14 @@ struct SSHDiagnosticReport: Equatable, Sendable {
     /// permission-denied authentication failure elsewhere in the run (the
     /// `connection` check, or any other step, classified by
     /// `SSHErrorClassifier` as `.permissionDenied` — whose fixed title is
-    /// "Kimlik doğrulama reddedildi"). That combination is exactly the
+    /// "Authentication rejected"). That combination is exactly the
     /// "no key available, server won't accept password/whatever else was
     /// tried" situation the WP3 key setup wizard exists to fix, so the
     /// diagnostics view surfaces a shortcut to it.
     var suggestsKeySetup: Bool {
         let agentHasNoUsableIdentity = checks.first { $0.id == "agent" }?.status == .warning
         let hasPermissionDenied = checks.contains {
-            $0.status == .failed && $0.summary == "Kimlik doğrulama reddedildi"
+            $0.status == .failed && $0.summary == String(localized: "Authentication rejected")
         }
         return agentHasNoUsableIdentity && hasPermissionDenied
     }
@@ -125,9 +125,9 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 createdAt: Date(),
                 checks: [SSHDiagnosticCheck(
                     id: "alias",
-                    title: "Bağlantı alias'ı",
+                    title: String(localized: "Connection alias"),
                     status: .failed,
-                    summary: "Somut bir Host alias'ı gerekli.",
+                    summary: String(localized: "A specific Host alias is required."),
                     detail: nil
                 )],
                 resolvedSettings: []
@@ -146,12 +146,12 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 timeout: stepTimeout
             ))
         } catch let error as SSHProcessClientError {
-            checks.append(check(for: error, id: "effective-config", title: "Çözümlenmiş SSH ayarları"))
+            checks.append(check(for: error, id: "effective-config", title: String(localized: "Resolved SSH settings")))
             return report(alias: normalizedAlias, checks: checks, settings: [])
         } catch {
             checks.append(SSHDiagnosticCheck(
                 id: "effective-config",
-                title: "Çözümlenmiş SSH ayarları",
+                title: String(localized: "Resolved SSH settings"),
                 status: .failed,
                 summary: error.localizedDescription,
                 detail: nil
@@ -167,7 +167,7 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
             let failure = classifier.classify(output: effectiveResult.combinedOutput)
             checks.append(SSHDiagnosticCheck(
                 id: "effective-config",
-                title: "Çözümlenmiş SSH ayarları",
+                title: String(localized: "Resolved SSH settings"),
                 status: .failed,
                 summary: failure.title,
                 detail: "\(failure.explanation) \(failure.suggestion)"
@@ -191,9 +191,10 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
         }
         checks.append(SSHDiagnosticCheck(
             id: "effective-config",
-            title: "Çözümlenmiş SSH ayarları",
+            title: String(localized: "Resolved SSH settings"),
             status: .passed,
-            summary: "OpenSSH \(settings.count) etkin ayar üretti.",
+            // TODO(plural)
+            summary: String(localized: "OpenSSH produced \(settings.count) active settings."),
             detail: SSHConfigSourceResolver.configurationTrace(from: effectiveResult.standardError)
         ))
 
@@ -230,10 +231,10 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
         if parsedConfig.usesProxyCommand {
             checks.append(SSHDiagnosticCheck(
                 id: "connection",
-                title: "Uçtan uca SSH bağlantısı",
+                title: String(localized: "End-to-end SSH connection"),
                 status: .warning,
-                summary: "Otomatik bağlantı kontrolü ProxyCommand nedeniyle atlandı.",
-                detail: "ProxyCommand yerel bir süreç çalıştırabilir. Açık kullanıcı onayıyla çalışma desteği ileride eklenebilir."
+                summary: String(localized: "Automatic connection check skipped because of ProxyCommand."),
+                detail: String(localized: "ProxyCommand can run a local process. Support for running with explicit user approval may be added in the future.")
             ))
         } else {
             checks.append(await connectionCheck(alias: normalizedAlias))
@@ -249,9 +250,9 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
         if Self.isIPAddress(hostname) {
             return SSHDiagnosticCheck(
                 id: "dns",
-                title: "DNS / hedef adres",
+                title: String(localized: "DNS / target address"),
                 status: .passed,
-                summary: "Hedef doğrudan bir IP adresi kullanıyor.",
+                summary: String(localized: "The target uses an IP address directly."),
                 detail: hostname
             )
         }
@@ -274,21 +275,22 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 let failure = classifier.classify(output: result.combinedOutput.isEmpty
                     ? "Could not resolve hostname \(hostname)"
                     : result.combinedOutput)
-                return diagnosticFailure(failure, id: "dns", title: "DNS çözümleme")
+                return diagnosticFailure(failure, id: "dns", title: String(localized: "DNS resolution"))
             }
             return SSHDiagnosticCheck(
                 id: "dns",
-                title: "DNS çözümleme",
+                title: String(localized: "DNS resolution"),
                 status: .passed,
-                summary: "Hostname \(addresses.count) adrese çözümlendi.",
+                // TODO(plural)
+                summary: String(localized: "Hostname resolved to \(addresses.count) addresses."),
                 detail: addresses.joined(separator: ", ")
             )
         } catch let error as SSHProcessClientError {
-            return check(for: error, id: "dns", title: "DNS çözümleme")
+            return check(for: error, id: "dns", title: String(localized: "DNS resolution"))
         } catch {
             return SSHDiagnosticCheck(
                 id: "dns",
-                title: "DNS çözümleme",
+                title: String(localized: "DNS resolution"),
                 status: .failed,
                 summary: error.localizedDescription,
                 detail: nil
@@ -302,9 +304,9 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
         if let proxyJump, proxyJump.caseInsensitiveCompare("none") != .orderedSame {
             return SSHDiagnosticCheck(
                 id: "proxy",
-                title: "ProxyJump zinciri",
+                title: String(localized: "ProxyJump chain"),
                 status: .information,
-                summary: "Bağlantı bir veya daha fazla ara host kullanıyor.",
+                summary: String(localized: "The connection uses one or more jump hosts."),
                 detail: proxyJump
             )
         }
@@ -313,15 +315,15 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 id: "proxy",
                 title: "ProxyCommand",
                 status: .information,
-                summary: "Bağlantı özel bir proxy komutu kullanıyor.",
-                detail: "Komut güvenlik nedeniyle rapora eklenmez."
+                summary: String(localized: "The connection uses a custom proxy command."),
+                detail: String(localized: "The command is not included in the report for security reasons.")
             )
         }
         return SSHDiagnosticCheck(
             id: "proxy",
-            title: "Proxy zinciri",
+            title: String(localized: "Proxy chain"),
             status: .passed,
-            summary: "Doğrudan bağlantı yapılandırılmış.",
+            summary: String(localized: "A direct connection is configured."),
             detail: nil
         )
     }
@@ -334,10 +336,10 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
         if config.usesProxy {
             return SSHDiagnosticCheck(
                 id: "port",
-                title: "Hedef port erişimi",
+                title: String(localized: "Target port access"),
                 status: .information,
-                summary: "Doğrudan port kontrolü ProxyJump/ProxyCommand nedeniyle atlandı.",
-                detail: "Hedef port, uçtan uca SSH kontrolünde proxy zinciri üzerinden sınanır."
+                summary: String(localized: "Direct port check skipped because of ProxyJump/ProxyCommand."),
+                detail: String(localized: "The target port is tested through the proxy chain during the end-to-end SSH check.")
             )
         }
 
@@ -350,22 +352,22 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
             if result.terminationStatus == 0 {
                 return SSHDiagnosticCheck(
                     id: "port",
-                    title: "Hedef port erişimi",
+                    title: String(localized: "Target port access"),
                     status: .passed,
-                    summary: "TCP \(hostname):\(port) bağlantı kabul ediyor.",
+                    summary: String(localized: "TCP \(hostname):\(port) accepts connections."),
                     detail: nil
                 )
             }
             let failure = classifier.classify(output: result.combinedOutput.isEmpty
                 ? "Connection timed out"
                 : result.combinedOutput)
-            return diagnosticFailure(failure, id: "port", title: "Hedef port erişimi")
+            return diagnosticFailure(failure, id: "port", title: String(localized: "Target port access"))
         } catch let error as SSHProcessClientError {
-            return check(for: error, id: "port", title: "Hedef port erişimi")
+            return check(for: error, id: "port", title: String(localized: "Target port access"))
         } catch {
             return SSHDiagnosticCheck(
                 id: "port",
-                title: "Hedef port erişimi",
+                title: String(localized: "Target port access"),
                 status: .failed,
                 summary: error.localizedDescription,
                 detail: nil
@@ -386,7 +388,7 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 id: "identity-files",
                 title: "IdentityFile",
                 status: .information,
-                summary: "Açık bir IdentityFile yok; SSH agent ve OpenSSH varsayılanları kullanılacak.",
+                summary: String(localized: "No explicit IdentityFile; SSH agent and OpenSSH defaults will be used."),
                 detail: nil
             )]
         }
@@ -404,8 +406,8 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                     id: "identity-\(index)",
                     title: "IdentityFile: \(URL(fileURLWithPath: rawPath).lastPathComponent)",
                     status: .warning,
-                    summary: "Dosya yolu bağlantı anında çözülecek OpenSSH token'ları içeriyor.",
-                    detail: "Çözülemeyen token: \(expansion.unresolvedTokens.joined(separator: ", ")). Dosya yok sayılmadı ve özel anahtar içeriği okunmadı."
+                    summary: String(localized: "The file path contains OpenSSH tokens that will be resolved at connection time."),
+                    detail: String(localized: "Unresolved token: \(expansion.unresolvedTokens.joined(separator: ", ")). The file was not skipped, and the private key content was not read.")
                 )
             }
             let url = URL(fileURLWithPath: expandedPath)
@@ -415,8 +417,8 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                     id: "identity-\(index)",
                     title: "IdentityFile: \(displayName)",
                     status: .failed,
-                    summary: "Dosya bulunamadı.",
-                    detail: "Özel anahtar içeriği okunmadı."
+                    summary: String(localized: "File not found."),
+                    detail: String(localized: "The private key content was not read.")
                 )
             }
 
@@ -427,9 +429,9 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 title: "IdentityFile: \(displayName)",
                 status: isOverlyPermissive ? .warning : .passed,
                 summary: isOverlyPermissive
-                    ? "Dosya izinleri grup veya diğer kullanıcılar için fazla açık."
-                    : "Dosya var ve izinleri kısıtlı.",
-                detail: permissions.map { "İzin: \(String($0, radix: 8)). Özel anahtar içeriği okunmadı." }
+                    ? String(localized: "File permissions are too open for group or other users.")
+                    : String(localized: "The file exists and its permissions are restricted."),
+                detail: permissions.map { String(localized: "Permissions: \(String($0, radix: 8)). The private key content was not read.") }
             )
         }
     }
@@ -443,8 +445,9 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                     id: "agent",
                     title: "SSH agent",
                     status: .passed,
-                    summary: "Agent \(keyCount) anahtar kimliği sunuyor.",
-                    detail: "Anahtar içeriği okunmadı veya uygulamaya aktarılmadı."
+                    // TODO(plural)
+                    summary: String(localized: "The agent is offering \(keyCount) key identities."),
+                    detail: String(localized: "The key content was not read or transferred to the app.")
                 )
             }
             let failure = classifier.classify(output: result.combinedOutput.isEmpty
@@ -483,10 +486,10 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
            configuredPaths.allSatisfy({ $0.caseInsensitiveCompare("none") == .orderedSame }) {
             return [SSHDiagnosticCheck(
                 id: "known-hosts",
-                title: "Sunucu kimliği",
+                title: String(localized: "Server identity"),
                 status: .warning,
-                summary: "UserKnownHostsFile none olarak yapılandırılmış.",
-                detail: "Kalıcı kullanıcı host key kaydı bu bağlantı için devre dışı."
+                summary: String(localized: "UserKnownHostsFile is configured as none."),
+                detail: String(localized: "Persistent user host-key recording is disabled for this connection.")
             )]
         }
 
@@ -510,10 +513,10 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 } else {
                     checks.append(SSHDiagnosticCheck(
                         id: "known-hosts-\(index)",
-                        title: "Sunucu kimliği: \(URL(fileURLWithPath: rawPath).lastPathComponent)",
+                        title: String(localized: "Server identity: \(URL(fileURLWithPath: rawPath).lastPathComponent)"),
                         status: .warning,
-                        summary: "known_hosts yolu güvenli biçimde çözülemedi.",
-                        detail: "Çözülemeyen token: \(expansion.unresolvedTokens.joined(separator: ", ")). Yanlış bir 'kayıt yok' sonucu üretilmedi."
+                        summary: String(localized: "The known_hosts path couldn't be resolved safely."),
+                        detail: String(localized: "Unresolved token: \(expansion.unresolvedTokens.joined(separator: ", ")). A false 'no record' result was not produced.")
                     ))
                 }
             }
@@ -564,8 +567,8 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                     id: id,
                     title: knownHostsTitle(path: sourcePath),
                     status: .warning,
-                    summary: "Bu hedef için known_hosts kaydı bulunamadı.",
-                    detail: "Uygulama kaydı otomatik eklemez. Fingerprint'i doğrulayıp normal terminal bağlantısında onayla."
+                    summary: String(localized: "No known_hosts entry was found for this target."),
+                    detail: String(localized: "The app doesn't add entries automatically. Verify the fingerprint and approve it in a regular terminal connection.")
                 )
             }
 
@@ -587,8 +590,8 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 title: knownHostsTitle(path: sourcePath),
                 status: fingerprints.isEmpty ? .warning : .passed,
                 summary: fingerprints.isEmpty
-                    ? "known_hosts kaydı var ancak fingerprint üretilemedi."
-                    : "known_hosts kaydı ve fingerprint bulundu.",
+                    ? String(localized: "A known_hosts entry exists, but a fingerprint could not be generated.")
+                    : String(localized: "known_hosts entry and fingerprint found."),
                 detail: fingerprints.joined(separator: "\n")
             )
         } catch let error as SSHProcessClientError {
@@ -605,8 +608,8 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
     }
 
     private func knownHostsTitle(path: String?) -> String {
-        guard let path else { return "Sunucu kimliği" }
-        return "Sunucu kimliği: \(URL(fileURLWithPath: path).lastPathComponent)"
+        guard let path else { return String(localized: "Server identity") }
+        return String(localized: "Server identity: \(URL(fileURLWithPath: path).lastPathComponent)")
     }
 
     private func connectionCheck(alias: String) async -> SSHDiagnosticCheck {
@@ -630,23 +633,23 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
             if result.terminationStatus == 0 {
                 return SSHDiagnosticCheck(
                     id: "connection",
-                    title: "Uçtan uca SSH bağlantısı",
+                    title: String(localized: "End-to-end SSH connection"),
                     status: .passed,
-                    summary: "Bağlantı, host güveni ve anahtar doğrulaması başarılı.",
+                    summary: String(localized: "Connection, host trust, and key verification succeeded."),
                     detail: nil
                 )
             }
             return diagnosticFailure(
                 classifier.classify(output: result.combinedOutput),
                 id: "connection",
-                title: "Uçtan uca SSH bağlantısı"
+                title: String(localized: "End-to-end SSH connection")
             )
         } catch let error as SSHProcessClientError {
-            return check(for: error, id: "connection", title: "Uçtan uca SSH bağlantısı")
+            return check(for: error, id: "connection", title: String(localized: "End-to-end SSH connection"))
         } catch {
             return SSHDiagnosticCheck(
                 id: "connection",
-                title: "Uçtan uca SSH bağlantısı",
+                title: String(localized: "End-to-end SSH connection"),
                 status: .failed,
                 summary: error.localizedDescription,
                 detail: nil
@@ -705,13 +708,13 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
     ) -> SSHDiagnosticReport? {
         guard Task.isCancelled else { return nil }
         var cancelledChecks = checks
-        if cancelledChecks.last?.summary != "İşlem iptal edildi" {
+        if cancelledChecks.last?.summary != String(localized: "Operation cancelled") {
             cancelledChecks.append(SSHDiagnosticCheck(
                 id: "cancelled",
-                title: "Tanılama",
+                title: String(localized: "Diagnostics"),
                 status: .warning,
-                summary: "İşlem iptal edildi",
-                detail: "İptalden sonra yeni bir ağ veya SSH alt süreci başlatılmadı."
+                summary: String(localized: "Operation cancelled"),
+                detail: String(localized: "No new network or SSH subprocess was started after cancellation.")
             ))
         }
         return report(alias: alias, checks: cancelledChecks, settings: settings)
@@ -763,7 +766,7 @@ enum SSHPathTokenExpander {
         } else if path.hasPrefix("~/") {
             path = context.homeDirectory + path.dropFirst()
         } else if path.hasPrefix("~") {
-            return SSHPathExpansionResult(expandedPath: nil, unresolvedTokens: ["~kullanıcı"])
+            return SSHPathExpansionResult(expandedPath: nil, unresolvedTokens: [String(localized: "~user")])
         }
 
         var result = ""
@@ -895,21 +898,21 @@ private enum SSHConfigSourceResolver {
 
         for line in matchingLines.sorted(by: { $0.number < $1.number }) {
             if document.globalLineRange?.contains(line.number) == true {
-                return "Global config, satır \(line.number)"
+                return String(localized: "Global config, line \(line.number)")
             }
             if let host = document.hostBlocks.first(where: {
                 $0.lineRange.contains(line.number) && hostPatterns($0.patterns, match: alias)
             }) {
-                return "Host \(host.displayName), satır \(line.number)"
+                return String(localized: "Host \(host.displayName), line \(line.number)")
             }
             if let match = document.matchBlocks.first(where: { $0.lineRange.contains(line.number) }) {
-                return "Olası \(match.displayName) kaynağı, satır \(line.number)"
+                return String(localized: "Possible \(match.displayName) source, line \(line.number)")
             }
         }
         if !document.includes.isEmpty || verboseOutput.localizedCaseInsensitiveContains("reading configuration data") {
-            return "OpenSSH varsayılanı veya Include zinciri"
+            return String(localized: "OpenSSH default or Include chain")
         }
-        return "OpenSSH varsayılanı"
+        return String(localized: "OpenSSH default")
     }
 
     static func configurationTrace(from output: String) -> String? {
@@ -923,7 +926,7 @@ private enum SSHConfigSourceResolver {
         let uniqueEntries = entries.reduce(into: [String]()) { result, entry in
             if !result.contains(entry) { result.append(entry) }
         }
-        return uniqueEntries.isEmpty ? nil : "Okunan config kaynakları: \(uniqueEntries.joined(separator: ", "))"
+        return uniqueEntries.isEmpty ? nil : String(localized: "Config sources read: \(uniqueEntries.joined(separator: ", "))")
     }
 
     private static func hostPatterns(_ patterns: [String], match alias: String) -> Bool {
@@ -944,11 +947,11 @@ private enum SSHConfigSourceResolver {
 struct SSHDiagnosticReportRedactor: Sendable {
     func render(_ report: SSHDiagnosticReport) -> String {
         var lines = [
-            "Terly Tanılama Raporu",
-            "Bağlantı: \(report.alias)",
-            "Tarih: \(report.createdAt.formatted(.iso8601))",
+            String(localized: "Terly Diagnostic Report"),
+            String(localized: "Connection: \(report.alias)"),
+            String(localized: "Date: \(report.createdAt.formatted(.iso8601))"),
             "",
-            "Kontroller",
+            String(localized: "Checks"),
         ]
         for check in report.checks {
             lines.append("[\(check.status.rawValue.uppercased())] \(check.title): \(check.summary)")
@@ -956,14 +959,14 @@ struct SSHDiagnosticReportRedactor: Sendable {
                 lines.append("  \(detail)")
             }
         }
-        lines.append(contentsOf: ["", "Çözümlenmiş ayarlar"])
+        lines.append(contentsOf: ["", String(localized: "Resolved settings")])
         for setting in report.resolvedSettings {
             let value: String
             switch setting.key {
             case "user", "localcommand", "remotecommand", "proxycommand":
-                value = "<redakte>"
+                value = String(localized: "<redacted>")
             case "identityfile", "userknownhostsfile", "globalknownhostsfile", "controlpath":
-                value = "<yerel-yol>"
+                value = String(localized: "<local-path>")
             default:
                 value = setting.value
             }
@@ -975,11 +978,11 @@ struct SSHDiagnosticReportRedactor: Sendable {
     private func redactLocalPaths(in text: String) -> String {
         var redacted = text.replacingOccurrences(
             of: FileManager.default.homeDirectoryForCurrentUser.path,
-            with: "<yerel-dizin>"
+            with: String(localized: "<local-dir>")
         )
         let localUser = NSUserName()
         if !localUser.isEmpty {
-            redacted = redacted.replacingOccurrences(of: localUser, with: "<yerel-kullanici>")
+            redacted = redacted.replacingOccurrences(of: localUser, with: String(localized: "<local-user>"))
         }
         return redacted
     }

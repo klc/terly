@@ -3570,6 +3570,1376 @@
           }
         }
       }
+    },
+    "Operation cancelled": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İşlem iptal edildi"
+          }
+        }
+      }
+    },
+    "The connection check was stopped by the user.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı kontrolü kullanıcı tarafından durduruldu."
+          }
+        }
+      }
+    },
+    "You can try again when you're ready.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hazır olduğunda yeniden deneyebilirsin."
+          }
+        }
+      }
+    },
+    "Connection timed out": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı zaman aşımına uğradı"
+          }
+        }
+      }
+    },
+    "The target didn't respond within the time allotted for this network step.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef, ağ adımı için ayrılan sürede yanıt vermedi."
+          }
+        }
+      }
+    },
+    "Check network access, the port, and any ProxyJump chain.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ağ erişimini, portu ve varsa ProxyJump zincirini kontrol et."
+          }
+        }
+      }
+    },
+    "SSH tool couldn't be launched": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH aracı başlatılamadı"
+          }
+        }
+      }
+    },
+    "Check that the OpenSSH tools are accessible on this system.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH araçlarının sistemde erişilebilir olduğunu kontrol et."
+          }
+        }
+      }
+    },
+    "Authentication cancelled": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kimlik doğrulama iptal edildi"
+          }
+        }
+      }
+    },
+    "The password or host identity confirmation prompt was dismissed by the user.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parola veya sunucu kimliği onay istemi kullanıcı tarafından kapatıldı."
+          }
+        }
+      }
+    },
+    "Try again when you're ready, and enter the requested password or give the confirmation.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hazır olduğunda yeniden dene ve istenen parolayı gir ya da onayı ver."
+          }
+        }
+      }
+    },
+    "Not authorized for this operation": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu işlem için yetki yok"
+          }
+        }
+      }
+    },
+    "The server rejected the operation on this file or folder.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu bu dosya veya klasör üzerinde işlemi reddetti."
+          }
+        }
+      }
+    },
+    "Check the remote file/folder permissions and ownership.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak dosya/klasör izinlerini ve sahipliğini kontrol et."
+          }
+        }
+      }
+    },
+    "The folder couldn't be deleted": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör silinemedi"
+          }
+        }
+      }
+    },
+    "The folder is not empty.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör boş değil."
+          }
+        }
+      }
+    },
+    "This app doesn't delete folders recursively; empty its contents first.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu uygulama klasörleri özyinelemeli (recursive) silmez; önce içeriğini boşalt."
+          }
+        }
+      }
+    },
+    "Couldn't rename": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden adlandırılamadı"
+          }
+        }
+      }
+    },
+    "The destination name may already be in use.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef ad zaten kullanılıyor olabilir."
+          }
+        }
+      }
+    },
+    "Choose a different name, or remove the existing item first.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farklı bir ad seç ya da önce var olan öğeyi kaldır."
+          }
+        }
+      }
+    },
+    "Couldn't create the folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör oluşturulamadı"
+          }
+        }
+      }
+    },
+    "A file or folder with this name may already exist.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu adla bir dosya veya klasör zaten var olabilir."
+          }
+        }
+      }
+    },
+    "Choose a different name, or check the existing item.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farklı bir ad seç ya da var olan öğeyi kontrol et."
+          }
+        }
+      }
+    },
+    "The file couldn't be deleted": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya silinemedi"
+          }
+        }
+      }
+    },
+    "The server rejected the request.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu isteği reddetti."
+          }
+        }
+      }
+    },
+    "Make sure the item is a file and that you have write permission.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öğenin bir dosya olduğundan ve yazma iznin olduğundan emin ol."
+          }
+        }
+      }
+    },
+    "Server identity has changed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu kimliği değişmiş"
+          }
+        }
+      }
+    },
+    "The saved host key doesn't match the key the server presented.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydedilmiş host key ile sunucunun sunduğu anahtar uyuşmuyor."
+          }
+        }
+      }
+    },
+    "Don't change the known_hosts entry without ruling out a possible attack or server reinstall.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olası saldırı veya yeniden kurulum durumunu doğrulamadan known_hosts kaydını değiştirme."
+          }
+        }
+      }
+    },
+    "Server identity isn't trusted yet": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu kimliği henüz güvenilir değil"
+          }
+        }
+      }
+    },
+    "No verified known_hosts entry was found for this host.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu host için doğrulanmış bir known_hosts kaydı bulunamadı."
+          }
+        }
+      }
+    },
+    "Verify the fingerprint through an independent channel, then explicitly approve it in a regular terminal connection.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fingerprint'i bağımsız bir kanaldan doğrulayıp normal terminal bağlantısında açıkça onayla."
+          }
+        }
+      }
+    },
+    "DNS resolution failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS çözümlemesi başarısız"
+          }
+        }
+      }
+    },
+    "The target hostname couldn't be resolved to an IP address.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef hostname bir IP adresine çözümlenemedi."
+          }
+        }
+      }
+    },
+    "Check the HostName spelling, the DNS/VPN connection, and the ProxyJump setting.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HostName yazımını, DNS/VPN bağlantısını ve ProxyJump ayarını kontrol et."
+          }
+        }
+      }
+    },
+    "ProxyJump chain failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ProxyJump zinciri başarısız"
+          }
+        }
+      }
+    },
+    "Couldn't establish the jump host, or the forwarding from the jump host to the target.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ara host veya ara hosttan hedefe yönlendirme kurulamadı."
+          }
+        }
+      }
+    },
+    "Check each ProxyJump alias and every host's reachability in the chain individually.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ProxyJump alias'larını ve zincirdeki her hostun erişimini ayrı ayrı kontrol et."
+          }
+        }
+      }
+    },
+    "The target port didn't respond in time.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef port süresi içinde yanıt vermedi."
+          }
+        }
+      }
+    },
+    "Check the firewall, VPN, port, and ProxyJump access.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firewall, VPN, port ve ProxyJump erişimini kontrol et."
+          }
+        }
+      }
+    },
+    "Connection refused": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı reddedildi"
+          }
+        }
+      }
+    },
+    "The target was reached, but the specified port refused the connection.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedefe ulaşıldı ancak belirtilen port bağlantıyı kabul etmedi."
+          }
+        }
+      }
+    },
+    "Check that the SSH service is running and verify the Port setting.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH servisinin çalıştığını ve Port ayarını kontrol et."
+          }
+        }
+      }
+    },
+    "SSH agent key unavailable": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH agent anahtarı kullanılamıyor"
+          }
+        }
+      }
+    },
+    "The agent isn't running, is empty, or can't offer the required key for signing.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agent çalışmıyor, boş veya gerekli anahtarı imzalama için sunamıyor."
+          }
+        }
+      }
+    },
+    "Check the agent status with ssh-add; don't give the app your private key.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh-add ile agent durumunu kontrol et; özel anahtarı uygulamaya verme."
+          }
+        }
+      }
+    },
+    "File or folder not found": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya veya klasör bulunamadı"
+          }
+        }
+      }
+    },
+    "The remote path no longer exists — it may have been deleted or moved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak yol artık mevcut değil — silinmiş veya taşınmış olabilir."
+          }
+        }
+      }
+    },
+    "Refresh the folder listing and check the path again.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasör listesini yenileyip yolu yeniden kontrol et."
+          }
+        }
+      }
+    },
+    "Authentication rejected": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kimlik doğrulama reddedildi"
+          }
+        }
+      }
+    },
+    "The server didn't accept the user or key that was presented.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu sunulan kullanıcı veya anahtarı kabul etmedi."
+          }
+        }
+      }
+    },
+    "Check the User, IdentityFile, and SSH agent keys.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User, IdentityFile ve SSH agent anahtarlarını kontrol et."
+          }
+        }
+      }
+    },
+    "SSH operation failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH işlemi başarısız"
+          }
+        }
+      }
+    },
+    "OpenSSH didn't provide a detailed error message.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH ayrıntılı bir hata mesajı vermedi."
+          }
+        }
+      }
+    },
+    "Review the checks in the diagnostic report.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tanılama raporundaki kontrolleri incele."
+          }
+        }
+      }
+    },
+    "The main config contains Match exec, and files in the Include chain can also run local commands.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana config Match exec içeriyor ve Include zincirindeki dosyalar da yerel komut çalıştırabilir."
+          }
+        }
+      }
+    },
+    "The main config contains Match exec; ssh -G can run this local command.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana config Match exec içeriyor; ssh -G bu yerel komutu çalıştırabilir."
+          }
+        }
+      }
+    },
+    "Files in the Include chain may contain Match exec; ssh -G can run these local commands.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include zincirindeki dosyalar Match exec içerebilir; ssh -G bu yerel komutları çalıştırabilir."
+          }
+        }
+      }
+    },
+    "Connection alias": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı alias'ı"
+          }
+        }
+      }
+    },
+    "A specific Host alias is required.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Somut bir Host alias'ı gerekli."
+          }
+        }
+      }
+    },
+    "Resolved SSH settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çözümlenmiş SSH ayarları"
+          }
+        }
+      }
+    },
+    "OpenSSH produced %lld active settings.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH %lld etkin ayar üretti."
+          }
+        }
+      }
+    },
+    "End-to-end SSH connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uçtan uca SSH bağlantısı"
+          }
+        }
+      }
+    },
+    "Automatic connection check skipped because of ProxyCommand.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik bağlantı kontrolü ProxyCommand nedeniyle atlandı."
+          }
+        }
+      }
+    },
+    "ProxyCommand can run a local process. Support for running with explicit user approval may be added in the future.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ProxyCommand yerel bir süreç çalıştırabilir. Açık kullanıcı onayıyla çalışma desteği ileride eklenebilir."
+          }
+        }
+      }
+    },
+    "DNS / target address": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS / hedef adres"
+          }
+        }
+      }
+    },
+    "The target uses an IP address directly.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef doğrudan bir IP adresi kullanıyor."
+          }
+        }
+      }
+    },
+    "DNS resolution": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS çözümleme"
+          }
+        }
+      }
+    },
+    "Hostname resolved to %lld addresses.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hostname %lld adrese çözümlendi."
+          }
+        }
+      }
+    },
+    "ProxyJump chain": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ProxyJump zinciri"
+          }
+        }
+      }
+    },
+    "The connection uses one or more jump hosts.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı bir veya daha fazla ara host kullanıyor."
+          }
+        }
+      }
+    },
+    "The connection uses a custom proxy command.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı özel bir proxy komutu kullanıyor."
+          }
+        }
+      }
+    },
+    "The command is not included in the report for security reasons.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komut güvenlik nedeniyle rapora eklenmez."
+          }
+        }
+      }
+    },
+    "Proxy chain": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proxy zinciri"
+          }
+        }
+      }
+    },
+    "A direct connection is configured.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doğrudan bağlantı yapılandırılmış."
+          }
+        }
+      }
+    },
+    "Target port access": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef port erişimi"
+          }
+        }
+      }
+    },
+    "Direct port check skipped because of ProxyJump/ProxyCommand.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doğrudan port kontrolü ProxyJump/ProxyCommand nedeniyle atlandı."
+          }
+        }
+      }
+    },
+    "The target port is tested through the proxy chain during the end-to-end SSH check.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef port, uçtan uca SSH kontrolünde proxy zinciri üzerinden sınanır."
+          }
+        }
+      }
+    },
+    "TCP %@:%lld accepts connections.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TCP %@:%lld bağlantı kabul ediyor."
+          }
+        }
+      }
+    },
+    "No explicit IdentityFile; SSH agent and OpenSSH defaults will be used.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açık bir IdentityFile yok; SSH agent ve OpenSSH varsayılanları kullanılacak."
+          }
+        }
+      }
+    },
+    "The file path contains OpenSSH tokens that will be resolved at connection time.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya yolu bağlantı anında çözülecek OpenSSH token'ları içeriyor."
+          }
+        }
+      }
+    },
+    "Unresolved token: %@. The file was not skipped, and the private key content was not read.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çözülemeyen token: %@. Dosya yok sayılmadı ve özel anahtar içeriği okunmadı."
+          }
+        }
+      }
+    },
+    "File not found.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya bulunamadı."
+          }
+        }
+      }
+    },
+    "The private key content was not read.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar içeriği okunmadı."
+          }
+        }
+      }
+    },
+    "File permissions are too open for group or other users.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya izinleri grup veya diğer kullanıcılar için fazla açık."
+          }
+        }
+      }
+    },
+    "The file exists and its permissions are restricted.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya var ve izinleri kısıtlı."
+          }
+        }
+      }
+    },
+    "Permissions: %@. The private key content was not read.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İzin: %@. Özel anahtar içeriği okunmadı."
+          }
+        }
+      }
+    },
+    "The agent is offering %lld key identities.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agent %lld anahtar kimliği sunuyor."
+          }
+        }
+      }
+    },
+    "The key content was not read or transferred to the app.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar içeriği okunmadı veya uygulamaya aktarılmadı."
+          }
+        }
+      }
+    },
+    "Server identity": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu kimliği"
+          }
+        }
+      }
+    },
+    "UserKnownHostsFile is configured as none.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UserKnownHostsFile none olarak yapılandırılmış."
+          }
+        }
+      }
+    },
+    "Persistent user host-key recording is disabled for this connection.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalıcı kullanıcı host key kaydı bu bağlantı için devre dışı."
+          }
+        }
+      }
+    },
+    "Server identity: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu kimliği: %@"
+          }
+        }
+      }
+    },
+    "The known_hosts path couldn't be resolved safely.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "known_hosts yolu güvenli biçimde çözülemedi."
+          }
+        }
+      }
+    },
+    "Unresolved token: %@. A false 'no record' result was not produced.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çözülemeyen token: %@. Yanlış bir 'kayıt yok' sonucu üretilmedi."
+          }
+        }
+      }
+    },
+    "No known_hosts entry was found for this target.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hedef için known_hosts kaydı bulunamadı."
+          }
+        }
+      }
+    },
+    "The app doesn't add entries automatically. Verify the fingerprint and approve it in a regular terminal connection.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygulama kaydı otomatik eklemez. Fingerprint'i doğrulayıp normal terminal bağlantısında onayla."
+          }
+        }
+      }
+    },
+    "A known_hosts entry exists, but a fingerprint could not be generated.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "known_hosts kaydı var ancak fingerprint üretilemedi."
+          }
+        }
+      }
+    },
+    "known_hosts entry and fingerprint found.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "known_hosts kaydı ve fingerprint bulundu."
+          }
+        }
+      }
+    },
+    "Connection, host trust, and key verification succeeded.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı, host güveni ve anahtar doğrulaması başarılı."
+          }
+        }
+      }
+    },
+    "Diagnostics": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tanılama"
+          }
+        }
+      }
+    },
+    "No new network or SSH subprocess was started after cancellation.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İptalden sonra yeni bir ağ veya SSH alt süreci başlatılmadı."
+          }
+        }
+      }
+    },
+    "~user": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~kullanıcı"
+          }
+        }
+      }
+    },
+    "Global config, line %lld": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global config, satır %lld"
+          }
+        }
+      }
+    },
+    "Host %@, line %lld": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host %@, satır %lld"
+          }
+        }
+      }
+    },
+    "Possible %@ source, line %lld": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olası %@ kaynağı, satır %lld"
+          }
+        }
+      }
+    },
+    "OpenSSH default or Include chain": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH varsayılanı veya Include zinciri"
+          }
+        }
+      }
+    },
+    "OpenSSH default": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH varsayılanı"
+          }
+        }
+      }
+    },
+    "Config sources read: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okunan config kaynakları: %@"
+          }
+        }
+      }
+    },
+    "Terly Diagnostic Report": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terly Tanılama Raporu"
+          }
+        }
+      }
+    },
+    "Connection: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı: %@"
+          }
+        }
+      }
+    },
+    "Date: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarih: %@"
+          }
+        }
+      }
+    },
+    "Checks": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontroller"
+          }
+        }
+      }
+    },
+    "Resolved settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çözümlenmiş ayarlar"
+          }
+        }
+      }
+    },
+    "<redacted>": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<redakte>"
+          }
+        }
+      }
+    },
+    "<local-path>": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<yerel-yol>"
+          }
+        }
+      }
+    },
+    "<local-dir>": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<yerel-dizin>"
+          }
+        }
+      }
+    },
+    "<local-user>": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<yerel-kullanici>"
+          }
+        }
+      }
+    },
+    "Connection Diagnostics and Trust Center": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı Tanılama ve Güven Merkezi"
+          }
+        }
+      }
+    },
+    "Run again": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden çalıştır"
+          }
+        }
+      }
+    },
+    "Checking DNS, host trust, agent, and end-to-end connection…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS, host güveni, agent ve uçtan uca bağlantı kontrol ediliyor…"
+          }
+        }
+      }
+    },
+    "Each network step is limited by a timeout. Cancelling ends the running subprocess.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Her ağ adımı timeout ile sınırlıdır. İptal, çalışan alt süreci sonlandırır."
+          }
+        }
+      }
+    },
+    "Diagnostics ready": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tanılama hazır"
+          }
+        }
+      }
+    },
+    "Use the button below to start the connection checks.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı kontrollerini başlatmak için aşağıdaki düğmeyi kullan."
+          }
+        }
+      }
+    },
+    "Config evaluation approval required": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config değerlendirme onayı gerekli"
+          }
+        }
+      }
+    },
+    "%@ You must explicitly approve this before diagnostics can start.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Tanılama başlamadan önce bunu açıkça onaylamalısın."
+          }
+        }
+      }
+    },
+    "The config can run a local command.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config yerel komut çalıştırabilir."
+          }
+        }
+      }
+    },
+    "Diagnose while evaluating config": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config'i değerlendirerek tanıla"
+          }
+        }
+      }
+    },
+    "Issue found": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorun bulundu"
+          }
+        }
+      }
+    },
+    "No critical issues found": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kritik sorun bulunmadı"
+          }
+        }
+      }
+    },
+    "Copied": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopyalandı"
+          }
+        }
+      }
+    },
+    "Copy redacted report": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redakte raporu kopyala"
+          }
+        }
+      }
+    },
+    "Resolved SSH settings (%lld)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çözümlenmiş SSH ayarları (%lld)"
+          }
+        }
+      }
+    },
+    "There's no usable key in the agent, and the server rejected authentication.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agent'ta kullanılabilir bir anahtar yok ve sunucu kimlik doğrulamayı reddetti."
+          }
+        }
+      }
+    },
+    "You can open the setup wizard to generate a new key and copy it to the server.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni bir anahtar üretip sunucuya kopyalamak için kurulum sihirbazını açabilirsin."
+          }
+        }
+      }
+    },
+    "Open Key Setup Wizard": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar Kurulumu Sihirbazını Aç"
+          }
+        }
+      }
+    },
+    "<hidden for security>": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<güvenlik nedeniyle gizlendi>"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
