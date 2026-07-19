@@ -8,13 +8,9 @@ settings:
     MACOSX_DEPLOYMENT_TARGET: 14.0
     SWIFT_EMIT_LOC_STRINGS: YES
 packages:
-  # Fork tracking upstream main, carrying only line-accurate scroll wheel +
-  # scrollSensitivity (feature/scroll-sensitivity), under review upstream as
-  # migueldeicaza/SwiftTerm#600. The Metal BufferPool fix has landed upstream
-  # (#598). Drop back to upstream once #600 lands. Package.swift pins the same revision.
   SwiftTerm:
-    url: https://github.com/klc/SwiftTerm.git
-    revision: 983cfbfaaac43cc9635d8c6983d4c4167b9b7bfd
+    url: https://github.com/migueldeicaza/SwiftTerm.git
+    from: 1.15.0
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle.git
     majorVersion: 2.0.0
