@@ -93,6 +93,7 @@ struct TerminalWorkspaceView: View {
     let isActive: Bool
     let isVisible: Bool
     let onRequestTransfer: (String) -> Void
+    let onDropFilesForUpload: ([URL], String) -> Void
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
     @State private var searchTerm = ""
@@ -103,6 +104,10 @@ struct TerminalWorkspaceView: View {
     @State private var hoveredDividerID: UUID?
     @State private var paneDrag: PaneDragState?
     @State private var draggedTabID: TerminalSession.ID?
+    @State private var fileDropTargetPaneID: TerminalPane.ID?
+    @State private var renamingTabID: TerminalSession.ID?
+    @State private var renamingTabTitle = ""
+    @FocusState private var renameFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -149,23 +154,40 @@ struct TerminalWorkspaceView: View {
             HStack(spacing: 6) {
                 ForEach(model.sessions) { session in
                     HStack(spacing: 5) {
-                        Button {
-                            model.selectedSessionID = session.id
-                        } label: {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(statusColor(session.status))
-                                    .frame(width: 7, height: 7)
-                                Text(session.displayName)
-                                    .lineLimit(1)
-                                if session.panes.count > 1 {
-                                    Text("\(session.panes.count)")
-                                        .font(.caption2.monospacedDigit())
-                                        .foregroundStyle(.secondary)
-                                }
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(statusColor(session.status))
+                                .frame(width: 7, height: 7)
+                            Text(session.displayTitle)
+                                .lineLimit(1)
+                            if session.panes.count > 1 {
+                                Text("\(session.panes.count)")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            TapGesture(count: 2)
+                                .exclusively(before: TapGesture(count: 1))
+                                .onEnded { value in
+                                    switch value {
+                                    case .first:
+                                        beginRenaming(session)
+                                    case .second:
+                                        model.selectedSessionID = session.id
+                                    }
+                                }
+                        )
+                        .popover(
+                            isPresented: Binding(
+                                get: { renamingTabID == session.id },
+                                set: { if !$0 { renamingTabID = nil } }
+                            ),
+                            arrowEdge: .bottom
+                        ) {
+                            renamePopover(for: session)
+                        }
 
                         Button {
                             model.closeTab(session.id)
@@ -199,6 +221,11 @@ struct TerminalWorkspaceView: View {
                             }
                         )
                     )
+                    .contextMenu {
+                        Button("Rename") {
+                            beginRenaming(session)
+                        }
+                    }
                 }
             }
             .animation(.default, value: model.sessions.map(\.id))
@@ -212,7 +239,7 @@ struct TerminalWorkspaceView: View {
         HStack(spacing: 10) {
             Image(systemName: "terminal.fill")
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.displayName)
+                Text(session.displayTitle)
                     .font(.headline)
                 Text(sessionStatusText(session))
                     .font(.caption)
@@ -508,6 +535,8 @@ struct TerminalWorkspaceView: View {
     ) -> some View {
         let isDragSource = paneDrag?.source == pane.id
         let isDragTarget = paneDrag?.target == pane.id
+        let isFileDropTarget = fileDropTargetPaneID == pane.id
+        let canUploadDroppedFiles = session.hostID != -1 && SSHLaunchPlanBuilder.isConcreteAlias(pane.alias)
 
         return VStack(spacing: 0) {
             HStack(spacing: 7) {
@@ -633,6 +662,32 @@ struct TerminalWorkspaceView: View {
                     .stroke(Color.accentColor, lineWidth: 2)
             }
         }
+        .overlay {
+            if isFileDropTarget && canUploadDroppedFiles {
+                ZStack {
+                    Color.accentColor.opacity(0.20)
+                    Rectangle()
+                        .stroke(Color.accentColor, lineWidth: 2)
+                    Text("Drop to upload: \(pane.alias)")
+                        .font(.headline)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                }
+                .allowsHitTesting(false)
+            }
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            guard canUploadDroppedFiles, !urls.isEmpty else { return false }
+            onDropFilesForUpload(urls, pane.alias)
+            return true
+        } isTargeted: { isTargeted in
+            if isTargeted && canUploadDroppedFiles {
+                fileDropTargetPaneID = pane.id
+            } else if fileDropTargetPaneID == pane.id {
+                fileDropTargetPaneID = nil
+            }
+        }
         .contentShape(Rectangle())
         .simultaneousGesture(
             TapGesture().onEnded {
@@ -647,6 +702,40 @@ struct TerminalWorkspaceView: View {
             in: sessionID,
             extendingSynchronization: NSEvent.modifierFlags.contains(.command)
         )
+    }
+
+    private func beginRenaming(_ session: TerminalSession) {
+        model.selectedSessionID = session.id
+        renamingTabTitle = session.customTitle ?? ""
+        renamingTabID = session.id
+    }
+
+    private func finishRenaming(_ session: TerminalSession) {
+        model.renameSession(session.id, title: renamingTabTitle)
+        renamingTabID = nil
+    }
+
+    private func renamePopover(for session: TerminalSession) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            TextField("Tab name", text: $renamingTabTitle)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 240)
+                .focused($renameFieldFocused)
+                .onSubmit { finishRenaming(session) }
+
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) {
+                    renamingTabID = nil
+                }
+                Button("Rename") {
+                    finishRenaming(session)
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(14)
+        .onAppear { renameFieldFocused = true }
     }
 
     private func runStartupAgain(in session: TerminalSession) {

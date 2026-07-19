@@ -565,6 +565,10 @@ struct SCPTransferSheet: View {
         "scp.lastRemoteDirectory.\(alias)"
     }
 
+    static func rememberedRemoteDirectory(alias: String) -> String? {
+        UserDefaults.standard.string(forKey: remoteDirectoryKey(alias: alias))
+    }
+
     private static let lastUploadDirectoryKey = "scp.lastLocalUploadDirectory"
     private static let lastDownloadDirectoryKey = "scp.lastLocalDownloadDirectory"
 }

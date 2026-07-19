@@ -2591,6 +2591,16 @@
         }
       }
     },
+    "Drop to upload: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemek için bırak: %@"
+          }
+        }
+      }
+    },
     "Duplicate connection" : {
       "localizations" : {
         "tr" : {
@@ -6325,6 +6335,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sekme"
+          }
+        }
+      }
+    },
+    "Tab name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme adı"
           }
         }
       }

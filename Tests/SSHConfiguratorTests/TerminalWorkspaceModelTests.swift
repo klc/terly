@@ -922,6 +922,66 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         XCTAssertEqual(model.selectedSession?.activePaneID, leftID)
     }
 
+    // MARK: - Faz 8: tab rename
+
+    @MainActor
+    func testRenameSessionSetsAndClearsCustomTitle() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+
+        model.renameSession(sessionID, title: "  Production API  ")
+        XCTAssertEqual(model.selectedSession?.customTitle, "Production API")
+        XCTAssertEqual(model.selectedSession?.displayTitle, "Production API")
+
+        model.renameSession(sessionID, title: "")
+        XCTAssertNil(model.selectedSession?.customTitle)
+    }
+
+    @MainActor
+    func testRenameSessionPersistsRoundTrip() {
+        let store = MockWorkspaceLayoutStore()
+        let model = TerminalWorkspaceModel(
+            launchPlanBuilder: SSHLaunchPlanBuilder(
+                sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                baseEnvironment: ["PATH": "/usr/bin:/bin"],
+                currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+            ),
+            workspaceStore: store
+        )
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        model.renameSession(sessionID, title: "Production")
+        model.flushPendingSave()
+
+        let restoredModel = TerminalWorkspaceModel(
+            launchPlanBuilder: SSHLaunchPlanBuilder(
+                sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                baseEnvironment: ["PATH": "/usr/bin:/bin"],
+                currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+            ),
+            workspaceStore: store
+        )
+        restoredModel.restoreWorkspace()
+
+        XCTAssertEqual(restoredModel.selectedSessionID, sessionID)
+        XCTAssertEqual(restoredModel.selectedSession?.customTitle, "Production")
+        XCTAssertEqual(restoredModel.selectedSession?.displayTitle, "Production")
+    }
+
+    @MainActor
+    func testEmptyTitleRevertsToAlias() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+
+        model.renameSession(sessionID, title: "Custom")
+        model.renameSession(sessionID, title: "  \n\t ")
+
+        XCTAssertNil(model.selectedSession?.customTitle)
+        XCTAssertEqual(model.selectedSession?.displayTitle, "prod")
+    }
+
     // MARK: - Faz 6: pane zoom
 
     @MainActor

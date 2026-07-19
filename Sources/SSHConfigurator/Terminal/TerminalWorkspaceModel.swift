@@ -311,6 +311,12 @@ final class TerminalWorkspaceModel: ObservableObject {
         )
     }
 
+    func renameSession(_ sessionID: TerminalSession.ID, title: String) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        sessions[index].customTitle = trimmedTitle.isEmpty ? nil : trimmedTitle
+    }
+
     /// Marks panes as closed-by-the-user (WP7 exit classification) and drops
     /// any pending auto-reconnect timer/state for them, so a tab/pane close
     /// never triggers the "connection dropped" band or a stray reconnect.
@@ -602,6 +608,7 @@ final class TerminalWorkspaceModel: ObservableObject {
                 id: session.id,
                 hostID: session.hostID,
                 alias: session.alias,
+                customTitle: session.customTitle,
                 groupID: session.groupID,
                 layout: session.layout.persisted,
                 activePaneID: session.activePaneID,
@@ -652,7 +659,8 @@ final class TerminalWorkspaceModel: ObservableObject {
                         alias: persistedSession.alias,
                         groupID: persistedSession.groupID,
                         layout: restoredLayout,
-                        activePaneID: persistedSession.activePaneID
+                        activePaneID: persistedSession.activePaneID,
+                        customTitle: persistedSession.customTitle
                     )
                     session.synchronizedPaneIDs = Set(persistedSession.synchronizedPaneIDs)
                     restoredSessions.append(session)

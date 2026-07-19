@@ -59,7 +59,8 @@ struct ContentView: View {
                 snippets: snippets,
                 runbooks: runbooks,
                 isHostSettingsSheetPresented: editingHostSelection != nil,
-                onRequestTransfer: { showTransfer(forAlias: $0) }
+                onRequestTransfer: { showTransfer(forAlias: $0) },
+                onDropFilesForUpload: uploadDroppedFiles
             )
             .frame(minWidth: 680, minHeight: 460)
         }
@@ -321,6 +322,31 @@ struct ContentView: View {
         guard SSHLaunchPlanBuilder.isConcreteAlias(alias) else { return }
         let hostID = model.hosts.first { $0.patterns.contains(alias) }?.id ?? alias.hashValue
         transferSelection = SCPTransferSelection(id: hostID, alias: alias)
+    }
+
+    private func uploadDroppedFiles(_ urls: [URL], alias: String) {
+        guard SSHLaunchPlanBuilder.isConcreteAlias(alias) else { return }
+        guard !model.hasChanges else {
+            showTransfer(forAlias: alias)
+            return
+        }
+
+        let remoteDirectory = SCPTransferSheet.rememberedRemoteDirectory(alias: alias) ?? "."
+        let items = urls.map { url in
+            let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+            return TransferItem(
+                direction: .upload,
+                alias: alias,
+                localURL: url,
+                remotePath: RemotePath.appending(url.lastPathComponent, to: remoteDirectory),
+                isDirectory: isDirectory,
+                transferProtocol: .scp,
+                verifyChecksum: false
+            )
+        }
+        guard !items.isEmpty else { return }
+        transferEngine.enqueue(items)
+        showTransfer(forAlias: alias)
     }
 
     private func showTransfer(for host: SSHHostBlock?) {
@@ -866,6 +892,7 @@ private struct ContentDetailView: View {
     @ObservedObject var runbooks: RunbookLibrary
     let isHostSettingsSheetPresented: Bool
     let onRequestTransfer: (String) -> Void
+    let onDropFilesForUpload: ([URL], String) -> Void
 
     var body: some View {
         if let document = model.document {
@@ -878,7 +905,8 @@ private struct ContentDetailView: View {
                         engine: terminalEngine,
                         isActive: terminalIsVisible && !isHostSettingsSheetPresented,
                         isVisible: terminalIsVisible,
-                        onRequestTransfer: onRequestTransfer
+                        onRequestTransfer: onRequestTransfer,
+                        onDropFilesForUpload: onDropFilesForUpload
                     )
                     .opacity(terminalIsVisible ? 1 : 0)
                     .allowsHitTesting(terminalIsVisible)

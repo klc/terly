@@ -88,10 +88,47 @@ struct PersistedSession: Codable, Equatable {
     let id: UUID
     let hostID: Int
     let alias: String
+    let customTitle: String?
     let groupID: UUID?
     let layout: PersistedPaneLayout
     let activePaneID: UUID
     let synchronizedPaneIDs: [UUID]
+
+    init(
+        id: UUID,
+        hostID: Int,
+        alias: String,
+        customTitle: String? = nil,
+        groupID: UUID?,
+        layout: PersistedPaneLayout,
+        activePaneID: UUID,
+        synchronizedPaneIDs: [UUID]
+    ) {
+        self.id = id
+        self.hostID = hostID
+        self.alias = alias
+        self.customTitle = customTitle
+        self.groupID = groupID
+        self.layout = layout
+        self.activePaneID = activePaneID
+        self.synchronizedPaneIDs = synchronizedPaneIDs
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, hostID, alias, customTitle, groupID, layout, activePaneID, synchronizedPaneIDs
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        hostID = try container.decode(Int.self, forKey: .hostID)
+        alias = try container.decode(String.self, forKey: .alias)
+        customTitle = try container.decodeIfPresent(String.self, forKey: .customTitle)
+        groupID = try container.decodeIfPresent(UUID.self, forKey: .groupID)
+        layout = try container.decode(PersistedPaneLayout.self, forKey: .layout)
+        activePaneID = try container.decode(UUID.self, forKey: .activePaneID)
+        synchronizedPaneIDs = try container.decodeIfPresent([UUID].self, forKey: .synchronizedPaneIDs) ?? []
+    }
 }
 
 struct PersistedWorkspace: Codable, Equatable {

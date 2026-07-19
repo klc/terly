@@ -97,6 +97,25 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
 
         XCTAssertFalse(pane.skippedAutomaticStartup)
     }
+
+    func testLegacyPersistedSessionDefaultsCustomTitleToNil() throws {
+        let paneID = UUID()
+        let sessionID = UUID()
+        let data = try XCTUnwrap("""
+        {
+            "id":"\(sessionID.uuidString)",
+            "hostID":1,
+            "alias":"prod",
+            "layout":{"type":"pane","pane":{"id":"\(paneID.uuidString)","alias":"prod"}},
+            "activePaneID":"\(paneID.uuidString)",
+            "synchronizedPaneIDs":[]
+        }
+        """.data(using: .utf8))
+
+        let session = try JSONDecoder().decode(PersistedSession.self, from: data)
+
+        XCTAssertNil(session.customTitle)
+    }
     
     @MainActor
     func testWorkspaceAutoSavesOnMutations() {

@@ -324,6 +324,7 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
     let id: UUID
     let hostID: Int
     let alias: String
+    var customTitle: String?
     let groupID: UUID?
     var layout: TerminalPaneLayout
     var activePaneID: TerminalPane.ID
@@ -337,11 +338,13 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
         hostID: Int,
         alias: String,
         initialPane: TerminalPane,
-        groupID: UUID? = nil
+        groupID: UUID? = nil,
+        customTitle: String? = nil
     ) {
         self.id = id
         self.hostID = hostID
         self.alias = alias
+        self.customTitle = customTitle
         self.groupID = groupID
         layout = .pane(initialPane)
         activePaneID = initialPane.id
@@ -355,11 +358,13 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
         alias: String,
         groupID: UUID? = nil,
         layout: TerminalPaneLayout,
-        activePaneID: TerminalPane.ID
+        activePaneID: TerminalPane.ID,
+        customTitle: String? = nil
     ) {
         self.id = id
         self.hostID = hostID
         self.alias = alias
+        self.customTitle = customTitle
         self.groupID = groupID
         self.layout = layout
         self.activePaneID = activePaneID
@@ -555,6 +560,10 @@ extension TerminalSession {
             return String(localized: "Local Terminal")
         }
         return alias
+    }
+
+    var displayTitle: String {
+        customTitle ?? displayName
     }
 }
 
