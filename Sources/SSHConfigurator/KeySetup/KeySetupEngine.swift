@@ -113,7 +113,7 @@ final class KeySetupEngine: ObservableObject {
                 generateState = .succeeded
                 publicKeyPreview = try? readPublicKey(privateKeyPath: privateKeyPath)
             } else {
-                generateState = .failed(failureMessage(result, fallback: "ssh-keygen çıkış kodu \(result.terminationStatus) döndürdü."))
+                generateState = .failed(failureMessage(result, fallback: String(localized: "ssh-keygen returned exit code \(result.terminationStatus).")))
             }
         } catch {
             generateState = .failed(error.localizedDescription)
@@ -138,7 +138,7 @@ final class KeySetupEngine: ObservableObject {
             agentAddOutput = result.combinedOutput
             agentAddState = result.terminationStatus == 0
                 ? .succeeded
-                : .failed(failureMessage(result, fallback: "ssh-add çıkış kodu \(result.terminationStatus) döndürdü."))
+                : .failed(failureMessage(result, fallback: String(localized: "ssh-add returned exit code \(result.terminationStatus).")))
         } catch {
             agentAddState = .failed(error.localizedDescription)
         }
@@ -182,7 +182,7 @@ final class KeySetupEngine: ObservableObject {
             copyOutput = result.combinedOutput
             copyState = result.terminationStatus == 0
                 ? .succeeded
-                : .failed(failureMessage(result, fallback: "Kopyalama çıkış kodu \(result.terminationStatus) döndürdü."))
+                : .failed(failureMessage(result, fallback: String(localized: "Copy returned exit code \(result.terminationStatus).")))
         } catch {
             copyState = .failed(error.localizedDescription)
         }
@@ -207,7 +207,7 @@ final class KeySetupEngine: ObservableObject {
             verifyOutput = result.combinedOutput
             verifyState = result.terminationStatus == 0
                 ? .succeeded
-                : .failed(failureMessage(result, fallback: "Doğrulama çıkış kodu \(result.terminationStatus) döndürdü."))
+                : .failed(failureMessage(result, fallback: String(localized: "Verification returned exit code \(result.terminationStatus).")))
         } catch {
             verifyState = .failed(error.localizedDescription)
         }

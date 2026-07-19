@@ -39,17 +39,17 @@ struct TunnelDefinition: Codable, Equatable, Identifiable, Hashable, Sendable {
 
     var validationError: String? {
         let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty else { return "Tünel adı gerekli." }
+        guard !name.isEmpty else { return String(localized: "Tunnel name is required.") }
         guard !targetHostAlias.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return "Hedef host gerekli."
+            return String(localized: "Target host is required.")
         }
-        guard Self.isValidPort(localPort) else { return "Yerel port 1 ile 65535 arasında olmalı." }
+        guard Self.isValidPort(localPort) else { return String(localized: "Local port must be between 1 and 65535.") }
 
         guard type != .dynamic else { return nil }
         guard !remoteBindAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return "Uzak host gerekli."
+            return String(localized: "Remote host is required.")
         }
-        guard Self.isValidPort(remotePort) else { return "Uzak port 1 ile 65535 arasında olmalı." }
+        guard Self.isValidPort(remotePort) else { return String(localized: "Remote port must be between 1 and 65535.") }
         return nil
     }
 

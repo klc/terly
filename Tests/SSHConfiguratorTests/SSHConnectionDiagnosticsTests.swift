@@ -38,7 +38,7 @@ final class SSHConnectionDiagnosticsTests: XCTestCase {
         XCTAssertEqual(report.checks.first(where: { $0.id == "connection" })?.status, .passed)
         XCTAssertEqual(
             report.resolvedSettings.first(where: { $0.key == "hostname" })?.source,
-            "Host prod, satır 2"
+            "Host prod, line 2"
         )
 
         let requests = executor.requests
@@ -80,8 +80,8 @@ final class SSHConnectionDiagnosticsTests: XCTestCase {
         if !localUser.isEmpty { XCTAssertFalse(text.contains(localUser)) }
         XCTAssertFalse(text.contains("deploy"))
         XCTAssertFalse(text.contains("secret-jump"))
-        XCTAssertTrue(text.contains("<yerel-yol>"))
-        XCTAssertTrue(text.contains("<redakte>"))
+        XCTAssertTrue(text.contains("<local-path>"))
+        XCTAssertTrue(text.contains("<redacted>"))
     }
 
     func testResolvedSourceHonorsEarlierWildcardHostBlock() async {
@@ -103,7 +103,7 @@ final class SSHConnectionDiagnosticsTests: XCTestCase {
 
         XCTAssertEqual(
             report.resolvedSettings.first(where: { $0.key == "user" })?.source,
-            "Host *, satır 2"
+            "Host *, line 2"
         )
     }
 
@@ -216,7 +216,7 @@ final class SSHConnectionDiagnosticsTests: XCTestCase {
         XCTAssertEqual(identity?.status, .warning)
         XCTAssertTrue(identity?.summary.contains("token") == true)
         XCTAssertEqual(knownHosts?.status, .warning)
-        XCTAssertTrue(knownHosts?.summary.contains("çözülemedi") == true)
+        XCTAssertTrue(knownHosts?.summary.contains("couldn't be resolved") == true)
         XCTAssertFalse(executor.requests.contains { $0.executableURL.lastPathComponent == "ssh-keygen" && $0.arguments.contains("-F") })
     }
 
@@ -256,7 +256,7 @@ final class SSHConnectionDiagnosticsTests: XCTestCase {
         let report = await task.value
 
         XCTAssertEqual(executor.requests.count, 2)
-        XCTAssertTrue(report.checks.contains { $0.summary == "İşlem iptal edildi" })
+        XCTAssertTrue(report.checks.contains { $0.summary == "Operation cancelled" })
     }
 
     func testPathExpansionSupportsKnownTokensAndReportsUnknownTokens() {

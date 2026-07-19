@@ -58,23 +58,23 @@ struct SSHErrorClassifier: Sendable {
             case .cancelled:
                 return error(
                     .cancelled,
-                    "İşlem iptal edildi",
-                    "Bağlantı kontrolü kullanıcı tarafından durduruldu.",
-                    "Hazır olduğunda yeniden deneyebilirsin."
+                    String(localized: "Operation cancelled"),
+                    String(localized: "The connection check was stopped by the user."),
+                    String(localized: "You can try again when you're ready.")
                 )
             case .timedOut:
                 return error(
                     .connectionTimeout,
-                    "Bağlantı zaman aşımına uğradı",
-                    "Hedef, ağ adımı için ayrılan sürede yanıt vermedi.",
-                    "Ağ erişimini, portu ve varsa ProxyJump zincirini kontrol et."
+                    String(localized: "Connection timed out"),
+                    String(localized: "The target didn't respond within the time allotted for this network step."),
+                    String(localized: "Check network access, the port, and any ProxyJump chain.")
                 )
             case let .launchFailed(message):
                 return error(
                     .processLaunch,
-                    "SSH aracı başlatılamadı",
+                    String(localized: "SSH tool couldn't be launched"),
                     message,
-                    "OpenSSH araçlarının sistemde erişilebilir olduğunu kontrol et."
+                    String(localized: "Check that the OpenSSH tools are accessible on this system.")
                 )
             }
         }
@@ -83,9 +83,9 @@ struct SSHErrorClassifier: Sendable {
         if normalized.contains("terly_askpass_cancelled") {
             return error(
                 .authenticationCancelled,
-                "Kimlik doğrulama iptal edildi",
-                "Parola veya sunucu kimliği onay istemi kullanıcı tarafından kapatıldı.",
-                "Hazır olduğunda yeniden dene ve istenen parolayı gir ya da onayı ver."
+                String(localized: "Authentication cancelled"),
+                String(localized: "The password or host identity confirmation prompt was dismissed by the user."),
+                String(localized: "Try again when you're ready, and enter the requested password or give the confirmation.")
             )
         }
         if let sftpCommand {
@@ -98,9 +98,9 @@ struct SSHErrorClassifier: Sendable {
             if normalized.contains("permission denied") {
                 return error(
                     .remoteOperationPermissionDenied,
-                    "Bu işlem için yetki yok",
-                    "Sunucu bu dosya veya klasör üzerinde işlemi reddetti.",
-                    "Uzak dosya/klasör izinlerini ve sahipliğini kontrol et."
+                    String(localized: "Not authorized for this operation"),
+                    String(localized: "The server rejected the operation on this file or folder."),
+                    String(localized: "Check the remote file/folder permissions and ownership.")
                 )
             }
             if normalized.contains("failure") {
@@ -108,30 +108,30 @@ struct SSHErrorClassifier: Sendable {
                 case .removeDirectory:
                     return error(
                         .remoteDirectoryNotEmpty,
-                        "Klasör silinemedi",
-                        "Klasör boş değil.",
-                        "Bu uygulama klasörleri özyinelemeli (recursive) silmez; önce içeriğini boşalt."
+                        String(localized: "The folder couldn't be deleted"),
+                        String(localized: "The folder is not empty."),
+                        String(localized: "This app doesn't delete folders recursively; empty its contents first.")
                     )
                 case .rename:
                     return error(
                         .remoteAlreadyExists,
-                        "Yeniden adlandırılamadı",
-                        "Hedef ad zaten kullanılıyor olabilir.",
-                        "Farklı bir ad seç ya da önce var olan öğeyi kaldır."
+                        String(localized: "Couldn't rename"),
+                        String(localized: "The destination name may already be in use."),
+                        String(localized: "Choose a different name, or remove the existing item first.")
                     )
                 case .createDirectory:
                     return error(
                         .remoteAlreadyExists,
-                        "Klasör oluşturulamadı",
-                        "Bu adla bir dosya veya klasör zaten var olabilir.",
-                        "Farklı bir ad seç ya da var olan öğeyi kontrol et."
+                        String(localized: "Couldn't create the folder"),
+                        String(localized: "A file or folder with this name may already exist."),
+                        String(localized: "Choose a different name, or check the existing item.")
                     )
                 case .remove:
                     return error(
                         .unknown,
-                        "Dosya silinemedi",
-                        "Sunucu isteği reddetti.",
-                        "Öğenin bir dosya olduğundan ve yazma iznin olduğundan emin ol."
+                        String(localized: "The file couldn't be deleted"),
+                        String(localized: "The server rejected the request."),
+                        String(localized: "Make sure the item is a file and that you have write permission.")
                     )
                 }
             }
@@ -142,9 +142,9 @@ struct SSHErrorClassifier: Sendable {
         ]) {
             return error(
                 .hostKeyMismatch,
-                "Sunucu kimliği değişmiş",
-                "Kaydedilmiş host key ile sunucunun sunduğu anahtar uyuşmuyor.",
-                "Olası saldırı veya yeniden kurulum durumunu doğrulamadan known_hosts kaydını değiştirme."
+                String(localized: "Server identity has changed"),
+                String(localized: "The saved host key doesn't match the key the server presented."),
+                String(localized: "Don't change the known_hosts entry without ruling out a possible attack or server reinstall.")
             )
         }
         if containsAny(normalized, [
@@ -155,9 +155,9 @@ struct SSHErrorClassifier: Sendable {
         ]) {
             return error(
                 .hostKeyUnknown,
-                "Sunucu kimliği henüz güvenilir değil",
-                "Bu host için doğrulanmış bir known_hosts kaydı bulunamadı.",
-                "Fingerprint'i bağımsız bir kanaldan doğrulayıp normal terminal bağlantısında açıkça onayla."
+                String(localized: "Server identity isn't trusted yet"),
+                String(localized: "No verified known_hosts entry was found for this host."),
+                String(localized: "Verify the fingerprint through an independent channel, then explicitly approve it in a regular terminal connection.")
             )
         }
         if containsAny(normalized, [
@@ -168,9 +168,9 @@ struct SSHErrorClassifier: Sendable {
         ]) {
             return error(
                 .dnsResolution,
-                "DNS çözümlemesi başarısız",
-                "Hedef hostname bir IP adresine çözümlenemedi.",
-                "HostName yazımını, DNS/VPN bağlantısını ve ProxyJump ayarını kontrol et."
+                String(localized: "DNS resolution failed"),
+                String(localized: "The target hostname couldn't be resolved to an IP address."),
+                String(localized: "Check the HostName spelling, the DNS/VPN connection, and the ProxyJump setting.")
             )
         }
         if containsAny(normalized, [
@@ -181,9 +181,9 @@ struct SSHErrorClassifier: Sendable {
         ]) {
             return error(
                 .proxyJump,
-                "ProxyJump zinciri başarısız",
-                "Ara host veya ara hosttan hedefe yönlendirme kurulamadı.",
-                "ProxyJump alias'larını ve zincirdeki her hostun erişimini ayrı ayrı kontrol et."
+                String(localized: "ProxyJump chain failed"),
+                String(localized: "Couldn't establish the jump host, or the forwarding from the jump host to the target."),
+                String(localized: "Check each ProxyJump alias and every host's reachability in the chain individually.")
             )
         }
         if containsAny(normalized, [
@@ -193,17 +193,17 @@ struct SSHErrorClassifier: Sendable {
         ]) {
             return error(
                 .connectionTimeout,
-                "Bağlantı zaman aşımına uğradı",
-                "Hedef port süresi içinde yanıt vermedi.",
-                "Firewall, VPN, port ve ProxyJump erişimini kontrol et."
+                String(localized: "Connection timed out"),
+                String(localized: "The target port didn't respond in time."),
+                String(localized: "Check the firewall, VPN, port, and ProxyJump access.")
             )
         }
         if normalized.contains("connection refused") {
             return error(
                 .connectionRefused,
-                "Bağlantı reddedildi",
-                "Hedefe ulaşıldı ancak belirtilen port bağlantıyı kabul etmedi.",
-                "SSH servisinin çalıştığını ve Port ayarını kontrol et."
+                String(localized: "Connection refused"),
+                String(localized: "The target was reached, but the specified port refused the connection."),
+                String(localized: "Check that the SSH service is running and verify the Port setting.")
             )
         }
         if containsAny(normalized, [
@@ -215,9 +215,9 @@ struct SSHErrorClassifier: Sendable {
         ]) {
             return error(
                 .agentUnavailable,
-                "SSH agent anahtarı kullanılamıyor",
-                "Agent çalışmıyor, boş veya gerekli anahtarı imzalama için sunamıyor.",
-                "ssh-add ile agent durumunu kontrol et; özel anahtarı uygulamaya verme."
+                String(localized: "SSH agent key unavailable"),
+                String(localized: "The agent isn't running, is empty, or can't offer the required key for signing."),
+                String(localized: "Check the agent status with ssh-add; don't give the app your private key.")
             )
         }
         // "No such file" is one of the handful of status codes the SFTP protocol (v3)
@@ -228,26 +228,26 @@ struct SSHErrorClassifier: Sendable {
         if normalized.contains("no such file") {
             return error(
                 .remoteNotFound,
-                "Dosya veya klasör bulunamadı",
-                "Uzak yol artık mevcut değil — silinmiş veya taşınmış olabilir.",
-                "Klasör listesini yenileyip yolu yeniden kontrol et."
+                String(localized: "File or folder not found"),
+                String(localized: "The remote path no longer exists — it may have been deleted or moved."),
+                String(localized: "Refresh the folder listing and check the path again.")
             )
         }
         if normalized.contains("permission denied") {
             return error(
                 .permissionDenied,
-                "Kimlik doğrulama reddedildi",
-                "Sunucu sunulan kullanıcı veya anahtarı kabul etmedi.",
-                "User, IdentityFile ve SSH agent anahtarlarını kontrol et."
+                String(localized: "Authentication rejected"),
+                String(localized: "The server didn't accept the user or key that was presented."),
+                String(localized: "Check the User, IdentityFile, and SSH agent keys.")
             )
         }
         return error(
             .unknown,
-            "SSH işlemi başarısız",
+            String(localized: "SSH operation failed"),
             output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                ? "OpenSSH ayrıntılı bir hata mesajı vermedi."
+                ? String(localized: "OpenSSH didn't provide a detailed error message.")
                 : output.trimmingCharacters(in: .whitespacesAndNewlines),
-            "Tanılama raporundaki kontrolleri incele."
+            String(localized: "Review the checks in the diagnostic report.")
         )
     }
 

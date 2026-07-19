@@ -5,7 +5,7 @@ import SwiftUI
 /// first). Four phases in strict order — target selection, parameter
 /// values, preview, running — and nothing is composed or sent to `ssh`
 /// until the user has seen the exact resolved command list and host count
-/// on the preview screen and pressed "Çalıştır".
+/// on the preview screen and pressed "Run".
 struct RunbookRunSheet: View {
     let runbook: Runbook
     let availableConnections: [SSHConnectionTarget]
@@ -44,17 +44,17 @@ struct RunbookRunSheet: View {
                 case .running: runningView
                 }
             }
-            .navigationTitle(runbook.name.isEmpty ? "Runbook Çalıştır" : runbook.name)
+            .navigationTitle(runbook.name.isEmpty ? String(localized: "Run Runbook") : runbook.name)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(phase == .running ? "Kapat" : "İptal") {
+                    Button(phase == .running ? "Close" : "Cancel") {
                         if phase == .running { engine.cancel() }
                         onClose()
                     }
                 }
                 if phase == .parameters || phase == .preview {
                     ToolbarItem(placement: .navigation) {
-                        Button("Geri", action: goBack)
+                        Button("Back", action: goBack)
                     }
                 }
                 if phase != .running {
@@ -64,12 +64,12 @@ struct RunbookRunSheet: View {
                 }
             }
             .confirmationDialog(
-                "Bu runbook tehlikeli olarak işaretli veya tehlikeli bir komut kalıbı içeriyor. \(resolvedTargets.count) hostta çalıştırmak istediğine emin misin?",
+                "This runbook is marked dangerous or contains a dangerous command pattern. Are you sure you want to run it on \(resolvedTargets.count) hosts?",
                 isPresented: $showingDangerConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Çalıştır", role: .destructive, action: startRun)
-                Button("Vazgeç", role: .cancel) {}
+                Button("Run", role: .destructive, action: startRun)
+                Button("Cancel", role: .cancel) {}
             }
         }
         .frame(minWidth: 560, minHeight: 480)
@@ -82,14 +82,14 @@ struct RunbookRunSheet: View {
     private var nextButton: some View {
         switch phase {
         case .targets:
-            Button("İleri") {
+            Button("Next") {
                 phase = runbook.parameters.isEmpty ? .preview : .parameters
             }
             .disabled(resolvedTargets.isEmpty)
         case .parameters:
-            Button("İleri") { phase = .preview }
+            Button("Next") { phase = .preview }
         case .preview:
-            Button("Çalıştır (\(resolvedTargets.count) host)") {
+            Button("Run (\(resolvedTargets.count) hosts)") {
                 if isDangerousRun {
                     showingDangerConfirmation = true
                 } else {
@@ -175,10 +175,10 @@ struct RunbookRunSheet: View {
 
     private var targetSelectionView: some View {
         Form {
-            Section("Hedef türü") {
-                Picker("Hedef türü", selection: $targetMode) {
-                    Text("Tek host").tag(TargetMode.host)
-                    Text("Bağlantı grubu").tag(TargetMode.group)
+            Section("Target type") {
+                Picker("Target type", selection: $targetMode) {
+                    Text("Single host").tag(TargetMode.host)
+                    Text("Connection group").tag(TargetMode.group)
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
@@ -187,11 +187,11 @@ struct RunbookRunSheet: View {
             if targetMode == .host {
                 Section("Host") {
                     if availableConnections.isEmpty {
-                        Text("Config içinde somut bir host bulunamadı.")
+                        Text("No concrete host found in the config.")
                             .foregroundStyle(.secondary)
                     } else {
                         Picker("Host", selection: $selectedAlias) {
-                            Text("Seçiniz...").tag(String?.none)
+                            Text("Select…").tag(String?.none)
                             ForEach(availableConnections) { connection in
                                 Text(connection.alias).tag(String?.some(connection.alias))
                             }
@@ -200,13 +200,13 @@ struct RunbookRunSheet: View {
                     }
                 }
             } else {
-                Section("Bağlantı grubu") {
+                Section("Connection group") {
                     if connectionGroups.isEmpty {
-                        Text("Tanımlı bağlantı grubu yok.")
+                        Text("No connection group defined.")
                             .foregroundStyle(.secondary)
                     } else {
-                        Picker("Grup", selection: $selectedGroupID) {
-                            Text("Seçiniz...").tag(UUID?.none)
+                        Picker("Group", selection: $selectedGroupID) {
+                            Text("Select…").tag(UUID?.none)
                             ForEach(connectionGroups) { group in
                                 Text(group.name).tag(UUID?.some(group.id))
                             }
@@ -216,7 +216,7 @@ struct RunbookRunSheet: View {
                 }
 
                 if let group = selectedGroup {
-                    Section("Grup üyeleri (\(group.aliases.count) host)") {
+                    Section("Group members (\(group.aliases.count) hosts)") {
                         ForEach(group.aliases, id: \.self) { alias in
                             Text(alias).font(.body.monospaced())
                         }
@@ -231,10 +231,10 @@ struct RunbookRunSheet: View {
 
     private var parameterFormView: some View {
         Form {
-            Section("Parametreler") {
+            Section("Parameters") {
                 ForEach(runbook.parameters) { parameter in
                     TextField(
-                        parameter.name.isEmpty ? "(isimsiz)" : parameter.name,
+                        parameter.name.isEmpty ? String(localized: "(unnamed)") : parameter.name,
                         text: Binding(
                             get: { parameterValues[parameter.id] ?? parameter.defaultValue ?? "" },
                             set: { parameterValues[parameter.id] = $0 }
@@ -244,7 +244,7 @@ struct RunbookRunSheet: View {
                 }
             }
 
-            Text("Bu değerler yalnızca bu çalıştırma için kullanılır; runbook dosyasına kaydedilmez.")
+            Text("These values are only used for this run; they aren't saved to the runbook file.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -255,13 +255,13 @@ struct RunbookRunSheet: View {
 
     private var previewView: some View {
         Form {
-            Section("Hedefler (\(resolvedTargets.count) host)") {
+            Section("Targets (\(resolvedTargets.count) hosts)") {
                 ForEach(resolvedTargets, id: \.self) { alias in
                     Text(alias).font(.body.monospaced())
                 }
             }
 
-            Section("Çalıştırılacak komutlar") {
+            Section("Commands to run") {
                 switch composedSteps {
                 case let .success(steps):
                     ForEach(Array(steps.enumerated()), id: \.offset) { index, entry in
@@ -273,13 +273,13 @@ struct RunbookRunSheet: View {
                                     .font(.body.monospaced())
                                     .textSelection(.enabled)
                                 if RunbookDangerDetector.isDangerous(entry.command) {
-                                    Label("Tehlikeli", systemImage: "exclamationmark.triangle.fill")
+                                    Label("Dangerous", systemImage: "exclamationmark.triangle.fill")
                                         .labelStyle(.iconOnly)
                                         .foregroundStyle(.orange)
                                 }
                             }
                             if entry.step.continueOnError {
-                                Text("Başarısız olursa bu hostta sonraki adımlara devam eder.")
+                                Text("If this fails, continues with the next steps on this host.")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -291,9 +291,9 @@ struct RunbookRunSheet: View {
                 }
             }
 
-            Section("Eşzamanlılık") {
+            Section("Concurrency") {
                 Stepper(
-                    "Aynı anda en fazla \(concurrencyLimit) host",
+                    "Up to \(concurrencyLimit) hosts at a time",
                     value: $concurrencyLimit,
                     in: RunbookExecutionEngine.concurrencyLimitRange
                 )
@@ -301,7 +301,7 @@ struct RunbookRunSheet: View {
 
             if isDangerousRun {
                 Label(
-                    "Bu runbook tehlikeli olarak işaretli veya tehlikeli bir komut kalıbı içeriyor. Çalıştırmadan önce ek onay istenecek.",
+                    "This runbook is marked dangerous or contains a dangerous command pattern. Extra confirmation will be required before running.",
                     systemImage: "exclamationmark.triangle.fill"
                 )
                 .foregroundStyle(.orange)
@@ -335,9 +335,9 @@ struct RunbookRunSheet: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 if engine.isRunning {
-                    Button("İptal Et", role: .destructive) { engine.cancel() }
+                    Button("Cancel run", role: .destructive) { engine.cancel() }
                 } else if hasFailedHosts {
-                    Button("Başarısızları tekrar dene") { engine.retryFailedHosts() }
+                    Button("Retry failed") { engine.retryFailedHosts() }
                 }
             }
             .padding()
@@ -361,9 +361,9 @@ struct RunbookRunSheet: View {
         }.count
 
         if engine.isRunning {
-            return "Çalışıyor... (\(succeeded + failed)/\(total) tamamlandı)"
+            return String(localized: "Running… (\(succeeded + failed)/\(total) completed)")
         }
-        return "\(succeeded)/\(total) başarılı, \(failed)/\(total) başarısız"
+        return String(localized: "\(succeeded)/\(total) succeeded, \(failed)/\(total) failed")
     }
 
     private var hasFailedHosts: Bool {
@@ -419,9 +419,9 @@ private struct RunbookHostRow: View {
 
     private var statusText: String {
         switch result.status {
-        case .pending: return "Bekliyor"
-        case let .running(step, total): return "Adım \(step)/\(total)"
-        case .succeeded: return "Başarılı"
+        case .pending: return String(localized: "Waiting")
+        case let .running(step, total): return String(localized: "Step \(step)/\(total)")
+        case .succeeded: return String(localized: "Succeeded")
         case let .failed(message): return message
         }
     }
@@ -434,7 +434,7 @@ private struct RunbookHostOutputView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                Text(result.output.isEmpty ? "Çıktı yok." : result.output)
+                Text(result.output.isEmpty ? String(localized: "No output.") : result.output)
                     .font(.system(.body, design: .monospaced))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -443,7 +443,7 @@ private struct RunbookHostOutputView: View {
             .navigationTitle(result.alias)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Kapat") { dismiss() }
+                    Button("Close") { dismiss() }
                 }
             }
         }

@@ -17,8 +17,8 @@ struct StartupFlowLaunchPreviewSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             SheetHeader(
-                title: items.count == 1 ? "Bağlantı başlangıç akışı" : "Grup başlangıç akışları",
-                subtitle: Text("SSH bağlantısı açılmadan önce otomatik çalışacak adımları kontrol et.").font(.caption),
+                title: items.count == 1 ? String(localized: "Connection startup flow") : String(localized: "Group startup flows"),
+                subtitle: Text("Review the steps that will run automatically before the SSH connection opens.").font(.caption),
                 onClose: { dismiss() }
             )
 
@@ -41,7 +41,7 @@ struct StartupFlowLaunchPreviewSheet: View {
                             }
                         }
                     } else {
-                        Text("Otomatik başlangıç akışı yok")
+                        Text("No automatic startup flow")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -53,17 +53,17 @@ struct StartupFlowLaunchPreviewSheet: View {
 
             HStack {
                 Label(
-                    "Tüm başlangıç akışları tek SSH bootstrap komutu olarak çalışır.",
+                    "All startup flows run as a single SSH bootstrap command.",
                     systemImage: "shield.lefthalf.filled"
                 )
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 Spacer()
-                Button(items.count == 1 ? "Bu sefer atla" : "Tümünü bu sefer atla") {
+                Button(items.count == 1 ? "Skip this time" : "Skip all this time") {
                     dismiss()
                     onSkip()
                 }
-                Button("Bağlan ve çalıştır") {
+                Button("Connect and run") {
                     dismiss()
                     onRun()
                 }
@@ -82,7 +82,7 @@ struct StartupFlowOrphanSection: View {
 
     var body: some View {
         if !records.isEmpty {
-            Section("Yetim başlangıç akışları") {
+            Section("Orphaned startup flows") {
                 ForEach(records) { record in
                     Menu {
                         ForEach(aliases, id: \.self) { alias in
@@ -91,7 +91,7 @@ struct StartupFlowOrphanSection: View {
                     } label: {
                         Label(record.profile.alias, systemImage: "link.badge.plus")
                     }
-                    .help("Config dışında kaybolan alias için yeni bir bağlantı seç")
+                    .help("Select a new connection for an alias that's missing from the config")
                 }
             }
         }

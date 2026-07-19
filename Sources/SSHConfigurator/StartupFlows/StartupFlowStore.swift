@@ -72,13 +72,13 @@ enum StartupFlowLibraryError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .invalidAlias:
-            "Başlangıç akışı somut bir SSH alias'ına bağlanmalıdır."
+            String(localized: "The startup flow must be linked to a concrete SSH alias.")
         case let .aliasAlreadyLinked(alias):
-            "\(alias) alias'ına zaten başka bir başlangıç profili bağlı."
+            String(localized: "Another startup profile is already linked to the alias \(alias).")
         case .profileNotFound:
-            "Başlangıç profili bulunamadı."
+            String(localized: "Startup profile not found.")
         case .missingPendingFingerprint:
-            "Config değişikliğine bağlı başlangıç profili için hedef config fingerprint'i bulunamadı."
+            String(localized: "No target config fingerprint found for the startup profile tied to a config change.")
         }
     }
 }

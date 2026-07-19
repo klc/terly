@@ -37,9 +37,12 @@ final class AskpassHelperScriptTests: XCTestCase {
             stubMode: .answer("yes")
         )
 
-        // Routed to the approve/reject dialog, not the password one.
-        XCTAssertTrue(result.capturedAppleScript.contains("Evet"))
-        XCTAssertTrue(result.capturedAppleScript.contains("Hayır"))
+        // Routed to the approve/reject dialog, not the password one. Button
+        // text itself is read from TERLY_ASKPASS_YES/NO at runtime (so it can
+        // be localized by the app), so the script only ever hands osascript
+        // a reference to those env vars, never literal button text.
+        XCTAssertTrue(result.capturedAppleScript.contains("ASKPASS_YES"))
+        XCTAssertTrue(result.capturedAppleScript.contains("ASKPASS_NO"))
         XCTAssertFalse(result.capturedAppleScript.contains("hidden answer"))
 
         XCTAssertEqual(result.exitCode, 0)
@@ -48,8 +51,8 @@ final class AskpassHelperScriptTests: XCTestCase {
     }
 
     func testHostKeyPromptNeverAutoAnswersYes() throws {
-        // Even though the confirmation dialog's *default* button is "Hayır"
-        // (fail closed), the script must not print anything on its own — it
+        // Even though the confirmation dialog's *default* button is the "no"
+        // one (fail closed), the script must not print anything on its own — it
         // only prints whatever the (stubbed) dialog interaction produced.
         let harness = try Harness()
         defer { harness.cleanUp() }
@@ -73,7 +76,7 @@ final class AskpassHelperScriptTests: XCTestCase {
         )
 
         XCTAssertTrue(result.capturedAppleScript.contains("hidden answer"))
-        XCTAssertFalse(result.capturedAppleScript.contains("Evet"))
+        XCTAssertFalse(result.capturedAppleScript.contains("ASKPASS_YES"))
 
         XCTAssertEqual(result.exitCode, 0)
         XCTAssertEqual(result.stdout, "s3cr3t\n")

@@ -186,7 +186,7 @@ struct QuickAccessEntry: Equatable, Identifiable, Sendable {
             groupID: group.id,
             alias: nil,
             title: group.name,
-            subtitle: "\(group.aliases.count) bağlantı",
+            subtitle: String(localized: "\(group.aliases.count) connections"),
             searchFields: [group.name],
             isFavorite: metadata.isFavorite,
             lastUsedAt: metadata.lastUsedAt

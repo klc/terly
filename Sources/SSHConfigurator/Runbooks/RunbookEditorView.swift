@@ -28,20 +28,20 @@ struct RunbookEditorView: View {
         NavigationStack {
             Form {
                 Section("Runbook") {
-                    TextField("Ad", text: $runbook.name)
+                    TextField("Name", text: $runbook.name)
                         .editorFieldStyle()
-                    TextField("Açıklama (isteğe bağlı)", text: $runbook.description, axis: .vertical)
+                    TextField("Description (optional)", text: $runbook.description, axis: .vertical)
                         .lineLimit(1 ... 3)
                         .editorFieldStyle()
-                    Toggle("Tehlikeli olarak işaretle", isOn: $runbook.isDangerous)
-                    Text("İşaretlenmemiş olsa da `rm -rf`, `shutdown` gibi tehlikeli komut kalıpları içeren adımlar çalıştırma önizlemesinde otomatik olarak uyarılır.")
+                    Toggle("Mark as dangerous", isOn: $runbook.isDangerous)
+                    Text("Even when unmarked, steps containing dangerous command patterns like `rm -rf` or `shutdown` are automatically flagged in the run preview.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
-                Section("Adımlar") {
+                Section("Steps") {
                     if runbook.steps.isEmpty {
-                        Text("Henüz adım eklenmedi.")
+                        Text("No steps added yet.")
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach($runbook.steps) { $step in
@@ -58,13 +58,13 @@ struct RunbookEditorView: View {
                     Button {
                         runbook.steps.append(RunbookStep())
                     } label: {
-                        Label("Adım ekle", systemImage: "plus")
+                        Label("Add step", systemImage: "plus")
                     }
                 }
 
-                Section("Parametreler") {
+                Section("Parameters") {
                     if runbook.parameters.isEmpty {
-                        Text("Komutlarda `{{ad}}` şeklinde kullanılacak parametre yok.")
+                        Text("No parameters to use as `{{name}}` in commands.")
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach($runbook.parameters) { $parameter in
@@ -78,10 +78,10 @@ struct RunbookEditorView: View {
                     Button {
                         runbook.parameters.append(RunbookParameter())
                     } label: {
-                        Label("Parametre ekle", systemImage: "plus")
+                        Label("Add parameter", systemImage: "plus")
                     }
 
-                    Text("Parola veya token gibi sırları varsayılan değere yazma — parametre değerleri her çalıştırmada ayrıca sorulur ve kalıcı saklanmaz.")
+                    Text("Don't put secrets like passwords or tokens in a default value — parameter values are asked for separately on every run and aren't stored persistently.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -93,7 +93,7 @@ struct RunbookEditorView: View {
                         }) {
                             HStack {
                                 Spacer()
-                                Text("Runbook'u Sil")
+                                Text("Delete Runbook")
                                 Spacer()
                             }
                         }
@@ -101,25 +101,25 @@ struct RunbookEditorView: View {
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(trimmedName.isEmpty ? "Yeni Runbook" : "Runbook Düzenle")
+            .navigationTitle(trimmedName.isEmpty ? "New Runbook" : "Edit Runbook")
             .confirmationDialog(
-                "Runbook'u silmek istediğinize emin misiniz?",
+                "Are you sure you want to delete this runbook?",
                 isPresented: $showingDeleteConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Sil", role: .destructive) {
+                Button("Delete", role: .destructive) {
                     onDelete?()
                 }
-                Button("Vazgeç", role: .cancel) {}
+                Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Bu işlem geri alınamaz.")
+                Text("This action cannot be undone.")
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("İptal", action: onCancel)
+                    Button("Cancel", action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Kaydet") {
+                    Button("Save") {
                         var trimmed = runbook
                         trimmed.name = trimmedName
                         onSave(trimmed)
@@ -160,35 +160,35 @@ private struct RunbookStepEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label("Komut", systemImage: "terminal")
+                Label("Command", systemImage: "terminal")
                     .font(.subheadline.weight(.semibold))
                 Spacer()
-                Button("Yukarı taşı", systemImage: "chevron.up", action: onMoveUp)
+                Button("Move up", systemImage: "chevron.up", action: onMoveUp)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
-                    .help("Adımı yukarı taşı")
-                    .accessibilityLabel("Adımı yukarı taşı")
-                Button("Aşağı taşı", systemImage: "chevron.down", action: onMoveDown)
+                    .help("Move step up")
+                    .accessibilityLabel("Move step up")
+                Button("Move down", systemImage: "chevron.down", action: onMoveDown)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
-                    .help("Adımı aşağı taşı")
-                    .accessibilityLabel("Adımı aşağı taşı")
-                Button("Adımı sil", systemImage: "trash", role: .destructive, action: onDelete)
+                    .help("Move step down")
+                    .accessibilityLabel("Move step down")
+                Button("Delete step", systemImage: "trash", role: .destructive, action: onDelete)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
-                    .help("Adımı sil")
-                    .accessibilityLabel("Adımı sil")
+                    .help("Delete step")
+                    .accessibilityLabel("Delete step")
             }
 
-            TextField("Komut", text: $step.command, prompt: Text("örn. apt-get install -y {{package}}"), axis: .vertical)
+            TextField("Command", text: $step.command, prompt: Text("e.g. apt-get install -y {{package}}"), axis: .vertical)
                 .font(.body.monospaced())
                 .lineLimit(1 ... 4)
                 .editorFieldStyle()
 
-            Toggle("Başarısız olursa bu hostta sonraki adımlara devam et", isOn: $step.continueOnError)
+            Toggle("Continue with the next steps on this host if this fails", isOn: $step.continueOnError)
 
             if RunbookDangerDetector.isDangerous(step.command) {
-                Label("Bu komut tehlikeli bir kalıp içeriyor.", systemImage: "exclamationmark.triangle.fill")
+                Label("This command contains a dangerous pattern.", systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
                     .font(.caption)
             }
@@ -204,11 +204,11 @@ private struct RunbookParameterEditor: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                TextField("Parametre adı", text: $parameter.name, prompt: Text("örn. version"))
+                TextField("Parameter name", text: $parameter.name, prompt: Text("e.g. version"))
                     .font(.body.monospaced())
                     .editorFieldStyle()
                 TextField(
-                    "Varsayılan değer (isteğe bağlı)",
+                    "Default value (optional)",
                     text: Binding(
                         get: { parameter.defaultValue ?? "" },
                         set: { parameter.defaultValue = $0.isEmpty ? nil : $0 }
@@ -218,11 +218,11 @@ private struct RunbookParameterEditor: View {
                 .editorFieldStyle()
             }
             Spacer()
-            Button("Parametreyi sil", systemImage: "trash", role: .destructive, action: onDelete)
+            Button("Delete parameter", systemImage: "trash", role: .destructive, action: onDelete)
                 .labelStyle(.iconOnly)
                 .buttonStyle(.borderless)
-                .help("Parametreyi sil")
-                .accessibilityLabel("Parametreyi sil")
+                .help("Delete parameter")
+                .accessibilityLabel("Delete parameter")
         }
         .padding(.vertical, 4)
     }

@@ -10,9 +10,9 @@ struct SnippetListView: View {
         VStack(spacing: 0) {
             if library.snippets.isEmpty {
                 ContentUnavailableView(
-                    "Snippet Bulunamadı",
+                    "No Snippets Found",
                     systemImage: "text.badge.plus",
-                    description: Text("Sık kullandığın komut veya metinleri key/value olarak kaydet. Terminalde ⌘S ile ara ve ekle.")
+                    description: Text("Save the commands or text you use often as key/value pairs. Search and insert them in the terminal with ⌘S.")
                 )
             } else {
                 List {
@@ -27,31 +27,31 @@ struct SnippetListView: View {
             }
         }
         .confirmationDialog(
-            "Snippet'i silmek istediğinize emin misiniz?",
+            "Are you sure you want to delete this snippet?",
             isPresented: Binding(
                 get: { pendingDeleteOffsets != nil },
                 set: { if !$0 { pendingDeleteOffsets = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Sil", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let offsets = pendingDeleteOffsets {
                     library.remove(at: offsets)
                 }
                 pendingDeleteOffsets = nil
             }
-            Button("Vazgeç", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 pendingDeleteOffsets = nil
             }
         } message: {
-            Text("Bu işlem geri alınamaz.")
+            Text("This action cannot be undone.")
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: {
                     editingSnippet = Snippet()
                 }) {
-                    Label("Snippet Ekle", systemImage: "plus")
+                    Label("Add Snippet", systemImage: "plus")
                 }
             }
         }
@@ -71,7 +71,7 @@ struct SnippetListView: View {
                 }
             )
         }
-        .navigationTitle("Snippet'ler")
+        .navigationTitle("Snippets")
     }
 }
 
@@ -83,7 +83,7 @@ struct SnippetRowView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Text(snippet.key.isEmpty ? "(isimsiz)" : snippet.key)
+                    Text(snippet.key.isEmpty ? String(localized: "(unnamed)") : snippet.key)
                         .font(.headline)
                     if snippet.isSecret {
                         Image(systemName: "lock.fill")
@@ -103,8 +103,8 @@ struct SnippetRowView: View {
                 Image(systemName: "pencil")
             }
             .buttonStyle(.plain)
-            .help("Snippet'i düzenle")
-            .accessibilityLabel("\(snippetDisplayName) snippet'ini düzenle")
+            .help("Edit snippet")
+            .accessibilityLabel("Edit the \(snippetDisplayName) snippet")
         }
         .padding(.vertical, 8)
         .contentShape(Rectangle())
@@ -112,6 +112,6 @@ struct SnippetRowView: View {
     }
 
     private var snippetDisplayName: String {
-        snippet.key.isEmpty ? "(isimsiz)" : snippet.key
+        snippet.key.isEmpty ? String(localized: "(unnamed)") : snippet.key
     }
 }

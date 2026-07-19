@@ -107,7 +107,7 @@ final class RunbookExecutionEngine: ObservableObject {
         isRunning = false
         for alias in orderedAliases {
             guard let status = results[alias]?.status, !status.isTerminal else { continue }
-            results[alias]?.status = .failed("İptal edildi.")
+            results[alias]?.status = .failed(String(localized: "Cancelled."))
         }
     }
 
@@ -152,7 +152,7 @@ final class RunbookExecutionEngine: ObservableObject {
 
         for (index, step) in runbook.steps.enumerated() {
             if Task.isCancelled {
-                failureMessage = "İptal edildi."
+                failureMessage = String(localized: "Cancelled.")
                 break
             }
             updateStatus(alias: alias, .running(step: index + 1, totalSteps: totalSteps))
@@ -161,12 +161,12 @@ final class RunbookExecutionEngine: ObservableObject {
             do {
                 composedCommand = try RunbookCommandComposer.compose(step: step, values: values)
             } catch {
-                appendOutput(alias: alias, "[Adım \(index + 1)] \(error.localizedDescription)")
+                appendOutput(alias: alias, String(localized: "[Step \(index + 1)] \(error.localizedDescription)"))
                 failureMessage = error.localizedDescription
                 break
             }
 
-            appendOutput(alias: alias, "[Adım \(index + 1)] \(step.command)")
+            appendOutput(alias: alias, String(localized: "[Step \(index + 1)] \(step.command)"))
 
             let request = SSHProcessRequest(
                 executableURL: sshURL,
@@ -181,7 +181,7 @@ final class RunbookExecutionEngine: ObservableObject {
                     appendOutput(alias: alias, combined)
                 }
                 if result.terminationStatus != 0 {
-                    let message = "Adım \(index + 1) çıkış kodu \(result.terminationStatus) ile başarısız oldu."
+                    let message = String(localized: "Step \(index + 1) failed with exit code \(result.terminationStatus).")
                     if step.continueOnError {
                         appendOutput(alias: alias, message)
                     } else {
@@ -191,7 +191,7 @@ final class RunbookExecutionEngine: ObservableObject {
                 }
             } catch {
                 let message = error.localizedDescription
-                appendOutput(alias: alias, "[Adım \(index + 1)] \(message)")
+                appendOutput(alias: alias, String(localized: "[Step \(index + 1)] \(message)"))
                 if step.continueOnError {
                     continue
                 } else {

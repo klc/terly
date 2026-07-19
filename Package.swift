@@ -11,12 +11,9 @@ let package = Package(
         .executable(name: "SSHConfigurator", targets: ["SSHConfigurator"]),
     ],
     dependencies: [
-        // Fork of upstream 1.14.0 carrying the Metal BufferPool memory-growth
-        // fix (unbounded IOAccelerator regions under htop-like workloads).
-        // Drop back to upstream once the fix lands there.
         .package(
-            url: "https://github.com/klc/SwiftTerm.git",
-            revision: "99f1bc935fd9937cf7361fd56d3cf89b082e0112"
+            url: "https://github.com/migueldeicaza/SwiftTerm.git",
+            from: "1.15.0"
         ),
         .package(
             url: "https://github.com/sparkle-project/Sparkle.git",

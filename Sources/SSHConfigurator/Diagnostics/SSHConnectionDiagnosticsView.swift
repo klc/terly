@@ -74,14 +74,14 @@ struct SSHConnectionDiagnosticsView: View {
             SheetHeader(
                 systemImage: "stethoscope",
                 iconFont: .title2,
-                title: "Bağlantı Tanılama ve Güven Merkezi",
+                title: String(localized: "Connection Diagnostics and Trust Center"),
                 subtitle: Text(alias).font(.caption.monospaced()),
                 onClose: { dismiss() }
             ) {
                 if model.isRunning {
-                    Button("İptal", role: .cancel) { model.cancel() }
+                    Button("Cancel", role: .cancel) { model.cancel() }
                 } else if model.report != nil {
-                    Button("Yeniden çalıştır", systemImage: "arrow.clockwise") { model.run() }
+                    Button("Run again", systemImage: "arrow.clockwise") { model.run() }
                 }
             }
 
@@ -93,9 +93,9 @@ struct SSHConnectionDiagnosticsView: View {
                 } else if model.isRunning {
                     VStack(spacing: 14) {
                         ProgressView()
-                        Text("DNS, host güveni, agent ve uçtan uca bağlantı kontrol ediliyor…")
+                        Text("Checking DNS, host trust, agent, and end-to-end connection…")
                             .foregroundStyle(.secondary)
-                        Text("Her ağ adımı timeout ile sınırlıdır. İptal, çalışan alt süreci sonlandırır.")
+                        Text("Each network step is limited by a timeout. Cancelling ends the running subprocess.")
                             .font(.footnote)
                             .foregroundStyle(.tertiary)
                     }
@@ -104,12 +104,12 @@ struct SSHConnectionDiagnosticsView: View {
                     reportView(report)
                 } else {
                     ContentUnavailableView(
-                        "Tanılama hazır",
+                        "Diagnostics ready",
                         systemImage: "checkmark.shield",
-                        description: Text("Bağlantı kontrollerini başlatmak için aşağıdaki düğmeyi kullan.")
+                        description: Text("Use the button below to start the connection checks.")
                     )
                     .overlay(alignment: .bottom) {
-                        Button("Bağlantıyı test et") { model.run() }
+                        Button("Test connection") { model.run() }
                             .buttonStyle(.borderedProminent)
                             .keyboardShortcut(.defaultAction)
                             .padding(32)
@@ -132,11 +132,11 @@ struct SSHConnectionDiagnosticsView: View {
 
     private var configEvaluationWarning: some View {
         ContentUnavailableView {
-            Label("Config değerlendirme onayı gerekli", systemImage: "exclamationmark.triangle.fill")
+            Label("Config evaluation approval required", systemImage: "exclamationmark.triangle.fill")
         } description: {
-            Text("\(executionPolicy.riskDescription ?? "Config yerel komut çalıştırabilir.") Tanılama başlamadan önce bunu açıkça onaylamalısın.")
+            Text("\(executionPolicy.riskDescription ?? String(localized: "The config can run a local command.")) You must explicitly approve this before diagnostics can start.")
         } actions: {
-            Button("Config'i değerlendirerek tanıla") {
+            Button("Diagnose while evaluating config") {
                 approvedMatchExec = true
                 model.run()
             }
@@ -149,13 +149,13 @@ struct SSHConnectionDiagnosticsView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Label(
-                        report.hasFailures ? "Sorun bulundu" : "Kritik sorun bulunmadı",
+                        report.hasFailures ? "Issue found" : "No critical issues found",
                         systemImage: report.hasFailures ? "xmark.octagon.fill" : "checkmark.shield.fill"
                     )
                     .font(.title2.bold())
                     .foregroundStyle(report.hasFailures ? .red : .green)
                     Spacer()
-                    Button(didCopyReport ? "Kopyalandı" : "Redakte raporu kopyala", systemImage: "doc.on.doc") {
+                    Button(didCopyReport ? "Copied" : "Copy redacted report", systemImage: "doc.on.doc") {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(report.redactedText, forType: .string)
                         didCopyReport = true
@@ -172,7 +172,7 @@ struct SSHConnectionDiagnosticsView: View {
                     keySetupSuggestion
                 }
 
-                DisclosureGroup("Çözümlenmiş SSH ayarları (\(report.resolvedSettings.count))") {
+                DisclosureGroup("Resolved SSH settings (\(report.resolvedSettings.count))") {
                     LazyVStack(alignment: .leading, spacing: 8) {
                         ForEach(report.resolvedSettings) { setting in
                             VStack(alignment: .leading, spacing: 3) {
@@ -206,12 +206,12 @@ struct SSHConnectionDiagnosticsView: View {
                 .font(.title3)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 4) {
-                Text("Agent'ta kullanılabilir bir anahtar yok ve sunucu kimlik doğrulamayı reddetti.")
+                Text("There's no usable key in the agent, and the server rejected authentication.")
                     .font(.subheadline.weight(.semibold))
-                Text("Yeni bir anahtar üretip sunucuya kopyalamak için kurulum sihirbazını açabilirsin.")
+                Text("You can open the setup wizard to generate a new key and copy it to the server.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                Button("Anahtar Kurulumu Sihirbazını Aç") {
+                Button("Open Key Setup Wizard") {
                     showingKeySetupWizard = true
                 }
                 .buttonStyle(.bordered)
@@ -225,7 +225,7 @@ struct SSHConnectionDiagnosticsView: View {
     private func displayValue(for setting: SSHResolvedSetting) -> String {
         switch setting.key {
         case "localcommand", "remotecommand", "proxycommand":
-            return "<güvenlik nedeniyle gizlendi>"
+            return String(localized: "<hidden for security>")
         default:
             return setting.value
         }

@@ -17,7 +17,7 @@ struct SyncApplyPreviewView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(title: "Uygulanacak değişiklikler", onClose: onClose)
+            SheetHeader(title: String(localized: "Changes to Apply"), onClose: onClose)
 
             Divider()
 
@@ -33,15 +33,15 @@ struct SyncApplyPreviewView: View {
 
                 if let selectedDiff {
                     HStack(spacing: 0) {
-                        SyncDiffColumn(title: "Mevcut (yerel)", source: selectedDiff.currentContent)
+                        SyncDiffColumn(title: String(localized: "Current (local)"), source: selectedDiff.currentContent)
                         Divider()
-                        SyncDiffColumn(title: "Gelen (uzak)", source: selectedDiff.incomingContent)
+                        SyncDiffColumn(title: String(localized: "Incoming (remote)"), source: selectedDiff.incomingContent)
                     }
                 } else {
                     ContentUnavailableView(
-                        "Değişiklik yok",
+                        "No Changes",
                         systemImage: "checkmark.circle",
-                        description: Text("İncelenecek bir şey kalmadı.")
+                        description: Text("Nothing left to review.")
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -65,7 +65,7 @@ private struct SyncDiffColumn: View {
             Divider()
 
             ScrollView([.horizontal, .vertical]) {
-                Text(source.isEmpty ? "(boş / yok)" : source)
+                Text(source.isEmpty ? String(localized: "(empty / none)") : source)
                     .font(.system(.body, design: .monospaced))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)

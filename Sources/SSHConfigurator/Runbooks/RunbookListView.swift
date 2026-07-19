@@ -13,9 +13,9 @@ struct RunbookListView: View {
         VStack(spacing: 0) {
             if library.runbooks.isEmpty {
                 ContentUnavailableView(
-                    "Runbook Bulunamadı",
+                    "No Runbooks Found",
                     systemImage: "list.bullet.rectangle",
-                    description: Text("Birden çok sunucuda çalıştırmak istediğin komut dizilerini adım adım kaydet.")
+                    description: Text("Save the command sequences you want to run on multiple servers, step by step.")
                 )
             } else {
                 List {
@@ -34,31 +34,31 @@ struct RunbookListView: View {
             }
         }
         .confirmationDialog(
-            "Runbook'u silmek istediğinize emin misiniz?",
+            "Are you sure you want to delete this runbook?",
             isPresented: Binding(
                 get: { pendingDeleteOffsets != nil },
                 set: { if !$0 { pendingDeleteOffsets = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Sil", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let offsets = pendingDeleteOffsets {
                     library.remove(at: offsets)
                 }
                 pendingDeleteOffsets = nil
             }
-            Button("Vazgeç", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 pendingDeleteOffsets = nil
             }
         } message: {
-            Text("Bu işlem geri alınamaz.")
+            Text("This action cannot be undone.")
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: {
                     editingRunbook = Runbook()
                 }) {
-                    Label("Runbook Ekle", systemImage: "plus")
+                    Label("Add Runbook", systemImage: "plus")
                 }
             }
         }
@@ -86,7 +86,7 @@ struct RunbookListView: View {
                 onClose: { runningRunbook = nil }
             )
         }
-        .navigationTitle("Runbook'lar")
+        .navigationTitle("Runbooks")
     }
 }
 
@@ -99,17 +99,17 @@ private struct RunbookRowView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Text(runbook.name.isEmpty ? "(isimsiz)" : runbook.name)
+                    Text(runbook.name.isEmpty ? String(localized: "(unnamed)") : runbook.name)
                         .font(.headline)
                     if runbook.isDangerous || runbook.steps.contains(where: { RunbookDangerDetector.isDangerous($0.command) }) {
-                        Label("Tehlikeli", systemImage: "exclamationmark.triangle.fill")
+                        Label("Dangerous", systemImage: "exclamationmark.triangle.fill")
                             .labelStyle(.iconOnly)
                             .font(.caption)
                             .foregroundStyle(.orange)
-                            .help("Bu runbook tehlikeli olarak işaretli veya tehlikeli bir komut kalıbı içeriyor.")
+                            .help("This runbook is marked dangerous or contains a dangerous command pattern.")
                     }
                 }
-                Text("\(runbook.steps.count) adım" + (runbook.description.isEmpty ? "" : " · \(runbook.description)"))
+                Text(stepsSummaryText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -118,18 +118,18 @@ private struct RunbookRowView: View {
             Spacer()
 
             Button(action: onRun) {
-                Label("Çalıştır", systemImage: "play.fill")
+                Label("Run", systemImage: "play.fill")
             }
             .buttonStyle(.borderless)
             .disabled(runbook.steps.isEmpty)
-            .accessibilityLabel("\(runbookDisplayName) runbook'unu çalıştır")
+            .accessibilityLabel("Run the \(runbookDisplayName) runbook")
 
             Button(action: onEdit) {
                 Image(systemName: "pencil")
             }
             .buttonStyle(.plain)
-            .help("Runbook'u düzenle")
-            .accessibilityLabel("\(runbookDisplayName) runbook'unu düzenle")
+            .help("Edit runbook")
+            .accessibilityLabel("Edit the \(runbookDisplayName) runbook")
         }
         .padding(.vertical, 8)
         .contentShape(Rectangle())
@@ -137,6 +137,12 @@ private struct RunbookRowView: View {
     }
 
     private var runbookDisplayName: String {
-        runbook.name.isEmpty ? "(isimsiz)" : runbook.name
+        runbook.name.isEmpty ? String(localized: "(unnamed)") : runbook.name
+    }
+
+    private var stepsSummaryText: String {
+        let stepsPart = String(localized: "\(runbook.steps.count) steps")
+        guard !runbook.description.isEmpty else { return stepsPart }
+        return "\(stepsPart) · \(runbook.description)"
     }
 }

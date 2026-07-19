@@ -12,7 +12,7 @@ struct UpdateSettingsView: View {
         Form {
             Section {
                 HStack(spacing: 8) {
-                    Button("Güncellemeleri Denetle") {
+                    Button("Check for Updates") {
                         guard viewModel.isUpdateChannelConfigured else { return }
                         isChecking = true
                         viewModel.checkForUpdates()
@@ -26,16 +26,16 @@ struct UpdateSettingsView: View {
                 }
 
                 if !viewModel.isUpdateChannelConfigured {
-                    Label("Güncelleme kanalı henüz yapılandırılmadı.", systemImage: "exclamationmark.triangle")
+                    Label("The update channel hasn't been configured yet.", systemImage: "exclamationmark.triangle")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
-                Toggle("Otomatik denetle", isOn: $viewModel.automaticallyChecksForUpdates)
+                Toggle("Check automatically", isOn: $viewModel.automaticallyChecksForUpdates)
             } header: {
-                Text("Güncellemeler")
+                Text("Updates")
             } footer: {
-                Text("Uygulama açık kaldığı sürece arka planda otomatik olarak yeni sürüm denetlenir.")
+                Text("New versions are checked for automatically in the background while the app is open.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -492,7 +492,7 @@ final class StartupFlowStoreTests: XCTestCase {
         XCTAssertEqual(
             StartupFlowEditingPolicy.availability(for: ["*.example.com", "!blocked"]),
             .unavailable(
-                message: "Başlangıç akışı yalnızca somut bir Host alias'ına bağlanabilir. Wildcard veya olumsuz desen için önce somut bir alias ekle."
+                message: "A startup flow can only be linked to a concrete Host alias. Add a concrete alias first for a wildcard or negated pattern."
             )
         )
         XCTAssertEqual(

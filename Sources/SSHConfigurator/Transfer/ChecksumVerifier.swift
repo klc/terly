@@ -43,7 +43,7 @@ struct TransferChecksumVerifier: ChecksumVerifying {
         async let remoteResult = remoteDigest(alias: alias, path: remotePath)
 
         guard let local = await localResult else {
-            return .unavailable(reason: "Yerel checksum hesaplanamadı.")
+            return .unavailable(reason: String(localized: "Local checksum could not be computed."))
         }
         switch await remoteResult {
         case let .unavailable(reason):
@@ -89,18 +89,18 @@ struct TransferChecksumVerifier: ChecksumVerifying {
                 timeout: timeout
             ))
             guard result.terminationStatus == 0 else {
-                return .unavailable(reason: "Uzak checksum hesaplanamadı.")
+                return .unavailable(reason: String(localized: "Remote checksum could not be computed."))
             }
             let output = result.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !output.contains(Self.unavailableMarker) else {
-                return .unavailable(reason: "Sunucuda shasum veya sha256sum bulunamadı.")
+                return .unavailable(reason: String(localized: "shasum or sha256sum was not found on the server."))
             }
             guard let digest = Self.firstToken(of: output) else {
-                return .unavailable(reason: "Uzak checksum çıktısı ayrıştırılamadı.")
+                return .unavailable(reason: String(localized: "Remote checksum output could not be parsed."))
             }
             return .digest(digest)
         } catch {
-            return .unavailable(reason: "Uzak checksum hesaplanamadı.")
+            return .unavailable(reason: String(localized: "Remote checksum could not be computed."))
         }
     }
 

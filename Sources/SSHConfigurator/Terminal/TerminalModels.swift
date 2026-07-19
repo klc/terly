@@ -320,11 +320,11 @@ enum TerminalWorkspaceError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .unsavedChanges:
-            return "Bağlantıyı açmadan önce değişiklikleri kaydet. SSH diskteki ~/.ssh/config dosyasını kullanır."
+            return String(localized: "Save your changes before opening the connection. SSH uses the ~/.ssh/config file on disk.")
         case .noConcreteAlias:
-            return "Wildcard veya olumsuz Host desenleri doğrudan bağlantı olarak açılamaz. Somut bir alias seç."
+            return String(localized: "Wildcard or negated Host patterns can't be opened directly as a connection. Select a specific alias.")
         case .noConnections:
-            return "Açılacak bir SSH bağlantısı bulunamadı."
+            return String(localized: "No SSH connection found to open.")
         }
     }
 }
@@ -474,5 +474,23 @@ struct SSHLaunchPlanBuilder: Sendable {
             throw TerminalWorkspaceError.noConcreteAlias
         }
         return normalizedAlias
+    }
+}
+
+extension TerminalSession {
+    var displayName: String {
+        if alias == "Yerel Terminal" || alias == "Local Terminal" {
+            return String(localized: "Local Terminal")
+        }
+        return alias
+    }
+}
+
+extension TerminalPane {
+    var displayName: String {
+        if alias == "Yerel Terminal" || alias == "Local Terminal" {
+            return String(localized: "Local Terminal")
+        }
+        return alias
     }
 }

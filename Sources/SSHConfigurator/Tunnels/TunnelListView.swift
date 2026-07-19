@@ -10,9 +10,9 @@ struct TunnelListView: View {
         VStack(spacing: 0) {
             if model.tunnels.isEmpty {
                 ContentUnavailableView(
-                    "Tünel Bulunamadı",
+                    "No Tunnels Found",
                     systemImage: "network",
-                    description: Text("Henüz bir SSH tüneli oluşturulmamış.")
+                    description: Text("No SSH tunnel has been created yet.")
                 )
             } else {
                 List {
@@ -44,7 +44,7 @@ struct TunnelListView: View {
                 Button(action: {
                     editingTunnel = TunnelDefinition()
                 }) {
-                    Label("Tünel Ekle", systemImage: "plus")
+                    Label("Add Tunnel", systemImage: "plus")
                 }
             }
         }
@@ -71,7 +71,7 @@ struct TunnelListView: View {
                 }
             )
         }
-        .navigationTitle("Tüneller")
+        .navigationTitle("Tunnels")
     }
 }
 
@@ -112,8 +112,8 @@ struct TunnelRowView: View {
             }
             .buttonStyle(.plain)
             .padding(.trailing, 8)
-            .help("Tüneli düzenle")
-            .accessibilityLabel("\(tunnel.name) tünelini düzenle")
+            .help("Edit tunnel")
+            .accessibilityLabel("Edit the \(tunnel.name) tunnel")
 
             Button(action: onToggle) {
                 Image(systemName: isRunning ? "stop.circle.fill" : "play.circle.fill")
@@ -122,8 +122,8 @@ struct TunnelRowView: View {
                     .foregroundStyle(isRunning ? .red : .green)
             }
             .buttonStyle(.plain)
-            .help(isRunning ? "Tüneli durdur" : "Tüneli başlat")
-            .accessibilityLabel(isRunning ? "\(tunnel.name) tünelini durdur" : "\(tunnel.name) tünelini başlat")
+            .help(isRunning ? "Stop tunnel" : "Start tunnel")
+            .accessibilityLabel(isRunning ? "Stop the \(tunnel.name) tunnel" : "Start the \(tunnel.name) tunnel")
         }
         .padding(.vertical, 8)
     }
@@ -143,11 +143,11 @@ struct TunnelRowView: View {
     
     private var statusText: String {
         switch status {
-        case .idle: return "Duruyor"
-        case .connecting: return "Bağlanıyor..."
-        case .active: return "Aktif"
-        case .reconnecting: return "Yeniden bağlanıyor..."
-        case let .failed(msg): return "Hata: \(msg)"
+        case .idle: return String(localized: "Stopped")
+        case .connecting: return String(localized: "Connecting…")
+        case .active: return String(localized: "Active")
+        case .reconnecting: return String(localized: "Reconnecting…")
+        case let .failed(msg): return String(localized: "Failed: \(msg)")
         }
     }
 }

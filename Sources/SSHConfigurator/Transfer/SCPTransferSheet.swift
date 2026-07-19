@@ -91,14 +91,14 @@ struct SCPTransferSheet: View {
             DispatchQueue.main.async { chooseDownloadDestination() }
         }
         .confirmationDialog(
-            "Yerel dosyanın üzerine yazılsın mı?",
+            "Overwrite the local file?",
             isPresented: $showingLocalOverwriteConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Üzerine yaz ve indir", role: .destructive) { submitEnqueue() }
-            Button("Vazgeç", role: .cancel) {}
+            Button("Overwrite and download", role: .destructive) { submitEnqueue() }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Seçilen yerel dosya zaten var ve indirilen dosyayla değiştirilecek.")
+            Text("The selected local file already exists and will be replaced by the downloaded file.")
         }
     }
 
@@ -107,7 +107,7 @@ struct SCPTransferSheet: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Dosya aktar")
+                Text("Transfer file")
                     .font(.title2.weight(.semibold))
                 Text(alias)
                     .font(.caption.monospaced())
@@ -115,8 +115,8 @@ struct SCPTransferSheet: View {
             }
             Spacer()
             // Tab picker
-            Picker("Sekme", selection: $selectedTab) {
-                Text("Yeni Aktarım").tag(SheetTab.newTransfer)
+            Picker("Tab", selection: $selectedTab) {
+                Text("New Transfer").tag(SheetTab.newTransfer)
                 Text(queueTabLabel).tag(SheetTab.queue)
                 Text(historyTabLabel).tag(SheetTab.history)
             }
@@ -130,12 +130,12 @@ struct SCPTransferSheet: View {
 
     private var queueTabLabel: String {
         let count = queue.items.count
-        return count == 0 ? "Kuyruk" : "Kuyruk (\(count))"
+        return count == 0 ? String(localized: "Queue") : String(localized: "Queue (\(count))")
     }
 
     private var historyTabLabel: String {
         let count = engine.historyLibrary.records.count
-        return count == 0 ? "Geçmiş" : "Geçmiş (\(count))"
+        return count == 0 ? String(localized: "History") : String(localized: "History (\(count))")
     }
 
     // MARK: - Tab content
@@ -162,7 +162,7 @@ struct SCPTransferSheet: View {
         VStack(spacing: 0) {
             Form {
                 Section {
-                    Picker("İşlem", selection: $direction) {
+                    Picker("Direction", selection: $direction) {
                         ForEach(SCPTransferDirection.allCases) { d in
                             Text(d.label).tag(d)
                         }
@@ -178,8 +178,8 @@ struct SCPTransferSheet: View {
                     downloadSections
                 }
 
-                Section("Gelişmiş") {
-                    Picker("Protokol", selection: $transferProtocol) {
+                Section("Advanced") {
+                    Picker("Protocol", selection: $transferProtocol) {
                         ForEach(TransferProtocol.allCases) { proto in
                             Text(proto.label).tag(proto)
                         }
@@ -188,17 +188,17 @@ struct SCPTransferSheet: View {
 
                     if transferProtocol.requiresSubsystem {
                         Label(
-                            "SFTP sunucuda etkin olmalıdır (sftp-server alt sistemi).",
+                            "SFTP must be enabled on the server (sftp-server subsystem).",
                             systemImage: "info.circle"
                         )
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     }
 
-                    Stepper("Eşzamanlı aktarım: \(concurrencyLimit)", value: $concurrencyLimit, in: 1 ... 5)
+                    Stepper("Concurrent transfers: \(concurrencyLimit)", value: $concurrencyLimit, in: 1 ... 5)
 
-                    Toggle("Aktarım sonrası checksum doğrula", isOn: $verifyChecksumAfterTransfer)
-                    Text("Klasör aktarımlarında checksum doğrulaması atlanır.")
+                    Toggle("Verify checksum after transfer", isOn: $verifyChecksumAfterTransfer)
+                    Text("Checksum verification is skipped for folder transfers.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -226,9 +226,9 @@ struct SCPTransferSheet: View {
                 Image(systemName: "tray")
                     .font(.largeTitle)
                     .foregroundStyle(.tertiary)
-                Text("Kuyrukta aktarım yok")
+                Text("No transfers in queue")
                     .foregroundStyle(.secondary)
-                Button("Yeni Aktarım Ekle") {
+                Button("Add new transfer") {
                     selectedTab = .newTransfer
                 }
                 .buttonStyle(.borderedProminent)
@@ -245,7 +245,7 @@ struct SCPTransferSheet: View {
             if queue.hasActiveOrPending, let total = queue.totalProgress {
                 VStack(spacing: 4) {
                     ProgressView(value: total, total: 1)
-                    Text("Toplam ilerleme: %\(Int((total * 100).rounded()))")
+                    Text("Total progress: \(Int((total * 100).rounded()))%")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -265,10 +265,10 @@ struct SCPTransferSheet: View {
             if !queue.items.allSatisfy(\.isTerminal) {
                 Divider()
                 HStack(spacing: 12) {
-                    Button("Tümünü İptal Et", role: .destructive) { engine.cancelAll() }
+                    Button("Cancel all", role: .destructive) { engine.cancelAll() }
                         .controlSize(.small)
                     Spacer()
-                    Button("Tamamlananları Temizle") { engine.clearFinished() }
+                    Button("Clear completed") { engine.clearFinished() }
                         .controlSize(.small)
                         .disabled(queue.items.allSatisfy { !$0.isTerminal })
                 }
@@ -284,7 +284,7 @@ struct SCPTransferSheet: View {
         HStack(spacing: 10) {
             // Validate hint in footer only on queue tab
             if selectedTab == .queue && !queue.hasActiveOrPending && !queue.items.isEmpty {
-                Button("Listeyi Temizle") { engine.clearFinished() }
+                Button("Clear list") { engine.clearFinished() }
                     .controlSize(.small)
             }
 
@@ -292,7 +292,7 @@ struct SCPTransferSheet: View {
 
             // "Arkaplanda Devam Et" — visible whenever there are active/waiting transfers
             if queue.hasActiveOrPending {
-                Button("Arkaplanda Devam Et") {
+                Button("Continue in Background") {
                     dismiss()
                 }
                 .keyboardShortcut(.escape, modifiers: [])
@@ -300,11 +300,11 @@ struct SCPTransferSheet: View {
 
             // Primary action depends on tab
             if selectedTab == .newTransfer {
-                Button("Kuyruğa Ekle") { enqueueItems() }
+                Button("Add to queue") { enqueueItems() }
                     .buttonStyle(.borderedProminent)
                     .disabled(!canEnqueue)
             } else {
-                Button("Kapat") { dismiss() }
+                Button("Close") { dismiss() }
                     .buttonStyle(.bordered)
                     .keyboardShortcut(.cancelAction)
                     .disabled(queue.hasActiveOrPending)
@@ -318,9 +318,9 @@ struct SCPTransferSheet: View {
 
     @ViewBuilder
     private var uploadSections: some View {
-        Section("Yerel dosya ve klasörler") {
+        Section("Local files and folders") {
             if selectedLocalItems.isEmpty {
-                Text("Dosya veya klasör seçilmedi")
+                Text("No file or folder selected")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(selectedLocalItems) { item in
@@ -348,15 +348,15 @@ struct SCPTransferSheet: View {
                     }
                 }
             }
-            Button("Dosya veya Klasör Ekle") { chooseLocalItems() }
+            Button("Add file or folder") { chooseLocalItems() }
         }
 
-        Section("Sunucudaki hedef klasör") {
+        Section("Destination folder on server") {
             selectionRow(
                 icon: "folder",
-                title: remoteDirectory.isEmpty ? "Klasör seçilmedi" : remoteDirectory,
-                detail: remoteDirectory.isEmpty ? "Dosyaların yükleneceği uzak klasörü seç" : nil,
-                buttonTitle: remoteDirectory.isEmpty ? "Klasör seç" : "Değiştir"
+                title: remoteDirectory.isEmpty ? String(localized: "No folder selected") : remoteDirectory,
+                detail: remoteDirectory.isEmpty ? String(localized: "Choose the remote folder to upload files to") : nil,
+                buttonTitle: remoteDirectory.isEmpty ? String(localized: "Choose folder") : String(localized: "Change")
             ) {
                 showingRemoteBrowser = true
             }
@@ -367,27 +367,27 @@ struct SCPTransferSheet: View {
 
     @ViewBuilder
     private var downloadSections: some View {
-        Section("Sunucudaki dosya") {
+        Section("File on server") {
             selectionRow(
                 icon: "externaldrive.connected.to.line.below",
-                title: selectedRemoteFile?.name ?? "Dosya seçilmedi",
+                title: selectedRemoteFile?.name ?? String(localized: "No file selected"),
                 detail: selectedRemoteFile.map { RemotePath.parent(of: $0.path) }
-                    ?? "Sunucudaki klasörleri gezerek indirilecek dosyayı seç",
-                buttonTitle: selectedRemoteFile == nil ? "Dosya seç" : "Değiştir"
+                    ?? String(localized: "Browse folders on the server to choose the file to download"),
+                buttonTitle: selectedRemoteFile == nil ? String(localized: "Choose file") : String(localized: "Change")
             ) {
                 showingRemoteBrowser = true
             }
         }
 
-        Section("Yerel kayıt yeri") {
+        Section("Local save location") {
             selectionRow(
                 icon: "folder.badge.plus",
-                title: downloadLocalURL?.lastPathComponent ?? "Kayıt yeri seçilmedi",
+                title: downloadLocalURL?.lastPathComponent ?? String(localized: "No save location selected"),
                 detail: downloadLocalURL?.deletingLastPathComponent().path
                     ?? (selectedRemoteFile == nil
-                        ? "Önce uzak dosyayı seç"
-                        : "Dosya adı hazır olarak getirilecek"),
-                buttonTitle: downloadLocalURL == nil ? "Kayıt yeri seç" : "Değiştir"
+                        ? String(localized: "Select the remote file first")
+                        : String(localized: "The filename will be pre-filled")),
+                buttonTitle: downloadLocalURL == nil ? String(localized: "Choose save location") : String(localized: "Change")
             ) {
                 chooseDownloadDestination()
             }
@@ -639,18 +639,18 @@ private struct InlineTransferItemRow: View {
     private var statusLabel: some View {
         switch item.state {
         case .waiting:
-            Text("Bekliyor").font(.caption).foregroundStyle(.secondary)
+            Text("Waiting").font(.caption).foregroundStyle(.secondary)
         case .active:
             if let progress = item.progress {
-                Text("%\(Int((progress * 100).rounded()))")
+                Text("\(Int((progress * 100).rounded()))%")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             } else {
-                Text("Başlatılıyor…").font(.caption).foregroundStyle(.secondary)
+                Text("Starting…").font(.caption).foregroundStyle(.secondary)
             }
         case .succeeded:
             HStack(spacing: 6) {
-                Label("Tamamlandı", systemImage: "checkmark.circle.fill")
+                Label("Completed", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                 if let checksumState = item.checksumState {
                     ChecksumStatusLabel(state: checksumState)
@@ -663,7 +663,7 @@ private struct InlineTransferItemRow: View {
                 .lineLimit(1)
                 .help(msg)
         case .cancelled:
-            Text("İptal edildi").font(.caption).foregroundStyle(.secondary)
+            Text("Cancelled").font(.caption).foregroundStyle(.secondary)
         }
     }
 
@@ -677,7 +677,7 @@ private struct InlineTransferItemRow: View {
                 Image(systemName: "xmark.circle")
             }
             .buttonStyle(.borderless)
-            .help("İptal et")
+            .help("Cancel transfer")
         case .failed, .cancelled:
             Button {
                 engine.retry(itemID: item.id)
@@ -685,7 +685,7 @@ private struct InlineTransferItemRow: View {
                 Image(systemName: "arrow.clockwise.circle")
             }
             .buttonStyle(.borderless)
-            .help("Yeniden dene")
+            .help("Retry")
         case .succeeded:
             EmptyView()
         }

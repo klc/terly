@@ -31,14 +31,14 @@ final class AutoReconnectChainIntegrationTests: XCTestCase {
         XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
         guard let sessionID = model.selectedSessionID,
               let originalPaneID = model.selectedSession?.activePaneID else {
-            return XCTFail("Beklenen: yeni açılan bağlantı bir oturum ve bölme üretmeli")
+            return XCTFail("Expected: newly opened connection should produce a session and pane")
         }
 
         // 1. Unexpected exit with auto-reconnect already opted in for "prod"
         // schedules the first backoff attempt.
         model.processDidExit(sessionID: sessionID, paneID: originalPaneID, exitCode: 1)
         guard case let .countingDown(firstAttempt, _, _) = model.paneReconnectStates[originalPaneID] else {
-            return XCTFail("Beklenen: countingDown durumu (ilk kopma)")
+            return XCTFail("Expected: countingDown state (first disconnect)")
         }
         XCTAssertEqual(firstAttempt, 1)
         XCTAssertEqual(scheduler.scheduledCount, 1)
@@ -48,7 +48,7 @@ final class AutoReconnectChainIntegrationTests: XCTestCase {
         XCTAssertTrue(scheduler.fireOldest())
         guard let reconnectedPaneID = model.selectedSession?.activePaneID,
               reconnectedPaneID != originalPaneID else {
-            return XCTFail("Beklenen: yeniden bağlanma yeni bir bölme kimliği üretmeli")
+            return XCTFail("Expected: reconnecting should produce a new pane ID")
         }
         XCTAssertEqual(model.selectedSession?.activePane?.status, .running)
         XCTAssertNil(model.paneReconnectStates[originalPaneID])
@@ -64,7 +64,7 @@ final class AutoReconnectChainIntegrationTests: XCTestCase {
         // restart the chain at attempt 1, not continue from wherever it left off.
         model.processDidExit(sessionID: sessionID, paneID: reconnectedPaneID, exitCode: 1)
         guard case let .countingDown(freshAttempt, maxAttempts, _) = model.paneReconnectStates[reconnectedPaneID] else {
-            return XCTFail("Beklenen: countingDown durumu (yeni kopma, sayaç sıfırlanmış)")
+            return XCTFail("Expected: countingDown state (new disconnect, counter reset)")
         }
         XCTAssertEqual(freshAttempt, 1)
         XCTAssertEqual(maxAttempts, AutoReconnectManager.maxAttempts)

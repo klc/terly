@@ -135,7 +135,7 @@ final class TransferQueueEngine: ObservableObject {
         if !launched {
             runners.removeValue(forKey: item.id)
             var failed = mutable
-            let message = error ?? "Başlatılamadı."
+            let message = error ?? String(localized: "Failed to start.")
             failed.markFailed(message)
             queue.update(failed)
             recordHistory(for: failed, outcome: .failed, failureMessage: message)

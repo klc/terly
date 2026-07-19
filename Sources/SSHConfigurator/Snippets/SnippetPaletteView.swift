@@ -40,7 +40,7 @@ struct SnippetPaletteView: View {
         HStack(spacing: 12) {
             Image(systemName: "text.badge.plus")
                 .foregroundStyle(.secondary)
-            TextField("Snippet key veya içerik ara", text: $query)
+            TextField("Search snippet key or content", text: $query)
                 .textFieldStyle(.plain)
                 .font(.title3)
                 .focused($searchIsFocused)
@@ -61,7 +61,7 @@ struct SnippetPaletteView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .accessibilityLabel("Aramayı temizle")
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(16)
@@ -72,9 +72,9 @@ struct SnippetPaletteView: View {
         if results.isEmpty {
             if snippets.isEmpty {
                 ContentUnavailableView(
-                    "Snippet Yok",
+                    "No Snippets",
                     systemImage: "text.badge.plus",
-                    description: Text("Kenar çubuğundaki Snippets bölümünden ekleyebilirsin.")
+                    description: Text("You can add some from the Snippets section in the sidebar.")
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -109,16 +109,16 @@ struct SnippetPaletteView: View {
 
     private var keyboardHelp: some View {
         HStack(spacing: 18) {
-            Label("Seç", systemImage: "arrow.up.arrow.down")
-            Label("Terminale yaz", systemImage: "return")
-            Label("Kapat", systemImage: "escape")
+            Label("Select", systemImage: "arrow.up.arrow.down")
+            Label("Insert into terminal", systemImage: "return")
+            Label("Close", systemImage: "escape")
             Spacer()
             Text("⌘S")
                 .font(.caption.monospaced())
                 .padding(.horizontal, 7)
                 .padding(.vertical, 3)
                 .background(.quaternary, in: RoundedRectangle(cornerRadius: 5))
-            Button("Kapat (Esc)") { dismiss() }
+            Button("Close (Esc)") { dismiss() }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
         }
@@ -167,7 +167,7 @@ private struct SnippetResultRow: View {
                     .foregroundStyle(Color.accentColor)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
-                        Text(snippet.key.isEmpty ? "(isimsiz)" : snippet.key)
+                        Text(snippet.key.isEmpty ? String(localized: "(unnamed)") : snippet.key)
                             .fontWeight(.medium)
                         if snippet.isSecret {
                             Image(systemName: "lock.fill")
@@ -211,7 +211,7 @@ struct SnippetPaletteSupport: ViewModifier {
         content
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button("Snippet ekle", systemImage: "text.badge.plus") {
+                    Button("Add Snippet", systemImage: "text.badge.plus") {
                         showingPalette = true
                     }
                     .keyboardShortcut("s", modifiers: .command)
@@ -219,13 +219,13 @@ struct SnippetPaletteSupport: ViewModifier {
                 }
             }
             .alert(
-                "Snippet kaydedilemedi",
+                "Snippet could not be saved",
                 isPresented: Binding(
                     get: { snippets.errorMessage != nil },
                     set: { if !$0 { snippets.dismissError() } }
                 )
             ) {
-                Button("Tamam", role: .cancel) { snippets.dismissError() }
+                Button("OK", role: .cancel) { snippets.dismissError() }
             } message: {
                 Text(snippets.errorMessage ?? "")
             }

@@ -82,7 +82,7 @@ final class SSHErrorClassifierTests: XCTestCase {
         let output = "remote rmdir \"/home/deploy/uploads\": Failure"
         let classified = classifier.classify(output: output, sftpCommand: .removeDirectory)
         XCTAssertEqual(classified.kind, .remoteDirectoryNotEmpty)
-        XCTAssertTrue(classified.userFacingDescription.contains("boş değil"))
+        XCTAssertTrue(classified.userFacingDescription.contains("not empty"))
     }
 
     func testRenameFailureClassifiesAsAlreadyExists() {
@@ -101,7 +101,7 @@ final class SSHErrorClassifierTests: XCTestCase {
         let output = "remote rm \"/home/deploy/report.txt\": Failure"
         let classified = classifier.classify(output: output, sftpCommand: .remove)
         XCTAssertEqual(classified.kind, .unknown)
-        XCTAssertTrue(classified.userFacingDescription.contains("Dosya silinemedi"))
+        XCTAssertTrue(classified.userFacingDescription.contains("The file couldn't be deleted"))
     }
 
     func testPermissionDeniedWithSftpCommandClassifiesAsOperationPermissionDeniedNotAuthFailure() {

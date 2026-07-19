@@ -17,9 +17,9 @@ public enum SSHConfigEditError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .hostBlockNotFound:
-            return "Düzenlenecek Host bloğu bulunamadı. Dosya dışarıdan değişmiş olabilir."
+            return String(localized: "The Host block to edit wasn't found. The file may have been changed externally.", bundle: .core)
         case .invalidHostPattern:
-            return "En az bir Host adı veya deseni gerekli."
+            return String(localized: "At least one Host name or pattern is required.", bundle: .core)
         }
     }
 }

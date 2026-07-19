@@ -87,11 +87,11 @@ enum KeySetupError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .invalidAlias:
-            return "Somut bir Host alias'ı gerekli."
+            return String(localized: "A concrete Host alias is required.")
         case .overwriteNotConfirmed:
-            return "Bu yolda zaten bir anahtar var. Üzerine yazmadan önce açıkça onaylaman gerekiyor."
+            return String(localized: "A key already exists at this path. You need to explicitly confirm before overwriting it.")
         case .publicKeyMissing:
-            return "Public key dosyası (.pub) bulunamadı veya okunamadı."
+            return String(localized: "The public key file (.pub) wasn't found or couldn't be read.")
         }
     }
 }

@@ -1,0 +1,106 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "A concrete Host name is required for validation.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doğrulama için somut bir Host adı gerekli."
+          }
+        }
+      }
+    },
+    "At least one Host name or pattern is required.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En az bir Host adı veya deseni gerekli."
+          }
+        }
+      }
+    },
+    "For safety, config files that are symbolic links can't be written to directly: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Güvenlik için sembolik link olan config dosyalarına doğrudan yazılamaz: %@"
+          }
+        }
+      }
+    },
+    "OpenSSH config validation failed.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenSSH config doğrulaması başarısız oldu."
+          }
+        }
+      }
+    },
+    "The Host block to edit wasn't found. The file may have been changed externally.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Düzenlenecek Host bloğu bulunamadı. Dosya dışarıdan değişmiş olabilir."
+          }
+        }
+      }
+    },
+    "The config file couldn't be read as UTF-8: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config dosyası UTF-8 olarak okunamadı: %@"
+          }
+        }
+      }
+    },
+    "The config file couldn't be read: %@ (%@)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config dosyası okunamadı: %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "The config file couldn't be written: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config dosyası yazılamadı: %@"
+          }
+        }
+      }
+    },
+    "The config file was changed externally while the app was open: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config dosyası uygulama açıkken dışarıdan değişti: %@"
+          }
+        }
+      }
+    },
+    "The selected backup isn't in the safe backup folder: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçilen yedek güvenli yedek klasöründe değil: %@"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

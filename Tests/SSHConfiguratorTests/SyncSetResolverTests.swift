@@ -81,7 +81,7 @@ final class SyncSetResolverTests: XCTestCase {
         XCTAssertFalse(syncSet.files.contains { $0.sourceURL.standardizedFileURL == outsideFile.standardizedFileURL })
         XCTAssertFalse(syncSet.files.contains { $0.sourceURL.path == "/etc/hosts" })
         XCTAssertGreaterThanOrEqual(syncSet.warnings.count, 1)
-        XCTAssertTrue(syncSet.warnings.contains { $0.message.contains("dışına çıkıyor") })
+        XCTAssertTrue(syncSet.warnings.contains { $0.message.contains("points outside") })
     }
 
     func testDoesNotHangOnCyclicIncludes() throws {
@@ -110,7 +110,7 @@ final class SyncSetResolverTests: XCTestCase {
         let relativePaths = Set(syncSet.files.map(\.relativePath))
 
         XCTAssertFalse(relativePaths.contains("ssh/chain\(depth).conf"))
-        XCTAssertTrue(syncSet.warnings.contains { $0.message.contains("Include zinciri") })
+        XCTAssertTrue(syncSet.warnings.contains { $0.message.contains("Include chain is deeper") })
     }
 
     func testIgnoresNonExistentIncludeGlobSilently() throws {
@@ -137,7 +137,7 @@ final class SyncSetResolverTests: XCTestCase {
         XCTAssertFalse(relativePaths.contains("ssh/id_ed25519.pub"))
         XCTAssertFalse(relativePaths.contains("ssh/known_hosts"))
         XCTAssertTrue(relativePaths.contains("ssh/conf.d.conf"))
-        XCTAssertTrue(syncSet.warnings.contains { $0.message.contains("özel anahtar") })
+        XCTAssertTrue(syncSet.warnings.contains { $0.message.contains("private key") })
     }
 
     func testSplitIncludeValueHonorsQuotedWhitespace() {

@@ -1,17 +1,16 @@
 name: SSHConfigurator
 options:
   minimumXcodeGenVersion: 2.40.0
+  developmentLanguage: en
 settings:
   base:
     SWIFT_VERSION: 6.0
     MACOSX_DEPLOYMENT_TARGET: 14.0
+    SWIFT_EMIT_LOC_STRINGS: YES
 packages:
-  # Fork of upstream 1.14.0 carrying the Metal BufferPool memory-growth fix
-  # plus line-accurate scroll wheel + scrollSensitivity (feature/scroll-sensitivity).
-  # Drop back to upstream once the fixes land there. Package.swift pins the same revision.
   SwiftTerm:
-    url: https://github.com/klc/SwiftTerm.git
-    revision: 99f1bc935fd9937cf7361fd56d3cf89b082e0112
+    url: https://github.com/migueldeicaza/SwiftTerm.git
+    from: 1.15.0
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle.git
     majorVersion: 2.0.0
@@ -45,6 +44,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
+        CFBundleLocalizations: [en, tr]
         # Sparkle appcast/EdDSA anahtarları: gerçek anahtarlar Mustafa'nın `generate_keys`
         # çıktısından gelecek (bkz. docs/RELEASING.md). Şimdilik placeholder — güncelleme
         # denetimi bu haliyle çalışmaz, Ayarlar > Güncellemeler bunu algılayıp uyarır.
@@ -108,6 +108,9 @@ schemes:
         SSHConfiguratorTests: [test]
         SSHConfiguratorUITests: [test]
     test:
+      # Testler EN kaynak stringlere assert eder; makine dili ne olursa olsun
+      # deterministik koşsun diye test dili sabitlenir.
+      language: en
       targets:
         - SSHConfigCoreTests
         - SSHConfiguratorTests

@@ -7,9 +7,9 @@ enum SSHConnectionGroupOpenMode: String, Codable, CaseIterable, Sendable {
     var label: String {
         switch self {
         case .separateTabs:
-            return "Ayrı sekmeler"
+            return String(localized: "Separate tabs")
         case .splitPanes:
-            return "Tek sekmede bölmeler"
+            return String(localized: "Split panes in one tab")
         }
     }
 }
@@ -99,11 +99,11 @@ enum SSHConnectionGroupError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .emptyName:
-            return "Bağlantı grubu için bir ad gir."
+            return String(localized: "Enter a name for the connection group.")
         case .emptyConnections:
-            return "Bağlantı grubuna en az bir bağlantı ekle."
+            return String(localized: "Add at least one connection to the group.")
         case let .missingConnections(aliases):
-            return "Gruptaki bağlantılar güncel SSH config içinde bulunamadı: \(aliases.joined(separator: ", ")). Grup ayarlarını güncelle."
+            return String(localized: "Connections in the group not found in the current SSH config: \(aliases.joined(separator: ", ")). Update the group settings.")
         }
     }
 }
