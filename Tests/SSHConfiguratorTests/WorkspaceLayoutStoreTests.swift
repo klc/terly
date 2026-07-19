@@ -5,6 +5,7 @@ import Foundation
 final class MockWorkspaceLayoutStore: WorkspaceLayoutPersisting {
     var savedWorkspace: PersistedWorkspace?
     var shouldFailLoad = false
+    var shouldFailSave = false
 
     func load() throws -> PersistedWorkspace {
         if shouldFailLoad {
@@ -14,6 +15,13 @@ final class MockWorkspaceLayoutStore: WorkspaceLayoutPersisting {
     }
 
     func save(_ workspace: PersistedWorkspace) throws {
+        if shouldFailSave {
+            throw NSError(
+                domain: "WorkspaceLayoutStoreTests",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "disk full"]
+            )
+        }
         savedWorkspace = workspace
     }
 }

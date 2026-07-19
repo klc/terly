@@ -970,6 +970,27 @@ final class TerminalWorkspaceModelTests: XCTestCase {
     }
 
     @MainActor
+    func testWorkspaceSaveFailureIsExposedAndDismissable() {
+        let store = MockWorkspaceLayoutStore()
+        store.shouldFailSave = true
+        let model = TerminalWorkspaceModel(
+            launchPlanBuilder: SSHLaunchPlanBuilder(
+                sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                baseEnvironment: ["PATH": "/usr/bin:/bin"],
+                currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+            ),
+            workspaceStore: store
+        )
+
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        model.flushPendingSave()
+
+        XCTAssertTrue(model.persistenceErrorMessage?.contains("disk full") == true)
+        model.dismissPersistenceError()
+        XCTAssertNil(model.persistenceErrorMessage)
+    }
+
+    @MainActor
     func testEmptyTitleRevertsToAlias() {
         let model = makeModel()
         XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))

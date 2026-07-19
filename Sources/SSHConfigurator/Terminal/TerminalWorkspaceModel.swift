@@ -16,6 +16,7 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
     @Published private(set) var errorMessage: String?
+    @Published private(set) var persistenceErrorMessage: String?
     /// WP7: per-pane automatic-reconnect UI state (countdown / exhausted /
     /// awaiting manual reconnect / network-back suggestion), mirrored from
     /// `autoReconnectManager` so `TerminalWorkspaceView` can observe it.
@@ -596,6 +597,10 @@ final class TerminalWorkspaceModel: ObservableObject {
         errorMessage = nil
     }
 
+    func dismissPersistenceError() {
+        persistenceErrorMessage = nil
+    }
+
     private static func isExited(_ status: TerminalPane.Status) -> Bool {
         if case .exited = status { return true }
         return false
@@ -619,7 +624,14 @@ final class TerminalWorkspaceModel: ObservableObject {
             sessions: persistedSessions,
             selectedSessionID: selectedSessionID
         )
-        try? workspaceStore.save(workspace)
+        do {
+            try workspaceStore.save(workspace)
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = String(
+                localized: "Terminal workspace could not be saved: \(error.localizedDescription)"
+            )
+        }
     }
 
     func restoreWorkspace(

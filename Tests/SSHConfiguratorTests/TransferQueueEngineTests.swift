@@ -27,9 +27,18 @@ final class TransferQueueEngineTests: XCTestCase {
 
     private func makeEngine(
         queue: TransferQueue,
-        historyLibrary: TransferHistoryLibrary? = nil
+        historyLibrary: TransferHistoryLibrary? = nil,
+        executor: ControlledTransferExecutor? = nil,
+        retryDelayNanoseconds: @escaping @MainActor (Int) -> UInt64 = { _ in 2_000_000_000 }
     ) -> TransferQueueEngine {
-        TransferQueueEngine(queue: queue, historyLibrary: historyLibrary ?? makeHistoryLibrary())
+        TransferQueueEngine(
+            queue: queue,
+            historyLibrary: historyLibrary ?? makeHistoryLibrary(),
+            runnerFactory: {
+                executor.map { TransferItemRunner(scpExecutor: $0) } ?? TransferItemRunner()
+            },
+            retryDelayNanoseconds: retryDelayNanoseconds
+        )
     }
 
     private func makeItem(
@@ -134,10 +143,19 @@ final class TransferQueueEngineTests: XCTestCase {
         XCTAssertEqual(queue.nextWaitingItem()?.id, a.id)
     }
 
+    func testNextWaitingItemSkipsExcludedRetry() {
+        let queue = makeQueue()
+        let delayed = makeItem()
+        let ready = makeItem()
+        queue.enqueue(contentsOf: [delayed, ready])
+
+        XCTAssertEqual(queue.nextWaitingItem(excluding: [delayed.id])?.id, ready.id)
+    }
+
     func testClearTerminatedRemovesOnlyTerminalItems() {
         let queue = makeQueue()
         var a = makeItem()
-        var b = makeItem()
+        let b = makeItem()
         a.markSucceeded()
         queue.enqueue(a)
         queue.enqueue(b)
@@ -197,6 +215,52 @@ final class TransferQueueEngineTests: XCTestCase {
 
         let updated = queue.items.first { $0.id == item.id }
         XCTAssertEqual(updated?.state, .cancelled)
+    }
+
+    func testCancelledProcessCompletionCannotRestartItemOrDuplicateHistory() async {
+        let queue = makeQueue()
+        let history = makeHistoryLibrary()
+        let executor = ControlledTransferExecutor(completesWithCancellationOnCancel: true)
+        let engine = makeEngine(queue: queue, historyLibrary: history, executor: executor)
+        let item = makeItem(direction: .download)
+
+        engine.enqueue([item])
+        XCTAssertEqual(executor.startCount, 1)
+
+        engine.cancel(itemID: item.id)
+        await Task.yield()
+
+        XCTAssertEqual(queue.items.first?.state, .cancelled)
+        XCTAssertEqual(executor.startCount, 1)
+        XCTAssertEqual(history.records.count, 1)
+        XCTAssertEqual(history.records.first?.outcome, .cancelled)
+    }
+
+    func testAutomaticRetryWaitsForBackoffBeforeRestarting() async throws {
+        let queue = makeQueue(concurrency: 1)
+        let executor = ControlledTransferExecutor()
+        let engine = makeEngine(
+            queue: queue,
+            executor: executor,
+            retryDelayNanoseconds: { _ in 100_000_000 }
+        )
+        let item = makeItem(direction: .download)
+
+        engine.enqueue([item])
+        XCTAssertEqual(executor.startCount, 1)
+
+        executor.completeAttempt(at: 0, with: .failed("network"))
+        await Task.yield()
+        XCTAssertEqual(queue.items.first?.state, .waiting)
+        XCTAssertEqual(executor.startCount, 1)
+
+        try await Task.sleep(nanoseconds: 30_000_000)
+        XCTAssertEqual(executor.startCount, 1)
+
+        try await Task.sleep(nanoseconds: 100_000_000)
+        await Task.yield()
+        XCTAssertEqual(executor.startCount, 2)
+        XCTAssertEqual(queue.items.first?.state, .active)
     }
 
     func testEngineCancelAllMovesAllActiveAndWaitingToCancelled() {
@@ -282,5 +346,45 @@ final class TransferQueueEngineTests: XCTestCase {
         engine.retry(itemID: item.id)
 
         XCTAssertTrue(history.records.isEmpty)
+    }
+}
+
+private final class ControlledTransferExecutor: SCPTransferExecuting, @unchecked Sendable {
+    private let completesWithCancellationOnCancel: Bool
+    private(set) var startCount = 0
+    private var completions: [@Sendable (SCPTransferCompletion) -> Void] = []
+
+    init(completesWithCancellationOnCancel: Bool = false) {
+        self.completesWithCancellationOnCancel = completesWithCancellationOnCancel
+    }
+
+    func start(
+        plan: SCPTransferPlan,
+        onProgress: @escaping @Sendable (SCPTransferProgressUpdate) -> Void,
+        completion: @escaping @Sendable (SCPTransferCompletion) -> Void
+    ) throws -> any SCPTransferProcess {
+        startCount += 1
+        completions.append(completion)
+        return ControlledTransferProcess {
+            if self.completesWithCancellationOnCancel {
+                completion(.failed("cancelled"))
+            }
+        }
+    }
+
+    func completeAttempt(at index: Int, with result: SCPTransferCompletion) {
+        completions[index](result)
+    }
+}
+
+private final class ControlledTransferProcess: SCPTransferProcess {
+    private let onCancel: () -> Void
+
+    init(onCancel: @escaping () -> Void) {
+        self.onCancel = onCancel
+    }
+
+    func cancel() {
+        onCancel()
     }
 }

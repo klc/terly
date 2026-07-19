@@ -34,12 +34,16 @@ struct SCPTransferSheet: View {
     @State private var showingRemoteBrowser = false
     @State private var shouldPromptForDownloadDestination = false
     @State private var showingLocalOverwriteConfirmation = false
+    @State private var showingRemoteOverwriteConfirmation = false
+    @State private var pendingUploadItems: [TransferItem] = []
+    @State private var remoteCollisionNames: [String] = []
+    @State private var isCheckingRemoteTargets = false
     @State private var validationMessage: String?
     @State private var transferProtocol: TransferProtocol = .scp
     @State private var concurrencyLimit: Int = 3
     @AppStorage("scp.verifyChecksumAfterTransfer") private var verifyChecksumAfterTransfer = false
 
-    private let listingService = SFTPDirectoryListingService()
+    private let uploadPreflight = UploadPreflight()
 
     init(
         alias: String,
@@ -99,6 +103,21 @@ struct SCPTransferSheet: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("The selected local file already exists and will be replaced by the downloaded file.")
+        }
+        .confirmationDialog(
+            "Overwrite remote items?",
+            isPresented: $showingRemoteOverwriteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Overwrite and upload", role: .destructive) {
+                submitUpload(pendingUploadItems)
+            }
+            Button("Cancel", role: .cancel) {
+                pendingUploadItems = []
+                remoteCollisionNames = []
+            }
+        } message: {
+            Text(remoteOverwriteMessage)
         }
     }
 
@@ -300,9 +319,18 @@ struct SCPTransferSheet: View {
 
             // Primary action depends on tab
             if selectedTab == .newTransfer {
-                Button("Add to queue") { enqueueItems() }
+                Button {
+                    enqueueItems()
+                } label: {
+                    if isCheckingRemoteTargets {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Text("Add to queue")
+                    }
+                }
                     .buttonStyle(.borderedProminent)
-                    .disabled(!canEnqueue)
+                    .disabled(!canEnqueue || isCheckingRemoteTargets)
             } else {
                 Button("Close") { dismiss() }
                     .buttonStyle(.bordered)
@@ -458,11 +486,35 @@ struct SCPTransferSheet: View {
                     verifyChecksum: verifyChecksumAfterTransfer && !local.isDirectory
                 )
             }
-            queue.concurrencyLimit = concurrencyLimit
-            engine.enqueue(items)
-            // Stay open — switch to queue tab so user sees progress.
-            resetDraft()
-            selectedTab = .queue
+            let duplicates = UploadPreflight.duplicateDestinationNames(in: items)
+            guard duplicates.isEmpty else {
+                validationMessage = String(
+                    localized: "Multiple selected items would upload to the same destination: \(duplicates.joined(separator: ", ")). Remove the duplicates and try again."
+                )
+                return
+            }
+            isCheckingRemoteTargets = true
+            Task { @MainActor in
+                defer { isCheckingRemoteTargets = false }
+                do {
+                    let result = try await uploadPreflight.inspect(
+                        alias: alias,
+                        remoteDirectory: remoteDirectory,
+                        items: items
+                    )
+                    if result.requiresOverwriteConfirmation {
+                        pendingUploadItems = items
+                        remoteCollisionNames = result.existingRemoteNames
+                        showingRemoteOverwriteConfirmation = true
+                    } else {
+                        submitUpload(items)
+                    }
+                } catch {
+                    validationMessage = String(
+                        localized: "The remote destination could not be checked: \(error.localizedDescription)"
+                    )
+                }
+            }
 
         case .download:
             guard let _ = selectedRemoteFile, let localURL = downloadLocalURL else { return }
@@ -490,6 +542,21 @@ struct SCPTransferSheet: View {
         // Stay open — switch to queue tab.
         resetDraft()
         selectedTab = .queue
+    }
+
+    private func submitUpload(_ items: [TransferItem]) {
+        guard !items.isEmpty else { return }
+        queue.concurrencyLimit = concurrencyLimit
+        engine.enqueue(items)
+        pendingUploadItems = []
+        remoteCollisionNames = []
+        resetDraft()
+        selectedTab = .queue
+    }
+
+    private var remoteOverwriteMessage: String {
+        let names = remoteCollisionNames.joined(separator: ", ")
+        return String(localized: "These items already exist in the remote directory and will be replaced: \(names)")
     }
 
     private func resetDraft() {

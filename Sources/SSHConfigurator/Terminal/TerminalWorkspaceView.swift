@@ -27,30 +27,6 @@ private struct PaneDragState {
     var target: TerminalPane.ID?
 }
 
-/// Faz 3: `DropDelegate` for tab reorder. `dropEntered` reorders live off the
-/// bound `draggedTabID` — it never decodes the `NSItemProvider` payload, the
-/// UUID is already known locally since this process is both the drag source
-/// and the drop target.
-private struct TabReorderDropDelegate: DropDelegate {
-    let target: TerminalSession.ID
-    @Binding var draggedTabID: TerminalSession.ID?
-    let moveSession: (_ sessionID: TerminalSession.ID, _ targetID: TerminalSession.ID) -> Void
-
-    func dropEntered(info: DropInfo) {
-        guard let draggedTabID, draggedTabID != target else { return }
-        moveSession(draggedTabID, target)
-    }
-
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        draggedTabID = nil
-        return true
-    }
-}
-
 /// Transparent AppKit view that owns a cursor rect for the divider hit strip.
 /// SwiftUI `.onHover` + `NSCursor.push()` gets clobbered by the terminal
 /// NSView's own cursor rects (IBeam); `resetCursorRects` is the reliable path.
@@ -103,7 +79,6 @@ struct TerminalWorkspaceView: View {
     @State private var transientRatios: [UUID: Double] = [:]
     @State private var hoveredDividerID: UUID?
     @State private var paneDrag: PaneDragState?
-    @State private var draggedTabID: TerminalSession.ID?
     @State private var fileDropTargetPaneID: TerminalPane.ID?
     @State private var renamingTabID: TerminalSession.ID?
     @State private var renamingTabTitle = ""
@@ -206,21 +181,17 @@ struct TerminalWorkspaceView: View {
                             : Color.secondary.opacity(0.08),
                         in: RoundedRectangle(cornerRadius: 7)
                     )
-                    .opacity(draggedTabID == session.id ? 0.5 : 1)
-                    .onDrag {
-                        draggedTabID = session.id
-                        return NSItemProvider(object: session.id.uuidString as NSString)
+                    .draggable(session.id.uuidString)
+                    .dropDestination(for: String.self) { payloads, _ in
+                        guard let rawSessionID = payloads.first,
+                              let sourceID = UUID(uuidString: rawSessionID),
+                              sourceID != session.id,
+                              model.sessions.contains(where: { $0.id == sourceID }) else {
+                            return false
+                        }
+                        model.moveSession(sourceID, before: session.id)
+                        return true
                     }
-                    .onDrop(
-                        of: [.text],
-                        delegate: TabReorderDropDelegate(
-                            target: session.id,
-                            draggedTabID: $draggedTabID,
-                            moveSession: { sessionID, targetID in
-                                model.moveSession(sessionID, before: targetID)
-                            }
-                        )
-                    )
                     .contextMenu {
                         Button("Rename") {
                             beginRenaming(session)
@@ -507,7 +478,7 @@ struct TerminalWorkspaceView: View {
             model.setSplitRatio(0.5, splitID: divider.id, in: sessionID)
         }
         .gesture(
-            DragGesture(minimumDistance: 2)
+            DragGesture(minimumDistance: 2, coordinateSpace: .named("paneGrid"))
                 .onChanged { value in
                     let rawRatio = isVertical
                         ? (value.location.x / geometry.size.width - divider.containerFrame.minX) / divider.containerFrame.width

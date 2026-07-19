@@ -127,7 +127,7 @@ final class TunnelWorkspaceModel: ObservableObject {
                 Task { @MainActor in
                     guard let self else { return }
                     self.tasks.removeValue(forKey: id)
-                    if case let .failed(msg) = self.activeStatuses[id] {
+                    if case .failed = self.activeStatuses[id] {
                         // Keep the failure message if we failed due to a specific matched error string
                     } else {
                         switch result {
