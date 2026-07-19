@@ -123,6 +123,54 @@
     },
     "%lld commits ahead, %lld commits behind": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$#@ahead@ ahead, %2$#@behind@ behind"
+          },
+          "substitutions": {
+            "ahead": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%1$lld commit"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%1$lld commits"
+                    }
+                  }
+                }
+              }
+            },
+            "behind": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%2$lld commit"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%2$lld commits"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -133,6 +181,24 @@
     },
     "%lld connections": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld connection"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld connections"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -143,6 +209,24 @@
     },
     "%lld connections selected": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld connection selected"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld connections selected"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -153,6 +237,24 @@
     },
     "%lld panes": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pane"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld panes"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -173,6 +275,24 @@
     },
     "%lld synchronized panes": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld synchronized pane"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld synchronized panes"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -193,6 +313,24 @@
     },
     "%lld transfers completed": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld transfer completed"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld transfers completed"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -2963,6 +3101,24 @@
     },
     "Hostname resolved to %lld addresses.": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Hostname resolved to %lld address."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Hostname resolved to %lld addresses."
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -3983,6 +4139,24 @@
     },
     "Open %lld SSH connections in %@": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Open %1$lld SSH connection in %2$@"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Open %1$lld SSH connections in %2$@"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -4083,6 +4257,24 @@
     },
     "OpenSSH produced %lld active settings.": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "OpenSSH produced %lld active setting."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "OpenSSH produced %lld active settings."
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -6123,6 +6315,24 @@
     },
     "The agent is offering %lld key identities.": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The agent is offering %lld key identity."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "The agent is offering %lld key identities."
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",

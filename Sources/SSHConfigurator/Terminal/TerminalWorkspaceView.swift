@@ -513,12 +513,10 @@ struct TerminalWorkspaceView: View {
             return String(localized: "Startup flow running · sync input locked")
         }
         if session.synchronizedPaneIDs.count > 1 {
-            // TODO(plural)
             return String(localized: "\(session.synchronizedPaneIDs.count) synchronized panes")
         }
         return session.panes.count == 1
             ? statusText(session.status)
-            // TODO(plural)
             : String(localized: "\(session.panes.count) panes")
     }
 

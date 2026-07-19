@@ -55,7 +55,6 @@ struct SyncSettingsView: View {
             Section {
                 statusRow
                 if let aheadBehind = coordinator.aheadBehind, aheadBehind.ahead > 0 || aheadBehind.behind > 0 {
-                    // TODO(plural)
                     Label("\(aheadBehind.ahead) commits ahead, \(aheadBehind.behind) commits behind", systemImage: "arrow.up.arrow.down")
                         .font(.caption)
                         .foregroundStyle(.secondary)

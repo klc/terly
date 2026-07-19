@@ -1015,7 +1015,6 @@ private struct ConnectionGroupRow: View {
             }
             .buttonStyle(.plain)
             .help("Open all SSH connections in the group")
-            // TODO(plural)
             .accessibilityLabel("Open \(group.aliases.count) SSH connections in \(group.name)")
         }
         .padding(.vertical, 2)
@@ -1117,7 +1116,6 @@ private struct HostGroupDisclosure: View {
             }
         }
         .accessibilityLabel("\(group.label ?? "SSH") connection group")
-        // TODO(plural)
         .accessibilityValue("\(hostCount(in: group)) connections")
     }
 
@@ -1246,7 +1244,6 @@ private struct ConnectionGroupEditorSheet: View {
                     }
                 }
 
-                // TODO(plural)
                 Text("\(selectedAliases.count) connections selected")
                     .font(.footnote)
                     .foregroundStyle(.secondary)

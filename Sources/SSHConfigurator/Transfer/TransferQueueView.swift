@@ -86,12 +86,9 @@ struct TransferQueueView: View {
         let waiting = queue.waitingCount
         let total = queue.items.count
         if total == 0 { return String(localized: "Queue is empty") }
-        // TODO(plural)
         if active == 0 && waiting == 0 { return String(localized: "\(total) transfers completed") }
         var parts: [String] = []
-        // TODO(plural)
         if active > 0 { parts.append(String(localized: "\(active) transferring")) }
-        // TODO(plural)
         if waiting > 0 { parts.append(String(localized: "\(waiting) waiting")) }
         return parts.joined(separator: ", ")
     }

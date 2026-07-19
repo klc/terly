@@ -193,7 +193,6 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
             id: "effective-config",
             title: String(localized: "Resolved SSH settings"),
             status: .passed,
-            // TODO(plural)
             summary: String(localized: "OpenSSH produced \(settings.count) active settings."),
             detail: SSHConfigSourceResolver.configurationTrace(from: effectiveResult.standardError)
         ))
@@ -281,7 +280,6 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                 id: "dns",
                 title: String(localized: "DNS resolution"),
                 status: .passed,
-                // TODO(plural)
                 summary: String(localized: "Hostname resolved to \(addresses.count) addresses."),
                 detail: addresses.joined(separator: ", ")
             )
@@ -445,7 +443,6 @@ final class SSHConnectionDiagnostics: SSHConnectionDiagnosing, @unchecked Sendab
                     id: "agent",
                     title: "SSH agent",
                     status: .passed,
-                    // TODO(plural)
                     summary: String(localized: "The agent is offering \(keyCount) key identities."),
                     detail: String(localized: "The key content was not read or transferred to the app.")
                 )

@@ -171,11 +171,9 @@ struct TransferItem: Identifiable, Sendable {
     private func formatETA(_ seconds: TimeInterval) -> String {
         guard seconds.isFinite, seconds > 0 else { return "" }
         let total = Int(seconds.rounded())
-        // TODO(plural)
         if total < 60 { return String(localized: "\(total)s remaining") }
         let minutes = total / 60
         let secs = total % 60
-        // TODO(plural)
         return String(localized: "\(minutes)m \(secs)s remaining")
     }
 }
