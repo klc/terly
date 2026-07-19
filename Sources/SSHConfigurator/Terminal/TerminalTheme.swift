@@ -88,7 +88,7 @@ enum TerminalThemeCatalog {
     /// `nil` so it keeps following the system accent color, as it always has.
     static let system = TerminalTheme(
         id: "system",
-        displayName: "Sistem",
+        displayName: String(localized: "System"),
         palette: TerminalColorPalette(
             // Byte-for-byte SwiftTerm's `Color.defaultInstalledColors`, so
             // selecting "Sistem" (or switching back to it from another theme)

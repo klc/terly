@@ -142,8 +142,8 @@ struct TerminalSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Picker("Yazı Tipi:", selection: $settings.fontName) {
-                    Text("Sistem (SF Mono)").tag("SF Mono")
+                Picker("Font:", selection: $settings.fontName) {
+                    Text("System (SF Mono)").tag("SF Mono")
                     ForEach(availableFonts, id: \.self) { font in
                         Text(font).tag(font)
                     }
@@ -151,43 +151,43 @@ struct TerminalSettingsView: View {
 
                 HStack {
                     Slider(value: $settings.fontSize, in: 9...24, step: 1) {
-                        Text("Yazı Boyutu:")
+                        Text("Font Size:")
                     }
                     Text("\(Int(settings.fontSize)) pt")
                         .font(.body.monospacedDigit())
                         .frame(width: 45, alignment: .trailing)
                 }
 
-                Picker("Tema:", selection: $settings.themeID) {
+                Picker("Theme:", selection: $settings.themeID) {
                     ForEach(TerminalThemeCatalog.all) { theme in
                         Text(theme.displayName).tag(theme.id)
                     }
                 }
 
-                Picker("İmleç:", selection: $settings.cursorStyleID) {
-                    Text("Blok").tag(TerminalCursorShape.block.rawValue)
-                    Text("Dikey Çizgi").tag(TerminalCursorShape.bar.rawValue)
-                    Text("Alt Çizgi").tag(TerminalCursorShape.underline.rawValue)
+                Picker("Cursor:", selection: $settings.cursorStyleID) {
+                    Text("Block").tag(TerminalCursorShape.block.rawValue)
+                    Text("Vertical Bar").tag(TerminalCursorShape.bar.rawValue)
+                    Text("Underline").tag(TerminalCursorShape.underline.rawValue)
                 }
 
-                Toggle("Yanıp sönme", isOn: $settings.cursorBlinks)
+                Toggle("Blink", isOn: $settings.cursorBlinks)
 
                 HStack {
                     Slider(value: $settings.scrollSensitivity, in: 0.2...2.0, step: 0.1) {
-                        Text("Kaydırma Hızı:")
+                        Text("Scroll Speed:")
                     }
                     Text(String(format: "%.1fx", settings.scrollSensitivity))
                         .font(.body.monospacedDigit())
                         .frame(width: 45, alignment: .trailing)
                 }
             } header: {
-                Text("Görünüm")
+                Text("Appearance")
             }
 
             Section {
                 themePreview
             } header: {
-                Text("Önizleme")
+                Text("Preview")
             }
         }
         .padding()
@@ -205,10 +205,10 @@ struct TerminalSettingsView: View {
     private var themePreview: some View {
         let palette = settings.resolvedTheme.palette
         return VStack(alignment: .leading, spacing: 6) {
-            Text("$ echo \"Merhaba Dünya!\"")
+            Text("$ echo \"Hello, World!\"")
                 .font(fontPreview)
                 .foregroundColor(color(palette.foreground))
-            Text("Merhaba Dünya!")
+            Text("Hello, World!")
                 .font(fontPreview)
                 .foregroundColor(color(palette.ansi[2]))
             HStack(spacing: 3) {

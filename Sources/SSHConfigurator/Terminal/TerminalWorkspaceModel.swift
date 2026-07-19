@@ -422,12 +422,17 @@ final class TerminalWorkspaceModel: ObservableObject {
         )
         if case let .running(stepIndex) = paneBeforeExit?.startupState {
             let failedStep = stepIndex ?? 0
-            let suffix = exitCode.map { " (çıkış: \($0))" } ?? ""
+            let message: String
+            if let exitCode {
+                message = String(localized: "SSH process closed before the startup flow finished (exit: \(exitCode)).")
+            } else {
+                message = String(localized: "SSH process closed before the startup flow finished.")
+            }
             sessions[index].layout = sessions[index].layout.updatingStartupState(
                 paneID: paneID,
                 state: .failed(
                     stepIndex: failedStep,
-                    message: "SSH süreci başlangıç akışı tamamlanmadan kapandı\(suffix)."
+                    message: message
                 )
             )
         }
@@ -479,10 +484,10 @@ final class TerminalWorkspaceModel: ObservableObject {
         case let .failed(stepIndex, exitCode):
             let summary = execution.stepSummaries.indices.contains(stepIndex)
                 ? execution.stepSummaries[stepIndex]
-                : "Bilinmeyen adım"
+                : String(localized: "Unknown step")
             state = .failed(
                 stepIndex: stepIndex,
-                message: "\(summary) başarısız oldu (çıkış: \(exitCode))."
+                message: String(localized: "\(summary) failed (exit: \(exitCode)).")
             )
         }
         sessions[index].layout = sessions[index].layout.updatingStartupState(
@@ -515,7 +520,7 @@ final class TerminalWorkspaceModel: ObservableObject {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
         sessions[index].layout = sessions[index].layout.updatingStartupState(
             paneID: paneID,
-            state: .failed(stepIndex: 0, message: "Başlangıç komutu terminale gönderilemedi.")
+            state: .failed(stepIndex: 0, message: String(localized: "The startup command could not be sent to the terminal."))
         )
     }
 

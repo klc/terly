@@ -438,7 +438,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         }
         XCTAssertEqual(stepIndex, 0)
         XCTAssertTrue(message.contains("/missing path"))
-        XCTAssertTrue(message.contains("çıkış: 2"))
+        XCTAssertTrue(message.contains("exit: 2"))
     }
 
     @MainActor
@@ -493,7 +493,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         guard case let .failed(_, message) = model.selectedSession?.activePane?.startupState else {
             return XCTFail("Başlangıç başarısız durumu bekleniyordu")
         }
-        XCTAssertTrue(message.contains("tamamlanmadan kapandı"))
+        XCTAssertTrue(message.contains("closed before the startup flow finished"))
         XCTAssertTrue(message.contains("255"))
     }
 

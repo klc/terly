@@ -2900,6 +2900,676 @@
           }
         }
       }
+    },
+    "Terminal not opened": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal açılmadı"
+          }
+        }
+      }
+    },
+    "Click an SSH connection in the sidebar.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sidebar'dan bir SSH bağlantısına tıkla."
+          }
+        }
+      }
+    },
+    "Close the tab and all SSH connections": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekmeyi ve tüm SSH bağlantılarını kapat"
+          }
+        }
+      }
+    },
+    "⌘-click to select for sync": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘-tıkla ile senkron seç"
+          }
+        }
+      }
+    },
+    "Run startup flow again": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışını tekrar çalıştır"
+          }
+        }
+      }
+    },
+    "Manually re-run the startup flow in the active terminal": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktif terminalde başlangıç akışını manuel tekrar çalıştır"
+          }
+        }
+      }
+    },
+    "Turn off sync": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkronu kapat"
+          }
+        }
+      }
+    },
+    "Clear synchronized terminal selection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senkron terminal seçimini temizle"
+          }
+        }
+      }
+    },
+    "Split vertically": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dikey böl"
+          }
+        }
+      }
+    },
+    "Split the active terminal vertically; opens the same connection on the right": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktif terminali dikey böl; aynı bağlantıyı sağda aç"
+          }
+        }
+      }
+    },
+    "Split horizontally": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yatay böl"
+          }
+        }
+      }
+    },
+    "Split the active terminal horizontally; opens the same connection below": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktif terminali yatay böl; aynı bağlantıyı altta aç"
+          }
+        }
+      }
+    },
+    "Close pane": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bölmeyi kapat"
+          }
+        }
+      }
+    },
+    "Close the active terminal pane": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktif terminal bölmesini kapat"
+          }
+        }
+      }
+    },
+    "Close connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıyı kapat"
+          }
+        }
+      }
+    },
+    "Close the terminal tab and all SSH processes": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal sekmesini ve tüm SSH süreçlerini kapat"
+          }
+        }
+      }
+    },
+    "Terminal appearance settings": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal görünüm ayarları"
+          }
+        }
+      }
+    },
+    "Close this terminal pane": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu terminal bölmesini kapat"
+          }
+        }
+      }
+    },
+    "SSH connection is open": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH bağlantısı açık"
+          }
+        }
+      }
+    },
+    "Terminal process closed (exit: %d)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal süreci kapandı (çıkış: %d)"
+          }
+        }
+      }
+    },
+    "Terminal process closed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal süreci kapandı"
+          }
+        }
+      }
+    },
+    "Startup flow running · sync input locked": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı çalışıyor · senkron giriş kilitli"
+          }
+        }
+      }
+    },
+    "%lld synchronized panes": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld senkron terminal bölmesi"
+          }
+        }
+      }
+    },
+    "%lld panes": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld terminal bölmesi"
+          }
+        }
+      }
+    },
+    "Startup flow ready": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı hazır"
+          }
+        }
+      }
+    },
+    "Skipped for this connection": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu bağlantıda atlandı"
+          }
+        }
+      }
+    },
+    "Startup: step %lld running": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç: %lld. adım çalışıyor"
+          }
+        }
+      }
+    },
+    "Startup flow running": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı çalışıyor"
+          }
+        }
+      }
+    },
+    "Startup flow completed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı tamamlandı"
+          }
+        }
+      }
+    },
+    "Step %lld failed: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adım başarısız: %@"
+          }
+        }
+      }
+    },
+    "Search in terminal": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminalde ara"
+          }
+        }
+      }
+    },
+    "Previous match (⇧⌘G)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önceki eşleşme (⇧⌘G)"
+          }
+        }
+      }
+    },
+    "Next match (⌘G)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonraki eşleşme (⌘G)"
+          }
+        }
+      }
+    },
+    "Close search (Esc)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aramayı kapat (Esc)"
+          }
+        }
+      }
+    },
+    "Connection lost": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı koptu"
+          }
+        }
+      }
+    },
+    "Terminal process exited (exit code: %d).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal süreci çıkış yaptı (çıkış kodu: %d)."
+          }
+        }
+      }
+    },
+    "Terminal process ended.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal süreci sonlandı."
+          }
+        }
+      }
+    },
+    "Reconnect": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden Bağlan"
+          }
+        }
+      }
+    },
+    "Close Pane": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bölmeyi Kapat"
+          }
+        }
+      }
+    },
+    "Automatically reconnect to this server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu sunucuda otomatik yeniden bağlan"
+          }
+        }
+      }
+    },
+    "Connection lost banner": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı koptu bandı"
+          }
+        }
+      }
+    },
+    "Automatic reconnect attempts exhausted (%lld/%lld).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik yeniden bağlanma denemeleri tükendi (%lld/%lld)."
+          }
+        }
+      }
+    },
+    "Network connection is back — reconnect?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ağ bağlantısı geri geldi — yeniden bağlanmak ister misin?"
+          }
+        }
+      }
+    },
+    "Automatic attempt %lld/%lld — retrying in %llds": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik deneme %lld/%lld — %lld sn içinde yeniden denenecek"
+          }
+        }
+      }
+    },
+    "Font:": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yazı Tipi:"
+          }
+        }
+      }
+    },
+    "System (SF Mono)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem (SF Mono)"
+          }
+        }
+      }
+    },
+    "Font Size:": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yazı Boyutu:"
+          }
+        }
+      }
+    },
+    "Theme:": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema:"
+          }
+        }
+      }
+    },
+    "Cursor:": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmleç:"
+          }
+        }
+      }
+    },
+    "Block": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blok"
+          }
+        }
+      }
+    },
+    "Vertical Bar": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dikey Çizgi"
+          }
+        }
+      }
+    },
+    "Underline": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alt Çizgi"
+          }
+        }
+      }
+    },
+    "Blink": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yanıp sönme"
+          }
+        }
+      }
+    },
+    "Scroll Speed:": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydırma Hızı:"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Görünüm"
+          }
+        }
+      }
+    },
+    "Preview": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önizleme"
+          }
+        }
+      }
+    },
+    "$ echo \"Hello, World!\"": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "$ echo \"Merhaba Dünya!\""
+          }
+        }
+      }
+    },
+    "Hello, World!": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merhaba Dünya!"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem"
+          }
+        }
+      }
+    },
+    "Save your changes before opening the connection. SSH uses the ~/.ssh/config file on disk.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıyı açmadan önce değişiklikleri kaydet. SSH diskteki ~/.ssh/config dosyasını kullanır."
+          }
+        }
+      }
+    },
+    "Wildcard or negated Host patterns can't be opened directly as a connection. Select a specific alias.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wildcard veya olumsuz Host desenleri doğrudan bağlantı olarak açılamaz. Somut bir alias seç."
+          }
+        }
+      }
+    },
+    "No SSH connection found to open.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açılacak bir SSH bağlantısı bulunamadı."
+          }
+        }
+      }
+    },
+    "SSH process closed before the startup flow finished (exit: %d).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH süreci başlangıç akışı tamamlanmadan kapandı (çıkış: %d)."
+          }
+        }
+      }
+    },
+    "SSH process closed before the startup flow finished.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH süreci başlangıç akışı tamamlanmadan kapandı."
+          }
+        }
+      }
+    },
+    "Unknown step": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilinmeyen adım"
+          }
+        }
+      }
+    },
+    "%@ failed (exit: %d).": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ başarısız oldu (çıkış: %d)."
+          }
+        }
+      }
+    },
+    "The startup command could not be sent to the terminal.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç komutu terminale gönderilemedi."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -90,9 +90,9 @@ struct TerminalWorkspaceView: View {
                 }
             } else {
                 ContentUnavailableView(
-                    "Terminal açılmadı",
+                    "Terminal not opened",
                     systemImage: "terminal",
-                    description: Text("Sidebar'dan bir SSH bağlantısına tıkla.")
+                    description: Text("Click an SSH connection in the sidebar.")
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -133,7 +133,7 @@ struct TerminalWorkspaceView: View {
                                 .font(.caption2.weight(.bold))
                         }
                         .buttonStyle(.plain)
-                        .help("Sekmeyi ve tüm SSH bağlantılarını kapat")
+                        .help("Close the tab and all SSH connections")
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
@@ -165,7 +165,7 @@ struct TerminalWorkspaceView: View {
             Spacer()
 
             if session.panes.count > 1 && session.synchronizedPaneIDs.isEmpty {
-                Text("⌘-tıkla ile senkron seç")
+                Text("⌘-click to select for sync")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -175,23 +175,23 @@ struct TerminalWorkspaceView: View {
                 .foregroundStyle(.secondary)
 
             if session.activePane?.startupExecution != nil {
-                Button("Başlangıç akışını tekrar çalıştır", systemImage: "arrow.clockwise.circle") {
+                Button("Run startup flow again", systemImage: "arrow.clockwise.circle") {
                     runStartupAgain(in: session)
                 }
                 .labelStyle(.iconOnly)
                 .disabled(session.activePane?.status != .running || session.isStartupRunning)
-                .help("Aktif terminalde başlangıç akışını manuel tekrar çalıştır")
+                .help("Manually re-run the startup flow in the active terminal")
             }
 
             if session.synchronizedPaneIDs.count > 1 {
-                Button("Senkronu kapat", systemImage: "link.badge.minus") {
+                Button("Turn off sync", systemImage: "link.badge.minus") {
                     model.clearPaneSynchronization(in: session.id)
                 }
                 .labelStyle(.iconOnly)
-                .help("Senkron terminal seçimini temizle")
+                .help("Clear synchronized terminal selection")
             }
 
-            Button("Dikey böl", systemImage: "rectangle.split.2x1") {
+            Button("Split vertically", systemImage: "rectangle.split.2x1") {
                 model.splitActivePane(
                     in: session.id,
                     axis: .vertical,
@@ -199,9 +199,9 @@ struct TerminalWorkspaceView: View {
                 )
             }
             .labelStyle(.iconOnly)
-            .help("Aktif terminali dikey böl; aynı bağlantıyı sağda aç")
+            .help("Split the active terminal vertically; opens the same connection on the right")
 
-            Button("Yatay böl", systemImage: "rectangle.split.1x2") {
+            Button("Split horizontally", systemImage: "rectangle.split.1x2") {
                 model.splitActivePane(
                     in: session.id,
                     axis: .horizontal,
@@ -209,21 +209,21 @@ struct TerminalWorkspaceView: View {
                 )
             }
             .labelStyle(.iconOnly)
-            .help("Aktif terminali yatay böl; aynı bağlantıyı altta aç")
+            .help("Split the active terminal horizontally; opens the same connection below")
 
             if session.panes.count > 1 {
-                Button("Bölmeyi kapat", systemImage: "rectangle.badge.xmark", role: .destructive) {
+                Button("Close pane", systemImage: "rectangle.badge.xmark", role: .destructive) {
                     model.closePane(session.activePaneID, in: session.id)
                 }
                 .labelStyle(.iconOnly)
-                .help("Aktif terminal bölmesini kapat")
+                .help("Close the active terminal pane")
             }
 
-            Button("Bağlantıyı kapat", systemImage: "stop.circle", role: .destructive) {
+            Button("Close connection", systemImage: "stop.circle", role: .destructive) {
                 model.closeTab(session.id)
             }
             .labelStyle(.iconOnly)
-            .help("Terminal sekmesini ve tüm SSH süreçlerini kapat")
+            .help("Close the terminal tab and all SSH processes")
 
             Button {
                 showingSettingsPopover = true
@@ -231,7 +231,7 @@ struct TerminalWorkspaceView: View {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.plain)
-            .help("Terminal görünüm ayarları")
+            .help("Terminal appearance settings")
             .popover(isPresented: $showingSettingsPopover, arrowEdge: .bottom) {
                 TerminalSettingsView()
             }
@@ -369,7 +369,7 @@ struct TerminalWorkspaceView: View {
                         .font(.caption2.weight(.bold))
                 }
                 .buttonStyle(.plain)
-                .help("Bu terminal bölmesini kapat")
+                .help("Close this terminal pane")
             }
             .padding(.horizontal, 8)
             .frame(height: pane.startupState == nil ? 27 : 38)
@@ -501,37 +501,40 @@ struct TerminalWorkspaceView: View {
     private func statusText(_ status: TerminalPane.Status) -> String {
         switch status {
         case .running:
-            return "SSH bağlantısı açık"
+            return String(localized: "SSH connection is open")
         case let .exited(code):
-            return code.map { "Terminal süreci kapandı (çıkış: \($0))" } ?? "Terminal süreci kapandı"
+            return code.map { String(localized: "Terminal process closed (exit: \($0))") }
+                ?? String(localized: "Terminal process closed")
         }
     }
 
     private func sessionStatusText(_ session: TerminalSession) -> String {
         if session.isStartupRunning {
-            return "Başlangıç akışı çalışıyor · senkron giriş kilitli"
+            return String(localized: "Startup flow running · sync input locked")
         }
         if session.synchronizedPaneIDs.count > 1 {
-            return "\(session.synchronizedPaneIDs.count) senkron terminal bölmesi"
+            // TODO(plural)
+            return String(localized: "\(session.synchronizedPaneIDs.count) synchronized panes")
         }
         return session.panes.count == 1
             ? statusText(session.status)
-            : "\(session.panes.count) terminal bölmesi"
+            // TODO(plural)
+            : String(localized: "\(session.panes.count) panes")
     }
 
     private func startupStatusText(_ state: StartupFlowRunState) -> String {
         switch state {
         case .ready:
-            return "Başlangıç akışı hazır"
+            return String(localized: "Startup flow ready")
         case .skipped:
-            return "Bu bağlantıda atlandı"
+            return String(localized: "Skipped for this connection")
         case let .running(stepIndex):
-            return stepIndex.map { "Başlangıç: \($0 + 1). adım çalışıyor" }
-                ?? "Başlangıç akışı çalışıyor"
+            return stepIndex.map { String(localized: "Startup: step \($0 + 1) running") }
+                ?? String(localized: "Startup flow running")
         case .completed:
-            return "Başlangıç akışı tamamlandı"
+            return String(localized: "Startup flow completed")
         case let .failed(stepIndex, message):
-            return "\(stepIndex + 1). adım başarısız: \(message)"
+            return String(localized: "Step \(stepIndex + 1) failed: \(message)")
         }
     }
 
@@ -563,7 +566,7 @@ struct TerminalWorkspaceView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            TextField("Terminalde ara", text: $searchTerm)
+            TextField("Search in terminal", text: $searchTerm)
                 .textFieldStyle(.plain)
                 .font(.callout)
                 .focused($searchFieldFocused)
@@ -593,7 +596,7 @@ struct TerminalWorkspaceView: View {
             }
             .buttonStyle(.plain)
             .disabled(searchTerm.isEmpty)
-            .help("Önceki eşleşme (⇧⌘G)")
+            .help("Previous match (⇧⌘G)")
 
             Button {
                 runFind(forward: true)
@@ -603,7 +606,7 @@ struct TerminalWorkspaceView: View {
             }
             .buttonStyle(.plain)
             .disabled(searchTerm.isEmpty)
-            .help("Sonraki eşleşme (⌘G)")
+            .help("Next match (⌘G)")
 
             Button {
                 closeSearch()
@@ -612,7 +615,7 @@ struct TerminalWorkspaceView: View {
                     .font(.caption2.weight(.bold))
             }
             .buttonStyle(.plain)
-            .help("Aramayı kapat (Esc)")
+            .help("Close search (Esc)")
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
@@ -725,16 +728,16 @@ struct TerminalWorkspaceView: View {
                     .foregroundStyle(exitCode == 0 ? .green : .red)
 
                 VStack(spacing: 6) {
-                    Text("Bağlantı koptu")
+                    Text("Connection lost")
                         .font(.headline)
                         .foregroundStyle(.primary)
 
                     if let code = exitCode {
-                        Text("Terminal süreci çıkış yaptı (çıkış kodu: \(code)).")
+                        Text("Terminal process exited (exit code: \(code)).")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     } else {
-                        Text("Terminal süreci sonlandı.")
+                        Text("Terminal process ended.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -755,21 +758,21 @@ struct TerminalWorkspaceView: View {
                         let profile = startupLibrary.profile(for: pane.alias)
                         model.manualReconnectRequested(pane.id, in: session.id, startupProfile: profile)
                     } label: {
-                        Label("Yeniden Bağlan", systemImage: "arrow.clockwise")
+                        Label("Reconnect", systemImage: "arrow.clockwise")
                     }
                     .buttonStyle(.borderedProminent)
 
                     Button(role: .destructive) {
                         model.closePane(pane.id, in: session.id)
                     } label: {
-                        Text("Bölmeyi Kapat")
+                        Text("Close Pane")
                     }
                     .buttonStyle(.bordered)
                 }
 
                 if isRealHost {
                     Toggle(
-                        "Bu sunucuda otomatik yeniden bağlan",
+                        "Automatically reconnect to this server",
                         isOn: Binding(
                             get: { model.isAutoReconnectEnabled(forAlias: pane.alias) },
                             set: { newValue in
@@ -797,15 +800,15 @@ struct TerminalWorkspaceView: View {
             .frame(maxWidth: 380)
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Bağlantı koptu bandı")
+        .accessibilityLabel("Connection lost banner")
     }
 
     private func reconnectStatusText(_ state: AutoReconnectManager.State?) -> String? {
         switch state {
         case let .exhausted(attempts):
-            return "Otomatik yeniden bağlanma denemeleri tükendi (\(attempts)/\(AutoReconnectManager.maxAttempts))."
+            return String(localized: "Automatic reconnect attempts exhausted (\(attempts)/\(AutoReconnectManager.maxAttempts)).")
         case .networkReturnedSuggestion:
-            return "Ağ bağlantısı geri geldi — yeniden bağlanmak ister misin?"
+            return String(localized: "Network connection is back — reconnect?")
         case .countingDown, .awaitingManualReconnect, nil:
             return nil
         }
@@ -823,10 +826,10 @@ struct TerminalWorkspaceView: View {
         TimelineView(.periodic(from: Date(), by: 1)) { context in
             let remaining = max(0, Int(fireDate.timeIntervalSince(context.date).rounded(.up)))
             HStack(spacing: 8) {
-                Text("Otomatik deneme \(attempt)/\(maxAttempts) — \(remaining) sn içinde yeniden denenecek")
+                Text("Automatic attempt \(attempt)/\(maxAttempts) — retrying in \(remaining)s")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Button("Vazgeç") {
+                Button("Cancel") {
                     model.cancelReconnectCountdown(paneID)
                 }
                 .buttonStyle(.plain)
