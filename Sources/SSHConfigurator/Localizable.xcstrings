@@ -2581,6 +2581,16 @@
         }
       }
     },
+    "Drag onto another pane to swap them" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeyi başka bölmenin üzerine sürükleyip yer değiştir"
+          }
+        }
+      }
+    },
     "Duplicate connection" : {
       "localizations" : {
         "tr" : {

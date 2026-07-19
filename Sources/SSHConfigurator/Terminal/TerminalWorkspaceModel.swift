@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import SwiftUI
 
 @MainActor
 final class TerminalWorkspaceModel: ObservableObject {
@@ -297,6 +298,19 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
 
+    /// Drag-and-drop tab reorder (Faz 3). No-op for an unknown session ID on
+    /// either side or when `sessionID == targetID`. Order persists through the
+    /// existing `sessions` `didSet` save, same as every other mutation.
+    func moveSession(_ sessionID: TerminalSession.ID, before targetID: TerminalSession.ID) {
+        guard sessionID != targetID,
+              let fromIndex = sessions.firstIndex(where: { $0.id == sessionID }),
+              let toIndex = sessions.firstIndex(where: { $0.id == targetID }) else { return }
+        sessions.move(
+            fromOffsets: IndexSet(integer: fromIndex),
+            toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex
+        )
+    }
+
     /// Marks panes as closed-by-the-user (WP7 exit classification) and drops
     /// any pending auto-reconnect timer/state for them, so a tab/pane close
     /// never triggers the "connection dropped" band or a stray reconnect.
@@ -343,6 +357,16 @@ final class TerminalWorkspaceModel: ObservableObject {
     func setSplitRatio(_ ratio: Double, splitID: UUID, in sessionID: TerminalSession.ID) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
         sessions[index].layout = sessions[index].layout.updatingRatio(splitID: splitID, ratio: ratio)
+    }
+
+    /// Drag-and-drop pane swap (Faz 2). `swappingPanes` already no-ops for an
+    /// unknown/identical ID pair; `activePaneID`/`synchronizedPaneIDs` are left
+    /// untouched and pane surfaces are keyed by pane ID, so the NSViews simply
+    /// move to their new position.
+    func swapPanes(_ a: TerminalPane.ID, _ b: TerminalPane.ID, in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
+              let swapped = sessions[index].layout.swappingPanes(a, b) else { return }
+        sessions[index].layout = swapped
     }
 
     func selectPane(

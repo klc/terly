@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Normalized (0–1) geometry for one split boundary, produced alongside pane
 /// frames by `layoutGeometry(for:in:)` so dividers can be drawn/dragged.
@@ -13,6 +14,39 @@ private struct SplitDividerGeometry: Identifiable {
 private struct PaneLayoutGeometry {
     var frames: [TerminalPane.ID: CGRect] = [:]
     var dividers: [SplitDividerGeometry] = []
+}
+
+/// Faz 2: in-progress pane drag-to-swap. `target` is re-derived on every
+/// `onChanged` tick by hit-testing `location` against the current normalized
+/// frames; `nil` while hovering over the source pane itself or empty space.
+private struct PaneDragState {
+    let source: TerminalPane.ID
+    var location: CGPoint
+    var target: TerminalPane.ID?
+}
+
+/// Faz 3: `DropDelegate` for tab reorder. `dropEntered` reorders live off the
+/// bound `draggedTabID` — it never decodes the `NSItemProvider` payload, the
+/// UUID is already known locally since this process is both the drag source
+/// and the drop target.
+private struct TabReorderDropDelegate: DropDelegate {
+    let target: TerminalSession.ID
+    @Binding var draggedTabID: TerminalSession.ID?
+    let moveSession: (_ sessionID: TerminalSession.ID, _ targetID: TerminalSession.ID) -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let draggedTabID, draggedTabID != target else { return }
+        moveSession(draggedTabID, target)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggedTabID = nil
+        return true
+    }
 }
 
 /// Transparent AppKit view that owns a cursor rect for the divider hit strip.
@@ -64,6 +98,8 @@ struct TerminalWorkspaceView: View {
     @FocusState private var searchFieldFocused: Bool
     @State private var transientRatios: [UUID: Double] = [:]
     @State private var hoveredDividerID: UUID?
+    @State private var paneDrag: PaneDragState?
+    @State private var draggedTabID: TerminalSession.ID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -84,6 +120,7 @@ struct TerminalWorkspaceView: View {
                 .background(terminalBackground)
                 .onChange(of: model.selectedSessionID) { _, _ in
                     closeSearch(returningFocus: false)
+                    paneDrag = nil
                 }
                 .onChange(of: session.activePaneID) { _, _ in
                     closeSearch(returningFocus: false)
@@ -143,8 +180,24 @@ struct TerminalWorkspaceView: View {
                             : Color.secondary.opacity(0.08),
                         in: RoundedRectangle(cornerRadius: 7)
                     )
+                    .opacity(draggedTabID == session.id ? 0.5 : 1)
+                    .onDrag {
+                        draggedTabID = session.id
+                        return NSItemProvider(object: session.id.uuidString as NSString)
+                    }
+                    .onDrop(
+                        of: [.text],
+                        delegate: TabReorderDropDelegate(
+                            target: session.id,
+                            draggedTabID: $draggedTabID,
+                            moveSession: { sessionID, targetID in
+                                model.moveSession(sessionID, before: targetID)
+                            }
+                        )
+                    )
                 }
             }
+            .animation(.default, value: model.sessions.map(\.id))
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         }
@@ -251,22 +304,51 @@ struct TerminalWorkspaceView: View {
                         model.selectedSessionID == session.id &&
                         session.activePaneID == pane.id
 
-                    paneSurface(pane, in: session, isActive: paneIsActive)
-                        .frame(
-                            width: max(1, geometry.size.width * normalizedFrame.width - 2),
-                            height: max(1, geometry.size.height * normalizedFrame.height - 2)
-                        )
-                        .position(
-                            x: geometry.size.width * normalizedFrame.midX,
-                            y: geometry.size.height * normalizedFrame.midY
-                        )
+                    paneSurface(
+                        pane,
+                        in: session,
+                        isActive: paneIsActive,
+                        geometry: geometry,
+                        paneFrames: geometryInfo.frames
+                    )
+                    .frame(
+                        width: max(1, geometry.size.width * normalizedFrame.width - 2),
+                        height: max(1, geometry.size.height * normalizedFrame.height - 2)
+                    )
+                    .position(
+                        x: geometry.size.width * normalizedFrame.midX,
+                        y: geometry.size.height * normalizedFrame.midY
+                    )
                 }
 
                 ForEach(geometryInfo.dividers) { divider in
                     splitDividerHandle(divider, in: geometry, sessionID: session.id)
                 }
             }
+            .coordinateSpace(name: "paneGrid")
         }
+    }
+
+    /// Hit-tests a `paneGrid`-space point against the current normalized pane
+    /// frames, skipping `source` (a pane can't be dropped onto itself).
+    private func paneID(
+        at location: CGPoint,
+        in geometry: GeometryProxy,
+        frames: [TerminalPane.ID: CGRect],
+        excluding source: TerminalPane.ID
+    ) -> TerminalPane.ID? {
+        for (candidateID, normalizedFrame) in frames where candidateID != source {
+            let frame = CGRect(
+                x: geometry.size.width * normalizedFrame.minX,
+                y: geometry.size.height * normalizedFrame.minY,
+                width: geometry.size.width * normalizedFrame.width,
+                height: geometry.size.height * normalizedFrame.height
+            )
+            if frame.contains(location) {
+                return candidateID
+            }
+        }
+        return nil
     }
 
     /// A near-invisible hit strip straddling a split boundary: drag to resize,
@@ -334,9 +416,14 @@ struct TerminalWorkspaceView: View {
     private func paneSurface(
         _ pane: TerminalPane,
         in session: TerminalSession,
-        isActive: Bool
+        isActive: Bool,
+        geometry: GeometryProxy,
+        paneFrames: [TerminalPane.ID: CGRect]
     ) -> some View {
-        VStack(spacing: 0) {
+        let isDragSource = paneDrag?.source == pane.id
+        let isDragTarget = paneDrag?.target == pane.id
+
+        return VStack(spacing: 0) {
             HStack(spacing: 7) {
                 HStack(spacing: 7) {
                     Circle()
@@ -361,6 +448,26 @@ struct TerminalWorkspaceView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
+                .opacity(isDragSource ? 0.6 : 1)
+                .help("Drag onto another pane to swap them")
+                .gesture(
+                    DragGesture(minimumDistance: 8, coordinateSpace: .named("paneGrid"))
+                        .onChanged { value in
+                            let target = paneID(
+                                at: value.location,
+                                in: geometry,
+                                frames: paneFrames,
+                                excluding: pane.id
+                            )
+                            paneDrag = PaneDragState(source: pane.id, location: value.location, target: target)
+                        }
+                        .onEnded { _ in
+                            if let target = paneDrag?.target {
+                                model.swapPanes(pane.id, target, in: session.id)
+                            }
+                            paneDrag = nil
+                        }
+                )
 
                 Button {
                     model.closePane(pane.id, in: session.id)
@@ -427,6 +534,14 @@ struct TerminalWorkspaceView: View {
                         : isActive ? Color.accentColor : Color.secondary.opacity(0.28),
                     lineWidth: isActive || session.synchronizedPaneIDs.contains(pane.id) ? 1.5 : 1
                 )
+        }
+        .overlay {
+            if isDragTarget {
+                Rectangle()
+                    .fill(Color.accentColor.opacity(0.25))
+                Rectangle()
+                    .stroke(Color.accentColor, lineWidth: 2)
+            }
         }
         .contentShape(Rectangle())
         .simultaneousGesture(

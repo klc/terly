@@ -705,6 +705,107 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         XCTAssertNil(layout.swappingPanes(paneA.id, UUID()))
     }
 
+    // MARK: - Faz 2: pane drag-and-drop swap
+
+    @MainActor
+    func testSwapPanesExchangesTreePositions() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let firstPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let secondPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        model.swapPanes(firstPaneID, secondPaneID, in: sessionID)
+
+        let session = try! XCTUnwrap(model.selectedSession)
+        XCTAssertEqual(session.panes.map(\.id), [secondPaneID, firstPaneID])
+        XCTAssertEqual(Set(session.panes.map(\.id)), Set([firstPaneID, secondPaneID]))
+    }
+
+    @MainActor
+    func testSwapPanesKeepsActiveAndSyncIDs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let firstPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let secondPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        model.selectPane(firstPaneID, in: sessionID, extendingSynchronization: true)
+        let activePaneIDBeforeSwap = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        let syncedIDsBeforeSwap = try! XCTUnwrap(model.selectedSession?.synchronizedPaneIDs)
+
+        model.swapPanes(firstPaneID, secondPaneID, in: sessionID)
+
+        XCTAssertEqual(model.selectedSession?.activePaneID, activePaneIDBeforeSwap)
+        XCTAssertEqual(model.selectedSession?.synchronizedPaneIDs, syncedIDsBeforeSwap)
+    }
+
+    @MainActor
+    func testSwapPanesIgnoresUnknownOrIdenticalIDs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let firstPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let layoutBefore = try! XCTUnwrap(model.selectedSession?.layout)
+
+        model.swapPanes(firstPaneID, firstPaneID, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.layout, layoutBefore)
+
+        model.swapPanes(firstPaneID, UUID(), in: sessionID)
+        XCTAssertEqual(model.selectedSession?.layout, layoutBefore)
+    }
+
+    // MARK: - Faz 3: tab drag-and-drop reorder
+
+    @MainActor
+    func testMoveSessionReordersTabs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "prod-db", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 3, alias: "prod-worker", hasUnsavedChanges: false))
+        let firstID = model.sessions[0].id
+        let thirdID = model.sessions[2].id
+
+        model.moveSession(thirdID, before: firstID)
+
+        XCTAssertEqual(model.sessions.map(\.alias), ["prod-worker", "prod-api", "prod-db"])
+    }
+
+    @MainActor
+    func testMoveSessionKeepsSelection() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "prod-db", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 3, alias: "prod-worker", hasUnsavedChanges: false))
+        let selectedID = try! XCTUnwrap(model.selectedSessionID)
+        let firstID = model.sessions[0].id
+
+        model.moveSession(selectedID, before: firstID)
+
+        XCTAssertEqual(model.selectedSessionID, selectedID)
+        XCTAssertEqual(model.sessions.map(\.id).first, selectedID)
+    }
+
+    @MainActor
+    func testMoveSessionIgnoresUnknownIDs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "prod-db", hasUnsavedChanges: false))
+        let aliasesBefore = model.sessions.map(\.alias)
+        let firstID = model.sessions[0].id
+
+        model.moveSession(UUID(), before: firstID)
+        XCTAssertEqual(model.sessions.map(\.alias), aliasesBefore)
+
+        model.moveSession(firstID, before: UUID())
+        XCTAssertEqual(model.sessions.map(\.alias), aliasesBefore)
+
+        model.moveSession(firstID, before: firstID)
+        XCTAssertEqual(model.sessions.map(\.alias), aliasesBefore)
+    }
+
     @MainActor
     private func makeModel() -> TerminalWorkspaceModel {
         TerminalWorkspaceModel(
