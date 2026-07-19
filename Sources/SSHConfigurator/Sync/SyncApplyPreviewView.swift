@@ -17,7 +17,7 @@ struct SyncApplyPreviewView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(title: "Changes to Apply", onClose: onClose)
+            SheetHeader(title: String(localized: "Changes to Apply"), onClose: onClose)
 
             Divider()
 
@@ -33,9 +33,9 @@ struct SyncApplyPreviewView: View {
 
                 if let selectedDiff {
                     HStack(spacing: 0) {
-                        SyncDiffColumn(title: "Current (local)", source: selectedDiff.currentContent)
+                        SyncDiffColumn(title: String(localized: "Current (local)"), source: selectedDiff.currentContent)
                         Divider()
-                        SyncDiffColumn(title: "Incoming (remote)", source: selectedDiff.incomingContent)
+                        SyncDiffColumn(title: String(localized: "Incoming (remote)"), source: selectedDiff.incomingContent)
                     }
                 } else {
                     ContentUnavailableView(

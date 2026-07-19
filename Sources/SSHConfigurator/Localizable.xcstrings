@@ -265,6 +265,24 @@
     },
     "%lld steps": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld step"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld steps"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -2991,6 +3009,24 @@
     },
     "Group members (%lld hosts)": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Group members (%lld host)"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Group members (%lld hosts)"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -3583,6 +3619,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aşağı taşı"
+          }
+        }
+      }
+    },
+    "Move step down": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adımı aşağı taşı"
+          }
+        }
+      }
+    },
+    "Move step up": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adımı yukarı taşı"
           }
         }
       }
@@ -5065,10 +5121,38 @@
     },
     "Run (%lld hosts)": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Run (%lld host)"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Run (%lld hosts)"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
             "value": "Çalıştır (%lld host)"
+          }
+        }
+      }
+    },
+    "Run Runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook Çalıştır"
           }
         }
       }
@@ -5119,6 +5203,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ runbook'unu çalıştır"
+          }
+        }
+      }
+    },
+    "Runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook"
           }
         }
       }
@@ -6175,6 +6269,24 @@
     },
     "Targets (%lld hosts)": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Targets (%lld host)"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Targets (%lld hosts)"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -7203,6 +7315,24 @@
     },
     "Up to %lld hosts at a time": {
       "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Up to %lld host at a time"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Up to %lld hosts at a time"
+                }
+              }
+            }
+          }
+        },
         "tr": {
           "stringUnit": {
             "state": "translated",
@@ -7297,6 +7427,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Komutu çalıştırarak doğrula"
+          }
+        }
+      }
+    },
+    "Value": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Değer"
           }
         }
       }

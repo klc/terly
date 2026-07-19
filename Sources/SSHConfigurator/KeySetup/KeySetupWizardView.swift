@@ -186,7 +186,7 @@ struct KeySetupWizardView: View {
             }
 
             Section("Public key to add") {
-                Text(publicKeyText.isEmpty ? "(couldn't read public key)" : publicKeyText)
+                Text(publicKeyText.isEmpty ? String(localized: "(couldn't read public key)") : publicKeyText)
                     .font(.system(.footnote, design: .monospaced))
                     .textSelection(.enabled)
             }
