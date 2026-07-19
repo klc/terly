@@ -18,7 +18,7 @@ public struct SSHConfigValidator: Sendable {
         allowingMatchExec: Bool = false
     ) -> SSHConfigValidationResult {
         guard !host.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return .invalid(message: "Doğrulama için somut bir Host adı gerekli.")
+            return .invalid(message: String(localized: "A concrete Host name is required for validation.", bundle: .core))
         }
         guard allowingMatchExec || !document.containsMatchExec else {
             return .requiresMatchExecConfirmation
@@ -49,7 +49,7 @@ public struct SSHConfigValidator: Sendable {
                 let data = errorPipe.fileHandleForReading.readDataToEndOfFile()
                 let message = String(decoding: data, as: UTF8.self)
                     .trimmingCharacters(in: .whitespacesAndNewlines)
-                return .invalid(message: message.isEmpty ? "OpenSSH config doğrulaması başarısız oldu." : message)
+                return .invalid(message: message.isEmpty ? String(localized: "OpenSSH config validation failed.", bundle: .core) : message)
             }
 
             return .valid

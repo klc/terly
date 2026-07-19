@@ -48,17 +48,17 @@ public enum SSHConfigFileStoreError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case let .unreadable(url, error):
-            return "Config dosyası okunamadı: \(url.path) (\(error.localizedDescription))"
+            return String(localized: "The config file couldn't be read: \(url.path) (\(error.localizedDescription))", bundle: .core)
         case let .invalidEncoding(url):
-            return "Config dosyası UTF-8 olarak okunamadı: \(url.path)"
+            return String(localized: "The config file couldn't be read as UTF-8: \(url.path)", bundle: .core)
         case let .fileChangedExternally(url):
-            return "Config dosyası uygulama açıkken dışarıdan değişti: \(url.path)"
+            return String(localized: "The config file was changed externally while the app was open: \(url.path)", bundle: .core)
         case let .symbolicLink(url):
-            return "Güvenlik için sembolik link olan config dosyalarına doğrudan yazılamaz: \(url.path)"
+            return String(localized: "For safety, config files that are symbolic links can't be written to directly: \(url.path)", bundle: .core)
         case let .unableToWrite(url):
-            return "Config dosyası yazılamadı: \(url.path)"
+            return String(localized: "The config file couldn't be written: \(url.path)", bundle: .core)
         case let .invalidBackup(url):
-            return "Seçilen yedek güvenli yedek klasöründe değil: \(url.path)"
+            return String(localized: "The selected backup isn't in the safe backup folder: \(url.path)", bundle: .core)
         }
     }
 }
