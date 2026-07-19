@@ -61,6 +61,10 @@ struct SSHConfiguratorApp: App {
 
         Settings {
             TabView {
+                GeneralSettingsView()
+                    .tabItem {
+                        Label("General", systemImage: "gearshape")
+                    }
                 TerminalSettingsView()
                     .tabItem {
                         Label("Terminal", systemImage: "terminal")

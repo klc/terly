@@ -654,7 +654,7 @@ private struct ContentSidebarView: View {
                     onOpenLocalTerminal()
                     model.selectedItem = .localTerminal
                 } label: {
-                    Label("Local terminal", systemImage: "terminal")
+                    Label("Local Terminal", systemImage: "terminal")
                 }
                 .buttonStyle(.plain)
                 .tag(ConfigNavigationItem.localTerminal)

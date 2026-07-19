@@ -115,7 +115,7 @@ struct TerminalWorkspaceView: View {
                                 Circle()
                                     .fill(statusColor(session.status))
                                     .frame(width: 7, height: 7)
-                                Text(session.alias)
+                                Text(session.displayName)
                                     .lineLimit(1)
                                 if session.panes.count > 1 {
                                     Text("\(session.panes.count)")
@@ -155,7 +155,7 @@ struct TerminalWorkspaceView: View {
         HStack(spacing: 10) {
             Image(systemName: "terminal.fill")
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.alias)
+                Text(session.displayName)
                     .font(.headline)
                 Text(sessionStatusText(session))
                     .font(.caption)
@@ -343,7 +343,7 @@ struct TerminalWorkspaceView: View {
                         .fill(statusColor(pane.status))
                         .frame(width: 6, height: 6)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(pane.alias)
+                        Text(pane.displayName)
                             .font(.caption.monospaced())
                             .lineLimit(1)
                         if let startupState = pane.startupState {

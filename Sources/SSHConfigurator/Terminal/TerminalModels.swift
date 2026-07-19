@@ -476,3 +476,21 @@ struct SSHLaunchPlanBuilder: Sendable {
         return normalizedAlias
     }
 }
+
+extension TerminalSession {
+    var displayName: String {
+        if alias == "Yerel Terminal" || alias == "Local Terminal" {
+            return String(localized: "Local Terminal")
+        }
+        return alias
+    }
+}
+
+extension TerminalPane {
+    var displayName: String {
+        if alias == "Yerel Terminal" || alias == "Local Terminal" {
+            return String(localized: "Local Terminal")
+        }
+        return alias
+    }
+}

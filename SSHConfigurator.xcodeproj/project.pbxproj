@@ -44,6 +44,7 @@
 		4CE594CDFB5597D5FF893997 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 7E62750A8B91755B5C23237C /* Sparkle */; };
 		4D5197910D92660DB4350C95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C6BE40066CC577CDAA33D8D6 /* Assets.xcassets */; };
 		4D6B0277F3A4E21444FB6B95 /* StartupFlowBootstrapBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1992CE6D96799F34D4972C83 /* StartupFlowBootstrapBuilder.swift */; };
+		4E4B0859EF646B24E349A8E6 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0A198B65DD603D79FA864C /* GeneralSettingsView.swift */; };
 		50B0BD911E468AC5360C72E8 /* StartupFlowEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08A4E34ADE44314D4D40324 /* StartupFlowEditorView.swift */; };
 		51C72DCA9493745961BB4BA2 /* AutoReconnectSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 640457D54E626608578CA306 /* AutoReconnectSettingsStore.swift */; };
 		567B7309828FCF74AE12590B /* RunbookListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DAC60C4AB97AD788CC3AE1 /* RunbookListView.swift */; };
@@ -324,6 +325,7 @@
 		CC0179F2E01FF1D0A77D8261 /* GitCommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitCommandRunner.swift; sourceTree = "<group>"; };
 		CCC750A806CFA9A14F8ACECB /* SSHConnectionDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConnectionDiagnostics.swift; sourceTree = "<group>"; };
 		CD77CC37B15F48F0E6F2F92C /* RunbookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookTests.swift; sourceTree = "<group>"; };
+		CF0A198B65DD603D79FA864C /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		D138052CC306199D33F9487B /* ChecksumVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecksumVerifier.swift; sourceTree = "<group>"; };
 		D21B0AACF6A5A0812F8B5D83 /* SCPTransferWorkspaceModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCPTransferWorkspaceModelTests.swift; sourceTree = "<group>"; };
 		D22042E64157754DB6E27E7A /* SSHConfigDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigDocument.swift; sourceTree = "<group>"; };
@@ -482,6 +484,7 @@
 				D378DEDB5144FEBE6D868714 /* ConfigViewModel.swift */,
 				44385BFF8ABAE6A32DECC8C6 /* ConnectionGroups.swift */,
 				64F17E24A3F1336017631C99 /* ContentView.swift */,
+				CF0A198B65DD603D79FA864C /* GeneralSettingsView.swift */,
 				4F7C7373DB0DF6E7AFDCF206 /* Info.plist */,
 				FCBFFEEE083667EF0489CFD0 /* Localizable.xcstrings */,
 				67EDC3784ED64215C34EC5EE /* SSHConfiguratorApp.swift */,
@@ -809,7 +812,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				5AF833CD0ECE89EA963C2446 /* XCRemoteSwiftPackageReference "Sparkle" */,
-				643353ADC391D9CD2BFF3A4B /* XCRemoteSwiftPackageReference "SwiftTerm" */,
+				59B221CFA5F5A7916A11A676 /* XCRemoteSwiftPackageReference "SwiftTerm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 28368CCAFF062FBF4104C174 /* Products */;
@@ -934,6 +937,7 @@
 				256B5AD90DE8B613DD1A3995 /* ContentView.swift in Sources */,
 				6D6421D70C7243FBF4D61F61 /* EmbeddedTerminalEngine.swift in Sources */,
 				3EC9D4F8EDE197D68ABFE2FF /* FormFieldStyle.swift in Sources */,
+				4E4B0859EF646B24E349A8E6 /* GeneralSettingsView.swift in Sources */,
 				721CCE9510C7416899368A34 /* GitCommandRunner.swift in Sources */,
 				EE770038031E137F7440E522 /* HostSettingsApplyCoordinator.swift in Sources */,
 				FCCB0E77D30F810406A6538E /* KeySetupEngine.swift in Sources */,
@@ -1407,6 +1411,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		59B221CFA5F5A7916A11A676 /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/migueldeicaza/SwiftTerm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.15.0;
+			};
+		};
 		5AF833CD0ECE89EA963C2446 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle.git";
@@ -1415,20 +1427,12 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		643353ADC391D9CD2BFF3A4B /* XCRemoteSwiftPackageReference "SwiftTerm" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/klc/SwiftTerm.git";
-			requirement = {
-				kind = revision;
-				revision = 983cfbfaaac43cc9635d8c6983d4c4167b9b7bfd;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		0ED1A60223CC7B857C5EF165 /* SwiftTerm */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 643353ADC391D9CD2BFF3A4B /* XCRemoteSwiftPackageReference "SwiftTerm" */;
+			package = 59B221CFA5F5A7916A11A676 /* XCRemoteSwiftPackageReference "SwiftTerm" */;
 			productName = SwiftTerm;
 		};
 		7E62750A8B91755B5C23237C /* Sparkle */ = {
