@@ -3,6 +3,18 @@
     <channel>
         <title>Terly</title>
         <item>
+            <title>1.1.1</title>
+            <pubDate>Sun, 19 Jul 2026 22:34:54 +0000</pubDate>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://klc.github.io/terly/updates/Terly-1.1.1.zip" length="5576826" type="application/octet-stream" sparkle:edSignature="S80ZgO9qeAouFe4RZzVZ+bvpiNnofxNcUr9U9awFrarcBzhMzCjbIiX1lsPY2J83BWBdAEIWXukJOVKg9U0kDQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://klc.github.io/terly/updates/Terly5-4.delta" sparkle:deltaFrom="4" length="2293846" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="980464" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="rPBuJNoKdiN2etSlbtQFH42rSqfnYyj444y5w56JOJNaHCfPNuZgkigsIUfINsMEZicwsZx0Lo4c1oNt7mjbCw=="/>
+                <enclosure url="https://klc.github.io/terly/updates/Terly5-3.delta" sparkle:deltaFrom="3" length="2565638" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="980464" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="Mota7m4Jyy8W84k9o7KS3/6D15gbKw3vkHL0P3JIDZJag0g5c6fAK3lmNQs4bAbhGwobs9U+pmArtH4PdYHMDw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>1.1.0</title>
             <pubDate>Sun, 19 Jul 2026 21:51:46 +0000</pubDate>
             <sparkle:version>4</sparkle:version>
