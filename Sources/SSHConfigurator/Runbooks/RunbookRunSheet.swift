@@ -234,7 +234,7 @@ struct RunbookRunSheet: View {
             Section("Parametreler") {
                 ForEach(runbook.parameters) { parameter in
                     TextField(
-                        parameter.name.isEmpty ? "(isimsiz)" : parameter.name,
+                        parameter.name.isEmpty ? String(localized: "(unnamed)") : parameter.name,
                         text: Binding(
                             get: { parameterValues[parameter.id] ?? parameter.defaultValue ?? "" },
                             set: { parameterValues[parameter.id] = $0 }

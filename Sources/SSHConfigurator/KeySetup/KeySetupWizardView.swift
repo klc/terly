@@ -50,19 +50,19 @@ struct KeySetupWizardView: View {
                     configureView
                 case .generating:
                     KeySetupStepStatusView(
-                        title: "Anahtar oluşturuldu",
+                        title: String(localized: "Key generated"),
                         state: engine.generateState,
                         output: engine.generateOutput,
-                        runningMessage: "ssh-keygen çalışıyor. Passphrase istenirse ayrı bir diyalog açılır.",
+                        runningMessage: String(localized: "ssh-keygen is running. A separate dialog opens if a passphrase is requested."),
                         onBack: { phase = .configure },
                         onRetry: { requestGenerate() }
                     )
                 case .addingToAgent:
                     KeySetupStepStatusView(
-                        title: "SSH agent'a eklendi",
+                        title: String(localized: "Added to SSH agent"),
                         state: engine.agentAddState,
                         output: engine.agentAddOutput,
-                        runningMessage: "ssh-add çalışıyor.",
+                        runningMessage: String(localized: "ssh-add is running."),
                         onSkip: { phase = .copyPreview },
                         onRetry: { startAgentAdd() }
                     )
@@ -70,19 +70,19 @@ struct KeySetupWizardView: View {
                     copyPreviewView
                 case .copying:
                     KeySetupStepStatusView(
-                        title: "Sunucuya kopyalandı",
+                        title: String(localized: "Copied to server"),
                         state: engine.copyState,
                         output: engine.copyOutput,
-                        runningMessage: "Public key sunucuda authorized_keys dosyasına ekleniyor.",
+                        runningMessage: String(localized: "Adding the public key to authorized_keys on the server."),
                         onBack: { phase = .copyPreview },
                         onRetry: { startCopy() }
                     )
                 case .verifying:
                     KeySetupStepStatusView(
-                        title: "Parolasız giriş doğrulandı",
+                        title: String(localized: "Password-less login verified"),
                         state: engine.verifyState,
                         output: engine.verifyOutput,
-                        runningMessage: "ssh -o BatchMode=yes ile test ediliyor.",
+                        runningMessage: String(localized: "Testing with ssh -o BatchMode=yes."),
                         onSkip: { phase = .done },
                         onRetry: { startVerify() }
                     )
@@ -90,23 +90,23 @@ struct KeySetupWizardView: View {
                     doneView
                 }
             }
-            .navigationTitle("Anahtar Kurulumu — \(alias)")
+            .navigationTitle("Key Setup — \(alias)")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(phase == .done ? "Kapat" : "İptal") { dismiss() }
+                    Button(phase == .done ? "Close" : "Cancel") { dismiss() }
                 }
             }
         }
         .frame(minWidth: 560, minHeight: 540)
         .confirmationDialog(
-            "\(URL(fileURLWithPath: trimmedPath).lastPathComponent) zaten var. Üzerine yazılsın mı?",
+            "\(URL(fileURLWithPath: trimmedPath).lastPathComponent) already exists. Overwrite it?",
             isPresented: $showingOverwriteConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Üzerine Yaz", role: .destructive) { startGenerate(overwriteConfirmed: true) }
-            Button("Vazgeç", role: .cancel) {}
+            Button("Overwrite", role: .destructive) { startGenerate(overwriteConfirmed: true) }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Mevcut anahtar dosyasının üzerine yazılacak. Bu işlem geri alınamaz.")
+            Text("The existing key file will be overwritten. This action cannot be undone.")
         }
         .onChange(of: engine.generateState) { _, newValue in
             guard phase == .generating, newValue == .succeeded else { return }
@@ -136,24 +136,24 @@ struct KeySetupWizardView: View {
 
     private var configureView: some View {
         Form {
-            Section("Hedef") {
+            Section("Target") {
                 LabeledContent("Host", value: alias)
             }
 
-            Section("Yeni anahtar") {
-                TextField("Özel anahtar yolu", text: $privateKeyPath, prompt: Text("örn. ~/.ssh/id_ed25519"))
+            Section("New key") {
+                TextField("Private key path", text: $privateKeyPath, prompt: Text("e.g. ~/.ssh/id_ed25519"))
                     .font(.system(.body, design: .monospaced))
                     .editorFieldStyle()
-                TextField("Yorum (-C)", text: $comment, prompt: Text("örn. mustafa@macbook"))
+                TextField("Comment (-C)", text: $comment, prompt: Text("e.g. mustafa@macbook"))
                     .editorFieldStyle()
             }
 
             Section {
-                Toggle("Anahtarı SSH agent'a ekle (ssh-add)", isOn: $addToAgent)
+                Toggle("Add key to SSH agent (ssh-add)", isOn: $addToAgent)
             }
 
             Section {
-                Text("Passphrase, ssh-keygen'in kendi istemiyle sorulur ve bir diyalog olarak gösterilir; uygulama passphrase'i hiçbir zaman görmez, tutmaz veya loglamaz.")
+                Text("The passphrase is requested through ssh-keygen's own prompt, shown as a dialog; the app never sees, stores, or logs the passphrase.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -162,7 +162,7 @@ struct KeySetupWizardView: View {
         .safeAreaInset(edge: .bottom) {
             HStack {
                 Spacer()
-                Button("Anahtar Oluştur") { requestGenerate() }
+                Button("Generate Key") { requestGenerate() }
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                     .disabled(trimmedPath.isEmpty)
@@ -175,25 +175,25 @@ struct KeySetupWizardView: View {
 
     private var copyPreviewView: some View {
         Form {
-            Section("Hedef") {
+            Section("Target") {
                 LabeledContent("Host", value: alias)
             }
 
-            Section("Çalıştırılacak uzak komut") {
+            Section("Remote command to run") {
                 Text("ssh -- \(alias) '\(KeySetupCommandBuilder.authorizedKeysRemoteScript)'")
                     .font(.system(.footnote, design: .monospaced))
                     .textSelection(.enabled)
             }
 
-            Section("Eklenecek public key") {
-                Text(publicKeyText.isEmpty ? "(public key okunamadı)" : publicKeyText)
+            Section("Public key to add") {
+                Text(publicKeyText.isEmpty ? "(couldn't read public key)" : publicKeyText)
                     .font(.system(.footnote, design: .monospaced))
                     .textSelection(.enabled)
             }
 
             if case let .failed(message) = engine.agentAddState, addToAgent {
                 Section {
-                    Label("SSH agent'a ekleme başarısız oldu: \(message)", systemImage: "exclamationmark.triangle.fill")
+                    Label("Adding to SSH agent failed: \(message)", systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
                         .font(.caption)
                 }
@@ -203,7 +203,7 @@ struct KeySetupWizardView: View {
         .safeAreaInset(edge: .bottom) {
             HStack {
                 Spacer()
-                Button("Sunucuya Kopyala") { startCopy() }
+                Button("Copy to Server") { startCopy() }
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                     .disabled(publicKeyText.isEmpty)
@@ -216,23 +216,23 @@ struct KeySetupWizardView: View {
 
     private var doneView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Özet")
+            Text("Summary")
                 .font(.title3.bold())
 
-            summaryRow(title: "Anahtar oluşturma", state: engine.generateState)
+            summaryRow(title: String(localized: "Key generation"), state: engine.generateState)
             if addToAgent {
-                summaryRow(title: "SSH agent'a ekleme", state: engine.agentAddState)
+                summaryRow(title: String(localized: "Add to SSH agent"), state: engine.agentAddState)
             }
-            summaryRow(title: "Sunucuya kopyalama", state: engine.copyState)
-            summaryRow(title: "Parolasız giriş doğrulaması", state: engine.verifyState)
+            summaryRow(title: String(localized: "Copy to server"), state: engine.copyState)
+            summaryRow(title: String(localized: "Password-less login verification"), state: engine.verifyState)
 
             Divider()
 
-            Toggle("Host'un IdentityFile alanını bu anahtara güncelle", isOn: $applyIdentityFile)
+            Toggle("Update the host's IdentityFile to this key", isOn: $applyIdentityFile)
                 .disabled(didApplyIdentityFile)
 
             if didApplyIdentityFile {
-                Label("IdentityFile güncellendi ve kaydedildi.", systemImage: "checkmark.circle.fill")
+                Label("IdentityFile updated and saved.", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                     .font(.caption)
             }
@@ -242,14 +242,14 @@ struct KeySetupWizardView: View {
             HStack {
                 Spacer()
                 if applyIdentityFile && !didApplyIdentityFile {
-                    Button("IdentityFile'ı Güncelle ve Uygula") {
+                    Button("Update and Apply IdentityFile") {
                         onIdentityFileAccepted(trimmedPath)
                         didApplyIdentityFile = true
                     }
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                 }
-                Button("Kapat") { dismiss() }
+                Button("Close") { dismiss() }
             }
         }
         .padding(24)
@@ -289,10 +289,10 @@ struct KeySetupWizardView: View {
 
     private func label(for state: KeySetupStepState) -> String {
         switch state {
-        case .succeeded: return "Başarılı"
+        case .succeeded: return String(localized: "Succeeded")
         case let .failed(message): return message
-        case .running: return "Çalışıyor"
-        case .pending: return "Atlandı"
+        case .running: return String(localized: "Running")
+        case .pending: return String(localized: "Skipped")
         }
     }
 
@@ -350,7 +350,7 @@ struct KeySetupWizardView: View {
 /// Shared "running / succeeded / failed" presentation for a single wizard
 /// step. `onBack`/`onSkip`/`onRetry` are all optional — callers only supply
 /// the actions that make sense for that step (e.g. the optional agent-add
-/// step offers "Atla" instead of "Geri").
+/// step offers "Skip" instead of "Back").
 private struct KeySetupStepStatusView: View {
     let title: String
     let state: KeySetupStepState
@@ -372,7 +372,7 @@ private struct KeySetupStepStatusView: View {
                     .foregroundStyle(.green)
                     .font(.headline)
             case let .failed(message):
-                Label("Başarısız oldu", systemImage: "xmark.octagon.fill")
+                Label("Failed", systemImage: "xmark.octagon.fill")
                     .foregroundStyle(.red)
                     .font(.headline)
                 ScrollView {
@@ -385,20 +385,20 @@ private struct KeySetupStepStatusView: View {
                 .frame(maxHeight: 220)
                 HStack {
                     if let onBack {
-                        Button("Geri", action: onBack)
+                        Button("Back", action: onBack)
                     }
                     if let onSkip {
-                        Button("Atla", action: onSkip)
+                        Button("Skip", action: onSkip)
                     }
                     if let onRetry {
-                        Button("Tekrar Dene", action: onRetry)
+                        Button("Retry", action: onRetry)
                             .buttonStyle(.borderedProminent)
                     }
                 }
             }
 
             if !output.isEmpty, state != .running {
-                DisclosureGroup("Çıktı") {
+                DisclosureGroup("Output") {
                     ScrollView {
                         Text(output)
                             .font(.footnote.monospaced())

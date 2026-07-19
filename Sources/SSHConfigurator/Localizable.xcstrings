@@ -4940,6 +4940,1476 @@
           }
         }
       }
+    },
+    "Cancelled.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İptal edildi."
+          }
+        }
+      }
+    },
+    "[Step %lld] %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Adım %lld] %@"
+          }
+        }
+      }
+    },
+    "Step %lld failed with exit code %d.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adım %lld çıkış kodu %d ile başarısız oldu."
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geri"
+          }
+        }
+      }
+    },
+    "Run": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalıştır"
+          }
+        }
+      }
+    },
+    "Next": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İleri"
+          }
+        }
+      }
+    },
+    "Run (%lld hosts)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalıştır (%lld host)"
+          }
+        }
+      }
+    },
+    "This runbook is marked dangerous or contains a dangerous command pattern. Are you sure you want to run it on %lld hosts?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu runbook tehlikeli olarak işaretli veya tehlikeli bir komut kalıbı içeriyor. %lld hostta çalıştırmak istediğine emin misin?"
+          }
+        }
+      }
+    },
+    "Target type": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef türü"
+          }
+        }
+      }
+    },
+    "Single host": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tek host"
+          }
+        }
+      }
+    },
+    "Connection group": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı grubu"
+          }
+        }
+      }
+    },
+    "No concrete host found in the config.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config içinde somut bir host bulunamadı."
+          }
+        }
+      }
+    },
+    "Host": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host"
+          }
+        }
+      }
+    },
+    "Select…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçiniz..."
+          }
+        }
+      }
+    },
+    "No connection group defined.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tanımlı bağlantı grubu yok."
+          }
+        }
+      }
+    },
+    "Group members (%lld hosts)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grup üyeleri (%lld host)"
+          }
+        }
+      }
+    },
+    "Parameters": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parametreler"
+          }
+        }
+      }
+    },
+    "(unnamed)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(isimsiz)"
+          }
+        }
+      }
+    },
+    "These values are only used for this run; they aren't saved to the runbook file.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu değerler yalnızca bu çalıştırma için kullanılır; runbook dosyasına kaydedilmez."
+          }
+        }
+      }
+    },
+    "Targets (%lld hosts)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedefler (%lld host)"
+          }
+        }
+      }
+    },
+    "Commands to run": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalıştırılacak komutlar"
+          }
+        }
+      }
+    },
+    "Dangerous": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tehlikeli"
+          }
+        }
+      }
+    },
+    "If this fails, continues with the next steps on this host.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başarısız olursa bu hostta sonraki adımlara devam eder."
+          }
+        }
+      }
+    },
+    "Concurrency": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eşzamanlılık"
+          }
+        }
+      }
+    },
+    "Up to %lld hosts at a time": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aynı anda en fazla %lld host"
+          }
+        }
+      }
+    },
+    "This runbook is marked dangerous or contains a dangerous command pattern. Extra confirmation will be required before running.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu runbook tehlikeli olarak işaretli veya tehlikeli bir komut kalıbı içeriyor. Çalıştırmadan önce ek onay istenecek."
+          }
+        }
+      }
+    },
+    "Cancel run": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İptal Et"
+          }
+        }
+      }
+    },
+    "Retry failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başarısızları tekrar dene"
+          }
+        }
+      }
+    },
+    "Running… (%lld/%lld completed)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalışıyor... (%lld/%lld tamamlandı)"
+          }
+        }
+      }
+    },
+    "%lld/%lld succeeded, %lld/%lld failed": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/%lld başarılı, %lld/%lld başarısız"
+          }
+        }
+      }
+    },
+    "Step %lld/%lld": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adım %lld/%lld"
+          }
+        }
+      }
+    },
+    "Succeeded": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başarılı"
+          }
+        }
+      }
+    },
+    "No output.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çıktı yok."
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ad"
+          }
+        }
+      }
+    },
+    "Description (optional)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açıklama (isteğe bağlı)"
+          }
+        }
+      }
+    },
+    "Mark as dangerous": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tehlikeli olarak işaretle"
+          }
+        }
+      }
+    },
+    "Even when unmarked, steps containing dangerous command patterns like `rm -rf` or `shutdown` are automatically flagged in the run preview.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İşaretlenmemiş olsa da `rm -rf`, `shutdown` gibi tehlikeli komut kalıpları içeren adımlar çalıştırma önizlemesinde otomatik olarak uyarılır."
+          }
+        }
+      }
+    },
+    "Steps": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adımlar"
+          }
+        }
+      }
+    },
+    "No steps added yet.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz adım eklenmedi."
+          }
+        }
+      }
+    },
+    "Add step": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adım ekle"
+          }
+        }
+      }
+    },
+    "No parameters to use as `{{name}}` in commands.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komutlarda `{{ad}}` şeklinde kullanılacak parametre yok."
+          }
+        }
+      }
+    },
+    "Add parameter": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parametre ekle"
+          }
+        }
+      }
+    },
+    "Don't put secrets like passwords or tokens in a default value — parameter values are asked for separately on every run and aren't stored persistently.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parola veya token gibi sırları varsayılan değere yazma — parametre değerleri her çalıştırmada ayrıca sorulur ve kalıcı saklanmaz."
+          }
+        }
+      }
+    },
+    "Delete Runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook'u Sil"
+          }
+        }
+      }
+    },
+    "New Runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni Runbook"
+          }
+        }
+      }
+    },
+    "Edit Runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook Düzenle"
+          }
+        }
+      }
+    },
+    "Are you sure you want to delete this runbook?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook'u silmek istediğinize emin misiniz?"
+          }
+        }
+      }
+    },
+    "This action cannot be undone.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu işlem geri alınamaz."
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydet"
+          }
+        }
+      }
+    },
+    "Command": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komut"
+          }
+        }
+      }
+    },
+    "Move up": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yukarı taşı"
+          }
+        }
+      }
+    },
+    "Move down": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aşağı taşı"
+          }
+        }
+      }
+    },
+    "Delete step": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adımı sil"
+          }
+        }
+      }
+    },
+    "e.g. apt-get install -y {{package}}": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. apt-get install -y {{package}}"
+          }
+        }
+      }
+    },
+    "Continue with the next steps on this host if this fails": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başarısız olursa bu hostta sonraki adımlara devam et"
+          }
+        }
+      }
+    },
+    "This command contains a dangerous pattern.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu komut tehlikeli bir kalıp içeriyor."
+          }
+        }
+      }
+    },
+    "Parameter name": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parametre adı"
+          }
+        }
+      }
+    },
+    "e.g. version": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. version"
+          }
+        }
+      }
+    },
+    "Default value (optional)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varsayılan değer (isteğe bağlı)"
+          }
+        }
+      }
+    },
+    "Delete parameter": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parametreyi sil"
+          }
+        }
+      }
+    },
+    "No Runbooks Found": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook Bulunamadı"
+          }
+        }
+      }
+    },
+    "Save the command sequences you want to run on multiple servers, step by step.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birden çok sunucuda çalıştırmak istediğin komut dizilerini adım adım kaydet."
+          }
+        }
+      }
+    },
+    "Add Runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook Ekle"
+          }
+        }
+      }
+    },
+    "This runbook is marked dangerous or contains a dangerous command pattern.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu runbook tehlikeli olarak işaretli veya tehlikeli bir komut kalıbı içeriyor."
+          }
+        }
+      }
+    },
+    "%lld steps": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld adım"
+          }
+        }
+      }
+    },
+    "Run the %@ runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ runbook'unu çalıştır"
+          }
+        }
+      }
+    },
+    "Edit runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runbook'u düzenle"
+          }
+        }
+      }
+    },
+    "Edit the %@ runbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ runbook'unu düzenle"
+          }
+        }
+      }
+    },
+    "Run automatically on connect": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlanınca otomatik çalıştır"
+          }
+        }
+      }
+    },
+    "No startup steps defined for this connection.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu bağlantı için başlangıç adımı tanımlanmadı."
+          }
+        }
+      }
+    },
+    "Change user": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanıcı değiştir"
+          }
+        }
+      }
+    },
+    "Change directory": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dizine geç"
+          }
+        }
+      }
+    },
+    "Run command": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komut çalıştır"
+          }
+        }
+      }
+    },
+    "The command may contain a value that looks like a password, token, or key. Startup flows are written to the metadata file unencrypted; don't add secrets.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Komut parola, token veya anahtar benzeri bir değer içeriyor olabilir. Başlangıç akışları şifrelenmeden metadata dosyasına yazılır; secret ekleme."
+          }
+        }
+      }
+    },
+    "The app never captures or stores your sudo password. If needed, it's entered at the normal terminal prompt.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygulama sudo parolasını yakalamaz veya saklamaz. Gerekirse parola normal terminal isteminde girilir."
+          }
+        }
+      }
+    },
+    "Preview before connecting": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı öncesi önizleme"
+          }
+        }
+      }
+    },
+    "Username": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanıcı adı"
+          }
+        }
+      }
+    },
+    "Runs as `sudo -iu <user>`. This step can only be first and can only appear once.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sudo -iu <kullanıcı> kullanılır. Bu adım ilk sırada ve yalnızca bir kez bulunabilir."
+          }
+        }
+      }
+    },
+    "Remote directory": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzak dizin"
+          }
+        }
+      }
+    },
+    "Shell command": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shell komutu"
+          }
+        }
+      }
+    },
+    "e.g. tmux attach || tmux new": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. tmux attach || tmux new"
+          }
+        }
+      }
+    },
+    "Stop the flow if this fails": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başarısız olursa akışı durdur"
+          }
+        }
+      }
+    },
+    "Connection startup flow": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı başlangıç akışı"
+          }
+        }
+      }
+    },
+    "Group startup flows": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grup başlangıç akışları"
+          }
+        }
+      }
+    },
+    "Review the steps that will run automatically before the SSH connection opens.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH bağlantısı açılmadan önce otomatik çalışacak adımları kontrol et."
+          }
+        }
+      }
+    },
+    "No automatic startup flow": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik başlangıç akışı yok"
+          }
+        }
+      }
+    },
+    "All startup flows run as a single SSH bootstrap command.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tüm başlangıç akışları tek SSH bootstrap komutu olarak çalışır."
+          }
+        }
+      }
+    },
+    "Skip this time": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu sefer atla"
+          }
+        }
+      }
+    },
+    "Skip all this time": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tümünü bu sefer atla"
+          }
+        }
+      }
+    },
+    "Connect and run": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlan ve çalıştır"
+          }
+        }
+      }
+    },
+    "Orphaned startup flows": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yetim başlangıç akışları"
+          }
+        }
+      }
+    },
+    "Select a new connection for an alias that's missing from the config": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config dışında kaybolan alias için yeni bir bağlantı seç"
+          }
+        }
+      }
+    },
+    "The startup flow must be linked to a concrete SSH alias.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı somut bir SSH alias'ına bağlanmalıdır."
+          }
+        }
+      }
+    },
+    "Another startup profile is already linked to the alias %@.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ alias'ına zaten başka bir başlangıç profili bağlı."
+          }
+        }
+      }
+    },
+    "Startup profile not found.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç profili bulunamadı."
+          }
+        }
+      }
+    },
+    "No target config fingerprint found for the startup profile tied to a config change.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Config değişikliğine bağlı başlangıç profili için hedef config fingerprint'i bulunamadı."
+          }
+        }
+      }
+    },
+    "A startup flow can only be linked to a concrete Host alias. Add a concrete alias first for a wildcard or negated pattern.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç akışı yalnızca somut bir Host alias'ına bağlanabilir. Wildcard veya olumsuz desen için önce somut bir alias ekle."
+          }
+        }
+      }
+    },
+    "Step %lld: enter a username.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adım için kullanıcı adı gir."
+          }
+        }
+      }
+    },
+    "Step %lld: the username isn't safe to use with sudo.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adımdaki kullanıcı adı sudo için güvenli bir kullanıcı adı değil."
+          }
+        }
+      }
+    },
+    "Step %lld: enter a remote directory path.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adım için uzak dizin yolu gir."
+          }
+        }
+      }
+    },
+    "Step %lld: enter the command to run.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adım için çalıştırılacak komutu gir."
+          }
+        }
+      }
+    },
+    "Step %lld: changing the user can only be the first step in the flow.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adımdaki kullanıcı değiştirme yalnızca akışın ilk adımı olabilir."
+          }
+        }
+      }
+    },
+    "Step %lld isn't supported: the user can only be changed once in a flow.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld. adım desteklenmiyor: bir akışta yalnızca bir kez kullanıcı değiştirilebilir."
+          }
+        }
+      }
+    },
+    "ssh-keygen returned exit code %d.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh-keygen çıkış kodu %d döndürdü."
+          }
+        }
+      }
+    },
+    "ssh-add returned exit code %d.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh-add çıkış kodu %d döndürdü."
+          }
+        }
+      }
+    },
+    "Copy returned exit code %d.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopyalama çıkış kodu %d döndürdü."
+          }
+        }
+      }
+    },
+    "Verification returned exit code %d.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doğrulama çıkış kodu %d döndürdü."
+          }
+        }
+      }
+    },
+    "A concrete Host alias is required.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Somut bir Host alias'ı gerekli."
+          }
+        }
+      }
+    },
+    "A key already exists at this path. You need to explicitly confirm before overwriting it.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu yolda zaten bir anahtar var. Üzerine yazmadan önce açıkça onaylaman gerekiyor."
+          }
+        }
+      }
+    },
+    "The public key file (.pub) wasn't found or couldn't be read.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public key dosyası (.pub) bulunamadı veya okunamadı."
+          }
+        }
+      }
+    },
+    "Key generated": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar oluşturuldu"
+          }
+        }
+      }
+    },
+    "ssh-keygen is running. A separate dialog opens if a passphrase is requested.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh-keygen çalışıyor. Passphrase istenirse ayrı bir diyalog açılır."
+          }
+        }
+      }
+    },
+    "Added to SSH agent": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH agent'a eklendi"
+          }
+        }
+      }
+    },
+    "ssh-add is running.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh-add çalışıyor."
+          }
+        }
+      }
+    },
+    "Copied to server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucuya kopyalandı"
+          }
+        }
+      }
+    },
+    "Adding the public key to authorized_keys on the server.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public key sunucuda authorized_keys dosyasına ekleniyor."
+          }
+        }
+      }
+    },
+    "Password-less login verified": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parolasız giriş doğrulandı"
+          }
+        }
+      }
+    },
+    "Testing with ssh -o BatchMode=yes.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ssh -o BatchMode=yes ile test ediliyor."
+          }
+        }
+      }
+    },
+    "Key Setup — %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar Kurulumu — %@"
+          }
+        }
+      }
+    },
+    "%@ already exists. Overwrite it?": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ zaten var. Üzerine yazılsın mı?"
+          }
+        }
+      }
+    },
+    "Overwrite": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Üzerine Yaz"
+          }
+        }
+      }
+    },
+    "The existing key file will be overwritten. This action cannot be undone.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mevcut anahtar dosyasının üzerine yazılacak. Bu işlem geri alınamaz."
+          }
+        }
+      }
+    },
+    "Target": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hedef"
+          }
+        }
+      }
+    },
+    "New key": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni anahtar"
+          }
+        }
+      }
+    },
+    "Private key path": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar yolu"
+          }
+        }
+      }
+    },
+    "Comment (-C)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yorum (-C)"
+          }
+        }
+      }
+    },
+    "e.g. mustafa@macbook": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "örn. mustafa@macbook"
+          }
+        }
+      }
+    },
+    "Add key to SSH agent (ssh-add)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarı SSH agent'a ekle (ssh-add)"
+          }
+        }
+      }
+    },
+    "The passphrase is requested through ssh-keygen's own prompt, shown as a dialog; the app never sees, stores, or logs the passphrase.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passphrase, ssh-keygen'in kendi istemiyle sorulur ve bir diyalog olarak gösterilir; uygulama passphrase'i hiçbir zaman görmez, tutmaz veya loglamaz."
+          }
+        }
+      }
+    },
+    "Generate Key": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar Oluştur"
+          }
+        }
+      }
+    },
+    "Remote command to run": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalıştırılacak uzak komut"
+          }
+        }
+      }
+    },
+    "Public key to add": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eklenecek public key"
+          }
+        }
+      }
+    },
+    "(couldn't read public key)": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(public key okunamadı)"
+          }
+        }
+      }
+    },
+    "Adding to SSH agent failed: %@": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH agent'a ekleme başarısız oldu: %@"
+          }
+        }
+      }
+    },
+    "Copy to Server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucuya Kopyala"
+          }
+        }
+      }
+    },
+    "Summary": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özet"
+          }
+        }
+      }
+    },
+    "Key generation": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar oluşturma"
+          }
+        }
+      }
+    },
+    "Add to SSH agent": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH agent'a ekleme"
+          }
+        }
+      }
+    },
+    "Copy to server": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucuya kopyalama"
+          }
+        }
+      }
+    },
+    "Password-less login verification": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parolasız giriş doğrulaması"
+          }
+        }
+      }
+    },
+    "Update the host's IdentityFile to this key": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host'un IdentityFile alanını bu anahtara güncelle"
+          }
+        }
+      }
+    },
+    "IdentityFile updated and saved.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IdentityFile güncellendi ve kaydedildi."
+          }
+        }
+      }
+    },
+    "Update and Apply IdentityFile": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IdentityFile'ı Güncelle ve Uygula"
+          }
+        }
+      }
+    },
+    "Running": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalışıyor"
+          }
+        }
+      }
+    },
+    "Skipped": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atlandı"
+          }
+        }
+      }
+    },
+    "Skip": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atla"
+          }
+        }
+      }
+    },
+    "Output": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çıktı"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -21,11 +21,11 @@ struct StartupFlowEditorView: View {
     private let secretDetector = StartupFlowSecretDetector()
 
     var body: some View {
-        Section("Başlangıç Akışı") {
-            Toggle("Bağlanınca otomatik çalıştır", isOn: $profile.automaticallyRun)
+        Section("Startup Flow") {
+            Toggle("Run automatically on connect", isOn: $profile.automaticallyRun)
 
             if profile.steps.isEmpty {
-                Text("Bu bağlantı için başlangıç adımı tanımlanmadı.")
+                Text("No startup steps defined for this connection.")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach($profile.steps) { $step in
@@ -39,34 +39,34 @@ struct StartupFlowEditorView: View {
                 .onMove(perform: move)
             }
 
-            Menu("Adım ekle", systemImage: "plus") {
-                Button("Kullanıcı değiştir") {
+            Menu("Add step", systemImage: "plus") {
+                Button("Change user") {
                     profile.steps.append(.changeUser(""))
                 }
-                Button("Dizine geç") {
+                Button("Change directory") {
                     profile.steps.append(.changeDirectory(""))
                 }
-                Button("Komut çalıştır") {
+                Button("Run command") {
                     profile.steps.append(.runCommand(""))
                 }
             }
 
             if secretDetector.mayContainSecret(profile) {
                 Label(
-                    "Komut parola, token veya anahtar benzeri bir değer içeriyor olabilir. Başlangıç akışları şifrelenmeden metadata dosyasına yazılır; secret ekleme.",
+                    "The command may contain a value that looks like a password, token, or key. Startup flows are written to the metadata file unencrypted; don't add secrets.",
                     systemImage: "exclamationmark.triangle.fill"
                 )
                 .foregroundStyle(.orange)
                 .font(.footnote)
             }
 
-            Text("Uygulama sudo parolasını yakalamaz veya saklamaz. Gerekirse parola normal terminal isteminde girilir.")
+            Text("The app never captures or stores your sudo password. If needed, it's entered at the normal terminal prompt.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
 
         if !profile.steps.isEmpty {
-            Section("Bağlantı öncesi önizleme") {
+            Section("Preview before connecting") {
                 ForEach(Array(profile.steps.enumerated()), id: \.element.id) { index, step in
                     HStack(alignment: .firstTextBaseline) {
                         Text("\(index + 1).")
@@ -108,38 +108,38 @@ private struct StartupFlowStepEditor: View {
                 Label(step.kind.label, systemImage: icon)
                     .font(.subheadline.weight(.semibold))
                 Spacer()
-                Button("Yukarı taşı", systemImage: "chevron.up", action: onMoveUp)
+                Button("Move up", systemImage: "chevron.up", action: onMoveUp)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
-                    .help("Adımı yukarı taşı")
-                    .accessibilityLabel("Adımı yukarı taşı")
-                Button("Aşağı taşı", systemImage: "chevron.down", action: onMoveDown)
+                    .help("Move step up")
+                    .accessibilityLabel("Move step up")
+                Button("Move down", systemImage: "chevron.down", action: onMoveDown)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
-                    .help("Adımı aşağı taşı")
-                    .accessibilityLabel("Adımı aşağı taşı")
-                Button("Adımı sil", systemImage: "trash", role: .destructive, action: onDelete)
+                    .help("Move step down")
+                    .accessibilityLabel("Move step down")
+                Button("Delete step", systemImage: "trash", role: .destructive, action: onDelete)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
-                    .help("Adımı sil")
-                    .accessibilityLabel("Adımı sil")
+                    .help("Delete step")
+                    .accessibilityLabel("Delete step")
             }
 
             switch step.kind {
             case .changeUser:
-                TextField("Kullanıcı adı", text: $step.value, prompt: Text("xyz"))
+                TextField("Username", text: $step.value, prompt: Text("xyz"))
                     .editorFieldStyle()
-                Text("sudo -iu <kullanıcı> kullanılır. Bu adım ilk sırada ve yalnızca bir kez bulunabilir.")
+                Text("Runs as `sudo -iu <user>`. This step can only be first and can only appear once.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             case .changeDirectory:
-                TextField("Uzak dizin", text: $step.value, prompt: Text("/home/xyz"))
+                TextField("Remote directory", text: $step.value, prompt: Text("/home/xyz"))
                     .editorFieldStyle()
             case .runCommand:
-                TextField("Shell komutu", text: $step.value, prompt: Text("örn. tmux attach || tmux new"), axis: .vertical)
+                TextField("Shell command", text: $step.value, prompt: Text("e.g. tmux attach || tmux new"), axis: .vertical)
                     .lineLimit(2...5)
                     .editorFieldStyle()
-                Toggle("Başarısız olursa akışı durdur", isOn: $step.stopOnFailure)
+                Toggle("Stop the flow if this fails", isOn: $step.stopOnFailure)
             }
         }
         .padding(.vertical, 4)

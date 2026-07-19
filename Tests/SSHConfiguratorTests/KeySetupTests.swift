@@ -282,8 +282,8 @@ final class KeySetupDiagnosticsSuggestionTests: XCTestCase {
             alias: "prod-api",
             createdAt: Date(),
             checks: [
-                SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .warning, summary: "Agent boş.", detail: nil),
-                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .failed, summary: "Authentication rejected", detail: nil),
+                SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .warning, summary: "Agent is empty.", detail: nil),
+                SSHDiagnosticCheck(id: "connection", title: "Connection", status: .failed, summary: "Authentication rejected", detail: nil),
             ],
             resolvedSettings: []
         )
@@ -295,8 +295,8 @@ final class KeySetupDiagnosticsSuggestionTests: XCTestCase {
             alias: "prod-api",
             createdAt: Date(),
             checks: [
-                SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .warning, summary: "Agent boş.", detail: nil),
-                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .passed, summary: "OK", detail: nil),
+                SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .warning, summary: "Agent is empty.", detail: nil),
+                SSHDiagnosticCheck(id: "connection", title: "Connection", status: .passed, summary: "OK", detail: nil),
             ],
             resolvedSettings: []
         )
@@ -308,8 +308,8 @@ final class KeySetupDiagnosticsSuggestionTests: XCTestCase {
             alias: "prod-api",
             createdAt: Date(),
             checks: [
-                SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .passed, summary: "1 anahtar.", detail: nil),
-                SSHDiagnosticCheck(id: "connection", title: "Bağlantı", status: .failed, summary: "Authentication rejected", detail: nil),
+                SSHDiagnosticCheck(id: "agent", title: "SSH agent", status: .passed, summary: "1 key.", detail: nil),
+                SSHDiagnosticCheck(id: "connection", title: "Connection", status: .failed, summary: "Authentication rejected", detail: nil),
             ],
             resolvedSettings: []
         )

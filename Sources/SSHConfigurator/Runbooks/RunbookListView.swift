@@ -99,7 +99,7 @@ private struct RunbookRowView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Text(runbook.name.isEmpty ? "(isimsiz)" : runbook.name)
+                    Text(runbook.name.isEmpty ? String(localized: "(unnamed)") : runbook.name)
                         .font(.headline)
                     if runbook.isDangerous || runbook.steps.contains(where: { RunbookDangerDetector.isDangerous($0.command) }) {
                         Label("Tehlikeli", systemImage: "exclamationmark.triangle.fill")
@@ -137,6 +137,6 @@ private struct RunbookRowView: View {
     }
 
     private var runbookDisplayName: String {
-        runbook.name.isEmpty ? "(isimsiz)" : runbook.name
+        runbook.name.isEmpty ? String(localized: "(unnamed)") : runbook.name
     }
 }

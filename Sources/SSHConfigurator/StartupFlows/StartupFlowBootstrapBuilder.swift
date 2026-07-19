@@ -11,17 +11,17 @@ enum StartupFlowBuildError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case let .emptyUser(step):
-            "\(step + 1). adım için kullanıcı adı gir."
+            String(localized: "Step \(step + 1): enter a username.")
         case let .invalidUser(step):
-            "\(step + 1). adımdaki kullanıcı adı sudo için güvenli bir kullanıcı adı değil."
+            String(localized: "Step \(step + 1): the username isn't safe to use with sudo.")
         case let .emptyDirectory(step):
-            "\(step + 1). adım için uzak dizin yolu gir."
+            String(localized: "Step \(step + 1): enter a remote directory path.")
         case let .emptyCommand(step):
-            "\(step + 1). adım için çalıştırılacak komutu gir."
+            String(localized: "Step \(step + 1): enter the command to run.")
         case let .changeUserMustBeFirst(step):
-            "\(step + 1). adımdaki kullanıcı değiştirme yalnızca akışın ilk adımı olabilir."
+            String(localized: "Step \(step + 1): changing the user can only be the first step in the flow.")
         case let .multipleUserChanges(step):
-            "\(step + 1). adım desteklenmiyor: bir akışta yalnızca bir kez kullanıcı değiştirilebilir."
+            String(localized: "Step \(step + 1) isn't supported: the user can only be changed once in a flow.")
         }
     }
 }

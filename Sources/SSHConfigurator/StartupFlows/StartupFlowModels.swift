@@ -8,9 +8,9 @@ enum StartupFlowStepKind: String, Codable, CaseIterable, Sendable {
 
     var label: String {
         switch self {
-        case .changeUser: "Kullanıcı değiştir"
-        case .changeDirectory: "Dizine geç"
-        case .runCommand: "Komut çalıştır"
+        case .changeUser: String(localized: "Change user")
+        case .changeDirectory: String(localized: "Change directory")
+        case .runCommand: String(localized: "Run command")
         }
     }
 }
@@ -228,7 +228,7 @@ enum StartupFlowEditingPolicy {
             return .available(alias: alias)
         }
         return .unavailable(
-            message: "Başlangıç akışı yalnızca somut bir Host alias'ına bağlanabilir. Wildcard veya olumsuz desen için önce somut bir alias ekle."
+            message: String(localized: "A startup flow can only be linked to a concrete Host alias. Add a concrete alias first for a wildcard or negated pattern.")
         )
     }
 }
