@@ -74,6 +74,7 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
 
     /// `XCTestExpectation` isn't as short-hand as `waitForExistence`, but there's
     /// no built-in "wait for disappearance" — this polls `exists` instead.
+    @MainActor
     private func waitForDisappearance(of element: XCUIElement, timeout: TimeInterval) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
