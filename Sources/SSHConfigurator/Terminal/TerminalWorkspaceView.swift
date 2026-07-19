@@ -90,6 +90,7 @@ struct TerminalWorkspaceView: View {
     let engine: any EmbeddedTerminalEngine
     let isActive: Bool
     let isVisible: Bool
+    let onRequestTransfer: (String) -> Void
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
     @State private var searchTerm = ""
@@ -242,6 +243,16 @@ struct TerminalWorkspaceView: View {
                 }
                 .labelStyle(.iconOnly)
                 .help("Clear synchronized terminal selection")
+            }
+
+            if session.hostID != -1 {
+                let transferAlias = session.activePane?.alias ?? session.alias
+                Button("Transfer files", systemImage: "arrow.left.arrow.right") {
+                    onRequestTransfer(transferAlias)
+                }
+                .labelStyle(.iconOnly)
+                .disabled(!SSHLaunchPlanBuilder.isConcreteAlias(transferAlias))
+                .help("Open file transfer for the active pane's connection")
             }
 
             Button("Split vertically", systemImage: "rectangle.split.2x1") {

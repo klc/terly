@@ -58,7 +58,8 @@ struct ContentView: View {
                 tunnelWorkspace: tunnelWorkspace,
                 snippets: snippets,
                 runbooks: runbooks,
-                isHostSettingsSheetPresented: editingHostSelection != nil
+                isHostSettingsSheetPresented: editingHostSelection != nil,
+                onRequestTransfer: { showTransfer(forAlias: $0) }
             )
             .frame(minWidth: 680, minHeight: 460)
         }
@@ -314,6 +315,12 @@ struct ContentView: View {
     private func requestDeleteHost(_ host: SSHHostBlock) {
         model.selectedItem = .host(host.id)
         showingDeleteConfirmation = true
+    }
+
+    private func showTransfer(forAlias alias: String) {
+        guard SSHLaunchPlanBuilder.isConcreteAlias(alias) else { return }
+        let hostID = model.hosts.first { $0.patterns.contains(alias) }?.id ?? alias.hashValue
+        transferSelection = SCPTransferSelection(id: hostID, alias: alias)
     }
 
     private func showTransfer(for host: SSHHostBlock?) {
@@ -858,6 +865,7 @@ private struct ContentDetailView: View {
     @ObservedObject var snippets: SnippetLibrary
     @ObservedObject var runbooks: RunbookLibrary
     let isHostSettingsSheetPresented: Bool
+    let onRequestTransfer: (String) -> Void
 
     var body: some View {
         if let document = model.document {
@@ -869,7 +877,8 @@ private struct ContentDetailView: View {
                         startupLibrary: startupFlows,
                         engine: terminalEngine,
                         isActive: terminalIsVisible && !isHostSettingsSheetPresented,
-                        isVisible: terminalIsVisible
+                        isVisible: terminalIsVisible,
+                        onRequestTransfer: onRequestTransfer
                     )
                     .opacity(terminalIsVisible ? 1 : 0)
                     .allowsHitTesting(terminalIsVisible)

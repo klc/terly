@@ -4298,6 +4298,16 @@
         }
       }
     },
+    "Open file transfer for the active pane's connection" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktif bölmenin bağlantısı için dosya aktarımını aç"
+          }
+        }
+      }
+    },
     "Open settings" : {
       "localizations" : {
         "tr" : {
