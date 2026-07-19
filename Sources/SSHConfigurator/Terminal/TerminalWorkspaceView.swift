@@ -2,8 +2,10 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Normalized (0–1) geometry for one split boundary, produced alongside pane
-/// frames by `layoutGeometry(for:in:)` so dividers can be drawn/dragged.
+/// Normalized (0–1) geometry for one split boundary, produced by
+/// `TerminalWorkspaceView.dividerGeometry(for:in:)` so dividers can be
+/// drawn/dragged; pane frames themselves come from
+/// `TerminalPaneLayout.normalizedFrames()`.
 private struct SplitDividerGeometry: Identifiable {
     let id: UUID              // split node id
     let axis: TerminalSplitAxis
@@ -135,6 +137,7 @@ struct TerminalWorkspaceView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .background(tabSelectionShortcuts())
     }
 
     private var terminalBackground: Color {
@@ -264,6 +267,7 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Split the active terminal vertically; opens the same connection on the right")
+            .keyboardShortcut("d", modifiers: .command)
 
             Button("Split horizontally", systemImage: "rectangle.split.1x2") {
                 model.splitActivePane(
@@ -274,8 +278,24 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Split the active terminal horizontally; opens the same connection below")
+            .keyboardShortcut("d", modifiers: [.command, .shift])
 
             if session.panes.count > 1 {
+                let isZoomed = session.zoomedPaneID != nil
+                Button(
+                    // Ternary of two literals resolves to the `StringProtocol`
+                    // `Button` overload instead of `LocalizedStringKey`, which
+                    // would silently skip the catalog — `String(localized:)`
+                    // forces the lookup explicitly on both branches.
+                    isZoomed ? String(localized: "Restore panes") : String(localized: "Zoom pane"),
+                    systemImage: isZoomed ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
+                ) {
+                    model.toggleZoom(in: session.id)
+                }
+                .labelStyle(.iconOnly)
+                .help("Temporarily expand the active pane to fill the window")
+                .keyboardShortcut(.return, modifiers: [.command, .shift])
+
                 Button("Close pane", systemImage: "rectangle.badge.xmark", role: .destructive) {
                     model.closePane(session.activePaneID, in: session.id)
                 }
@@ -302,11 +322,66 @@ struct TerminalWorkspaceView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
+        .background(directionalPaneShortcuts(session))
+    }
+
+    /// Faz 5: ⌘⌥arrow directional pane navigation. Invisible keyboard-shortcut
+    /// carriers — same `.opacity(0)` hidden-button pattern already used for
+    /// the remote file browser's Delete shortcut (`RemoteFileBrowserView`).
+    /// `model.selectPane(direction:in:)` already no-ops when nothing lies in
+    /// that direction, so these stay unconditionally enabled.
+    private func directionalPaneShortcuts(_ session: TerminalSession) -> some View {
+        Group {
+            Button("Select pane to the left") {
+                model.selectPane(direction: .left, in: session.id)
+            }
+            .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+
+            Button("Select pane to the right") {
+                model.selectPane(direction: .right, in: session.id)
+            }
+            .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+
+            Button("Select pane above") {
+                model.selectPane(direction: .up, in: session.id)
+            }
+            .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+
+            Button("Select pane below") {
+                model.selectPane(direction: .down, in: session.id)
+            }
+            .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+        }
+        .opacity(0)
+    }
+
+    /// Faz 5: ⌘1–9 tab selection. Same invisible-button pattern as
+    /// `directionalPaneShortcuts`; `KeyEquivalent` needs a concrete per-index
+    /// literal since there's no String → KeyEquivalent conversion, hence the
+    /// fixed lookup table instead of building the character from `index + 1`.
+    private static let tabSelectionShortcutKeys: [KeyEquivalent] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+    private func tabSelectionShortcuts() -> some View {
+        Group {
+            ForEach(0..<min(Self.tabSelectionShortcutKeys.count, model.sessions.count), id: \.self) { index in
+                let session = model.sessions[index]
+                Button("Select tab \(index + 1)") {
+                    model.selectedSessionID = session.id
+                }
+                .keyboardShortcut(Self.tabSelectionShortcutKeys[index], modifiers: .command)
+                .frame(width: 0, height: 0)
+            }
+        }
+        .opacity(0)
     }
 
     private func sessionSurface(_ session: TerminalSession) -> some View {
         GeometryReader { geometry in
-            let geometryInfo = layoutGeometry(for: session.layout)
+            let geometryInfo = layoutGeometry(for: session.layout, zoomedPaneID: session.zoomedPaneID)
 
             ZStack(alignment: .topLeading) {
                 ForEach(session.panes) { pane in
@@ -464,6 +539,10 @@ struct TerminalWorkspaceView: View {
                 .gesture(
                     DragGesture(minimumDistance: 8, coordinateSpace: .named("paneGrid"))
                         .onChanged { value in
+                            // Faz 6: pane drag-swap is disabled while zoomed —
+                            // every other pane is collapsed to zero size, so
+                            // there's nothing sane to hit-test against anyway.
+                            guard session.zoomedPaneID == nil else { return }
                             let target = paneID(
                                 at: value.location,
                                 in: geometry,
@@ -473,10 +552,9 @@ struct TerminalWorkspaceView: View {
                             paneDrag = PaneDragState(source: pane.id, location: value.location, target: target)
                         }
                         .onEnded { _ in
-                            if let target = paneDrag?.target {
-                                model.swapPanes(pane.id, target, in: session.id)
-                            }
-                            paneDrag = nil
+                            defer { paneDrag = nil }
+                            guard session.zoomedPaneID == nil, let target = paneDrag?.target else { return }
+                            model.swapPanes(pane.id, target, in: session.id)
                         }
                 )
 
@@ -507,6 +585,7 @@ struct TerminalWorkspaceView: View {
                     // back on every state change; closing the bar restores focus.
                     isActive: isActive && searchPaneID != pane.id,
                     isVisible: isVisible && model.selectedSessionID == session.id,
+                    isVisibleInLayout: session.zoomedPaneID == nil || session.zoomedPaneID == pane.id,
                     onStartupEvent: { event in
                         model.startupEvent(event, sessionID: session.id, paneID: pane.id)
                     },
@@ -582,45 +661,85 @@ struct TerminalWorkspaceView: View {
         }
     }
 
-    /// Single recursive walk producing both normalized pane frames and the
-    /// divider geometry needed to draw/drag split boundaries. `effectiveRatio`
-    /// reads `transientRatios` first so an in-progress drag resizes panes
-    /// live without writing to the model on every tick.
+    /// Faz 5: pane frames now come from `TerminalPaneLayout.normalizedFrames()`
+    /// (moved to the model layer so directional pane navigation can hit-test
+    /// the same geometry); divider geometry stays view-side via
+    /// `dividerGeometry(for:)`. `effectiveLayout(for:)` bakes any in-progress
+    /// divider drag (`transientRatios`) into a throwaway copy of the layout
+    /// first, so both walks agree during a live drag exactly like the old
+    /// combined walk did.
+    ///
+    /// Faz 6: while `zoomedPaneID` is set, the zoomed pane takes the full
+    /// (0,0,1,1) frame, every other pane collapses to zero size, and there
+    /// are no dividers to draw/drag.
     private func layoutGeometry(
         for layout: TerminalPaneLayout,
-        in frame: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        zoomedPaneID: TerminalPane.ID?
     ) -> PaneLayoutGeometry {
+        let displayLayout = effectiveLayout(for: layout)
+
+        if let zoomedPaneID, displayLayout.pane(id: zoomedPaneID) != nil {
+            var frames: [TerminalPane.ID: CGRect] = [:]
+            for pane in displayLayout.panes {
+                frames[pane.id] = pane.id == zoomedPaneID
+                    ? CGRect(x: 0, y: 0, width: 1, height: 1)
+                    : .zero
+            }
+            return PaneLayoutGeometry(frames: frames, dividers: [])
+        }
+
+        return PaneLayoutGeometry(
+            frames: displayLayout.normalizedFrames(),
+            dividers: dividerGeometry(for: displayLayout)
+        )
+    }
+
+    /// Bakes `transientRatios` (an in-progress divider drag) into `layout` via
+    /// the model's own `updatingRatio`, so `normalizedFrames()` and
+    /// `dividerGeometry(for:)` both read the live ratio without either of them
+    /// needing to know about this view-only `@State`.
+    private func effectiveLayout(for layout: TerminalPaneLayout) -> TerminalPaneLayout {
+        guard !transientRatios.isEmpty else { return layout }
+        return transientRatios.reduce(layout) { partial, entry in
+            partial.updatingRatio(splitID: entry.key, ratio: entry.value)
+        }
+    }
+
+    /// Divider-only recursive walk: the boundary/container-frame math needed
+    /// to draw and drag split handles. Numerically identical to the pane-frame
+    /// math in `TerminalPaneLayout.normalizedFrames()` — duplicated here
+    /// because `SplitDividerGeometry` is a view-only type dividers stay
+    /// view-side per the Faz 5 plan.
+    private func dividerGeometry(
+        for layout: TerminalPaneLayout,
+        in frame: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+    ) -> [SplitDividerGeometry] {
         switch layout {
-        case let .pane(pane):
-            return PaneLayoutGeometry(frames: [pane.id: frame], dividers: [])
+        case .pane:
+            return []
 
         case let .split(id, axis, ratio, first, second):
-            let effectiveRatio = transientRatios[id] ?? ratio
             let firstFrame: CGRect
             let secondFrame: CGRect
             let lineFrame: CGRect
 
             switch axis {
             case .vertical:
-                let firstWidth = frame.width * effectiveRatio
+                let firstWidth = frame.width * ratio
                 firstFrame = CGRect(x: frame.minX, y: frame.minY, width: firstWidth, height: frame.height)
                 secondFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: frame.width - firstWidth, height: frame.height)
                 lineFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: 0, height: frame.height)
             case .horizontal:
-                let firstHeight = frame.height * effectiveRatio
+                let firstHeight = frame.height * ratio
                 firstFrame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: firstHeight)
                 secondFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: frame.height - firstHeight)
                 lineFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: 0)
             }
 
-            var geometry = layoutGeometry(for: first, in: firstFrame)
-            let secondGeometry = layoutGeometry(for: second, in: secondFrame)
-            geometry.frames.merge(secondGeometry.frames) { current, _ in current }
-            geometry.dividers.append(
-                SplitDividerGeometry(id: id, axis: axis, containerFrame: frame, lineFrame: lineFrame)
-            )
-            geometry.dividers.append(contentsOf: secondGeometry.dividers)
-            return geometry
+            var dividers = dividerGeometry(for: first, in: firstFrame)
+            dividers.append(SplitDividerGeometry(id: id, axis: axis, containerFrame: frame, lineFrame: lineFrame))
+            dividers.append(contentsOf: dividerGeometry(for: second, in: secondFrame))
+            return dividers
         }
     }
 

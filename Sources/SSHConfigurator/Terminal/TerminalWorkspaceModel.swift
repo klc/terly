@@ -346,6 +346,7 @@ final class TerminalWorkspaceModel: ObservableObject {
             sessions[index].layout = updatedLayout
             sessions[index].activePaneID = newPane.id
             sessions[index].synchronizedPaneIDs = []
+            sessions[index].zoomedPaneID = nil
             errorMessage = nil
             return true
         } catch {
@@ -367,6 +368,39 @@ final class TerminalWorkspaceModel: ObservableObject {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
               let swapped = sessions[index].layout.swappingPanes(a, b) else { return }
         sessions[index].layout = swapped
+        sessions[index].zoomedPaneID = nil
+    }
+
+    /// Faz 6: zooms the active pane to fill the session, or restores every
+    /// pane if it's already zoomed. Single-pane sessions have nothing to
+    /// zoom into, so this no-ops for them.
+    func toggleZoom(in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
+              sessions[index].panes.count > 1 else { return }
+        sessions[index].zoomedPaneID = sessions[index].zoomedPaneID == nil
+            ? sessions[index].activePaneID
+            : nil
+    }
+
+    /// Faz 5: ⌘⌥arrow directional pane navigation. Picks the pane whose
+    /// center is nearest to the active pane's center in `direction` (pure
+    /// computation, see `TerminalPaneLayout.nearestPane`); no-op when
+    /// nothing lies that way. Routed through the existing `selectPane(_:in:)`
+    /// so it clears synchronized-pane selection exactly like a plain click.
+    ///
+    /// Faz 6: `nearestPane` hit-tests the real (unzoomed) geometry, so if the
+    /// session is currently zoomed this would otherwise make some other,
+    /// still-hidden pane "active" while the zoomed pane keeps filling the
+    /// window — focus would have nowhere visible to land. Exit zoom first,
+    /// same as `closePane`/`splitActivePane`/`swapPanes`.
+    func selectPane(direction: PaneDirection, in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
+              let targetID = sessions[index].layout.nearestPane(
+                  from: sessions[index].activePaneID,
+                  direction: direction
+              ) else { return }
+        sessions[index].zoomedPaneID = nil
+        selectPane(targetID, in: sessionID)
     }
 
     func selectPane(
@@ -406,6 +440,10 @@ final class TerminalWorkspaceModel: ObservableObject {
     func closePane(_ paneID: TerminalPane.ID, in sessionID: TerminalSession.ID) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
               sessions[index].layout.pane(id: paneID) != nil else { return }
+        // Faz 6: exit zoom unconditionally on close — covers both "must exit
+        // zoom before closing" and "clear zoomedPaneID if the zoomed pane
+        // itself is the one being closed" in one line.
+        sessions[index].zoomedPaneID = nil
         markPanesAsUserClosed([paneID])
 
         if sessions[index].panes.count == 1 {

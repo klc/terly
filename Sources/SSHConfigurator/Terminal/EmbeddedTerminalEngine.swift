@@ -24,6 +24,7 @@ protocol EmbeddedTerminalEngine {
         synchronizedPaneIDs: Set<TerminalPane.ID>,
         isActive: Bool,
         isVisible: Bool,
+        isVisibleInLayout: Bool,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
         onActivate: @escaping @MainActor @Sendable () -> Void,

@@ -5079,6 +5079,16 @@
         }
       }
     },
+    "Restore panes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeleri geri getir"
+          }
+        }
+      }
+    },
     "Restore this backup" : {
       "localizations" : {
         "tr" : {
@@ -5618,6 +5628,46 @@
         }
       }
     },
+    "Select pane above" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üstteki bölmeyi seç"
+          }
+        }
+      }
+    },
+    "Select pane below" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alttaki bölmeyi seç"
+          }
+        }
+      }
+    },
+    "Select pane to the left" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sol bölmeyi seç"
+          }
+        }
+      }
+    },
+    "Select pane to the right" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ bölmeyi seç"
+          }
+        }
+      }
+    },
     "Select remote file" : {
       "localizations" : {
         "tr" : {
@@ -5634,6 +5684,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uzak klasör seç"
+          }
+        }
+      }
+    },
+    "Select tab %lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld numaralı sekmeyi seç"
           }
         }
       }
@@ -6353,6 +6413,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hedefler (%lld host)"
+          }
+        }
+      }
+    },
+    "Temporarily expand the active pane to fill the window" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktif bölmeyi geçici olarak pencereyi kaplayacak şekilde büyüt"
           }
         }
       }
@@ -7671,6 +7741,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hazır olduğunda yeniden deneyebilirsin."
+          }
+        }
+      }
+    },
+    "Zoom pane" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeyi büyüt"
           }
         }
       }

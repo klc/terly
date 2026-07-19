@@ -15,6 +15,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
         synchronizedPaneIDs: Set<TerminalPane.ID>,
         isActive: Bool,
         isVisible: Bool,
+        isVisibleInLayout: Bool,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
         onActivate: @escaping @MainActor @Sendable () -> Void,
@@ -27,6 +28,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
                 synchronizedPaneIDs: synchronizedPaneIDs,
                 isActive: isActive,
                 isVisible: isVisible,
+                isVisibleInLayout: isVisibleInLayout,
                 inputRouter: inputRouter,
                 searchRouter: searchRouter,
                 focusCoordinator: focusCoordinator,
@@ -238,6 +240,12 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
     let synchronizedPaneIDs: Set<TerminalPane.ID>
     let isActive: Bool
     let isVisible: Bool
+    /// Faz 6: pane zoom. `false` while this pane is hidden behind another
+    /// zoomed pane in the same session — combined with `isVisible` (tab-level
+    /// visibility) to decide the NSView's `isHidden`. Kept as a separate flag
+    /// rather than folded into `isVisible` at the call site so each concern
+    /// (tab selection vs. zoom) stays independently readable here.
+    let isVisibleInLayout: Bool
     let inputRouter: TerminalInputRouter
     let searchRouter: TerminalSearchRouter
     let focusCoordinator: TerminalFocusCoordinator
@@ -328,7 +336,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
             currentDirectory: configuration.currentDirectoryURL?.path
         )
 
-        terminal.isHidden = !isVisible
+        terminal.isHidden = !(isVisible && isVisibleInLayout)
 
         if isActive {
             focusCoordinator.claimFocus(for: terminal)
@@ -338,6 +346,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
     }
 
     func updateNSView(_ terminal: LocalProcessTerminalView, context: Context) {
+        let shouldBeVisible = isVisible && isVisibleInLayout
         if let terminal = terminal as? SynchronizableLocalProcessTerminalView {
             terminal.synchronizedPaneIDs = synchronizedPaneIDs
             // Reassigned every update: the closure captures this render's view
@@ -357,9 +366,9 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
             terminal.getTerminal().setCursorStyle(settings.resolvedCursorStyle)
             terminal.scrollSensitivity = CGFloat(settings.scrollSensitivity)
         }
-        if terminal.isHidden == isVisible {
-            terminal.isHidden = !isVisible
-            if isVisible {
+        if terminal.isHidden == shouldBeVisible {
+            terminal.isHidden = !shouldBeVisible
+            if shouldBeVisible {
                 terminal.needsDisplay = true
                 // SwiftTerm's Metal row cache keys rows on content generation and
                 // font/size, not on color — a theme switch while this pane was
