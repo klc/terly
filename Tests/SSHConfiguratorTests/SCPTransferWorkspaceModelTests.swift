@@ -4,6 +4,19 @@ import XCTest
 
 final class SCPTransferWorkspaceModelTests: XCTestCase {
     @MainActor
+    func testTransferSheetReturnsRememberedRemoteDirectoryForDroppedUploads() {
+        let alias = "drop-test-\(UUID().uuidString)"
+        let key = "scp.lastRemoteDirectory.\(alias)"
+        defer { UserDefaults.standard.removeObject(forKey: key) }
+        UserDefaults.standard.set("/srv/uploads", forKey: key)
+
+        XCTAssertEqual(
+            SCPTransferSheet.rememberedRemoteDirectory(alias: alias),
+            "/srv/uploads"
+        )
+    }
+
+    @MainActor
     func testUnsavedConfigPreventsStartingTransfer() {
         let executor = FakeSCPTransferExecutor()
         let model = SCPTransferWorkspaceModel(executor: executor)

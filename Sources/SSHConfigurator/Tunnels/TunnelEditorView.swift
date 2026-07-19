@@ -79,7 +79,7 @@ struct TunnelEditorView: View {
                     }
                 }
 
-                if let onDelete = onDelete {
+                if onDelete != nil {
                     Section {
                         Button(role: .destructive, action: {
                             showingDeleteConfirmation = true

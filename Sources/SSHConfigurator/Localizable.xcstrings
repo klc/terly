@@ -1,6 +1,96 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Multiple dropped items would upload to the same destination: %@. Rename or remove the duplicates and try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bırakılan birden fazla öğe aynı hedefe yüklenecek: %@. Çakışan öğeleri yeniden adlandırın veya kaldırıp tekrar deneyin."
+          }
+        }
+      }
+    },
+    "Multiple selected items would upload to the same destination: %@. Remove the duplicates and try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen birden fazla öğe aynı hedefe yüklenecek: %@. Çakışan öğeleri kaldırıp tekrar deneyin."
+          }
+        }
+      }
+    },
+    "Overwrite and upload" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üzerine yaz ve yükle"
+          }
+        }
+      }
+    },
+    "Overwrite remote items?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzak öğelerin üzerine yazılsın mı?"
+          }
+        }
+      }
+    },
+    "Terminal workspace could not be saved: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal çalışma alanı kaydedilemedi: %@"
+          }
+        }
+      }
+    },
+    "The remote destination could not be checked: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzak hedef kontrol edilemedi: %@"
+          }
+        }
+      }
+    },
+    "These items already exist in the remote directory and will be replaced: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu öğeler uzak dizinde zaten var ve değiştirilecek: %@"
+          }
+        }
+      }
+    },
+    "Upload could not be prepared" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleme hazırlanamadı"
+          }
+        }
+      }
+    },
+    "Workspace could not be saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çalışma alanı kaydedilemedi"
+          }
+        }
+      }
+    },
     " — everything written here is committed to the remote repo and the git history is permanent; deleting doesn't undo it. Private keys are never synced." : {
       "localizations" : {
         "tr" : {
@@ -2581,6 +2671,26 @@
         }
       }
     },
+    "Drag onto another pane to swap them" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeyi başka bölmenin üzerine sürükleyip yer değiştir"
+          }
+        }
+      }
+    },
+    "Drop to upload: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklemek için bırak: %@"
+          }
+        }
+      }
+    },
     "Duplicate connection" : {
       "localizations" : {
         "tr" : {
@@ -4288,6 +4398,16 @@
         }
       }
     },
+    "Open file transfer for the active pane's connection" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktif bölmenin bağlantısı için dosya aktarımını aç"
+          }
+        }
+      }
+    },
     "Open settings" : {
       "localizations" : {
         "tr" : {
@@ -5059,6 +5179,16 @@
         }
       }
     },
+    "Restore panes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeleri geri getir"
+          }
+        }
+      }
+    },
     "Restore this backup" : {
       "localizations" : {
         "tr" : {
@@ -5598,6 +5728,46 @@
         }
       }
     },
+    "Select pane above" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üstteki bölmeyi seç"
+          }
+        }
+      }
+    },
+    "Select pane below" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alttaki bölmeyi seç"
+          }
+        }
+      }
+    },
+    "Select pane to the left" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sol bölmeyi seç"
+          }
+        }
+      }
+    },
+    "Select pane to the right" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ bölmeyi seç"
+          }
+        }
+      }
+    },
     "Select remote file" : {
       "localizations" : {
         "tr" : {
@@ -5614,6 +5784,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uzak klasör seç"
+          }
+        }
+      }
+    },
+    "Select tab %lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld numaralı sekmeyi seç"
           }
         }
       }
@@ -6249,6 +6429,16 @@
         }
       }
     },
+    "Tab name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme adı"
+          }
+        }
+      }
+    },
     "Tap the + button in the left menu to create a new SSH connection." : {
       "localizations" : {
         "tr" : {
@@ -6333,6 +6523,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hedefler (%lld host)"
+          }
+        }
+      }
+    },
+    "Temporarily expand the active pane to fill the window" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktif bölmeyi geçici olarak pencereyi kaplayacak şekilde büyüt"
           }
         }
       }
@@ -7651,6 +7851,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hazır olduğunda yeniden deneyebilirsin."
+          }
+        }
+      }
+    },
+    "Zoom pane" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeyi büyüt"
           }
         }
       }

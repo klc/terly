@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import SwiftUI
 
 @MainActor
 final class TerminalWorkspaceModel: ObservableObject {
@@ -15,6 +16,7 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
     @Published private(set) var errorMessage: String?
+    @Published private(set) var persistenceErrorMessage: String?
     /// WP7: per-pane automatic-reconnect UI state (countdown / exhausted /
     /// awaiting manual reconnect / network-back suggestion), mirrored from
     /// `autoReconnectManager` so `TerminalWorkspaceView` can observe it.
@@ -297,6 +299,25 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
 
+    /// Drag-and-drop tab reorder (Faz 3). No-op for an unknown session ID on
+    /// either side or when `sessionID == targetID`. Order persists through the
+    /// existing `sessions` `didSet` save, same as every other mutation.
+    func moveSession(_ sessionID: TerminalSession.ID, before targetID: TerminalSession.ID) {
+        guard sessionID != targetID,
+              let fromIndex = sessions.firstIndex(where: { $0.id == sessionID }),
+              let toIndex = sessions.firstIndex(where: { $0.id == targetID }) else { return }
+        sessions.move(
+            fromOffsets: IndexSet(integer: fromIndex),
+            toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex
+        )
+    }
+
+    func renameSession(_ sessionID: TerminalSession.ID, title: String) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        sessions[index].customTitle = trimmedTitle.isEmpty ? nil : trimmedTitle
+    }
+
     /// Marks panes as closed-by-the-user (WP7 exit classification) and drops
     /// any pending auto-reconnect timer/state for them, so a tab/pane close
     /// never triggers the "connection dropped" band or a stray reconnect.
@@ -332,6 +353,7 @@ final class TerminalWorkspaceModel: ObservableObject {
             sessions[index].layout = updatedLayout
             sessions[index].activePaneID = newPane.id
             sessions[index].synchronizedPaneIDs = []
+            sessions[index].zoomedPaneID = nil
             errorMessage = nil
             return true
         } catch {
@@ -343,6 +365,49 @@ final class TerminalWorkspaceModel: ObservableObject {
     func setSplitRatio(_ ratio: Double, splitID: UUID, in sessionID: TerminalSession.ID) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
         sessions[index].layout = sessions[index].layout.updatingRatio(splitID: splitID, ratio: ratio)
+    }
+
+    /// Drag-and-drop pane swap (Faz 2). `swappingPanes` already no-ops for an
+    /// unknown/identical ID pair; `activePaneID`/`synchronizedPaneIDs` are left
+    /// untouched and pane surfaces are keyed by pane ID, so the NSViews simply
+    /// move to their new position.
+    func swapPanes(_ a: TerminalPane.ID, _ b: TerminalPane.ID, in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
+              let swapped = sessions[index].layout.swappingPanes(a, b) else { return }
+        sessions[index].layout = swapped
+        sessions[index].zoomedPaneID = nil
+    }
+
+    /// Faz 6: zooms the active pane to fill the session, or restores every
+    /// pane if it's already zoomed. Single-pane sessions have nothing to
+    /// zoom into, so this no-ops for them.
+    func toggleZoom(in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
+              sessions[index].panes.count > 1 else { return }
+        sessions[index].zoomedPaneID = sessions[index].zoomedPaneID == nil
+            ? sessions[index].activePaneID
+            : nil
+    }
+
+    /// Faz 5: ⌘⌥arrow directional pane navigation. Picks the pane whose
+    /// center is nearest to the active pane's center in `direction` (pure
+    /// computation, see `TerminalPaneLayout.nearestPane`); no-op when
+    /// nothing lies that way. Routed through the existing `selectPane(_:in:)`
+    /// so it clears synchronized-pane selection exactly like a plain click.
+    ///
+    /// Faz 6: `nearestPane` hit-tests the real (unzoomed) geometry, so if the
+    /// session is currently zoomed this would otherwise make some other,
+    /// still-hidden pane "active" while the zoomed pane keeps filling the
+    /// window — focus would have nowhere visible to land. Exit zoom first,
+    /// same as `closePane`/`splitActivePane`/`swapPanes`.
+    func selectPane(direction: PaneDirection, in sessionID: TerminalSession.ID) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
+              let targetID = sessions[index].layout.nearestPane(
+                  from: sessions[index].activePaneID,
+                  direction: direction
+              ) else { return }
+        sessions[index].zoomedPaneID = nil
+        selectPane(targetID, in: sessionID)
     }
 
     func selectPane(
@@ -382,6 +447,10 @@ final class TerminalWorkspaceModel: ObservableObject {
     func closePane(_ paneID: TerminalPane.ID, in sessionID: TerminalSession.ID) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }),
               sessions[index].layout.pane(id: paneID) != nil else { return }
+        // Faz 6: exit zoom unconditionally on close — covers both "must exit
+        // zoom before closing" and "clear zoomedPaneID if the zoomed pane
+        // itself is the one being closed" in one line.
+        sessions[index].zoomedPaneID = nil
         markPanesAsUserClosed([paneID])
 
         if sessions[index].panes.count == 1 {
@@ -528,6 +597,10 @@ final class TerminalWorkspaceModel: ObservableObject {
         errorMessage = nil
     }
 
+    func dismissPersistenceError() {
+        persistenceErrorMessage = nil
+    }
+
     private static func isExited(_ status: TerminalPane.Status) -> Bool {
         if case .exited = status { return true }
         return false
@@ -540,6 +613,7 @@ final class TerminalWorkspaceModel: ObservableObject {
                 id: session.id,
                 hostID: session.hostID,
                 alias: session.alias,
+                customTitle: session.customTitle,
                 groupID: session.groupID,
                 layout: session.layout.persisted,
                 activePaneID: session.activePaneID,
@@ -550,7 +624,14 @@ final class TerminalWorkspaceModel: ObservableObject {
             sessions: persistedSessions,
             selectedSessionID: selectedSessionID
         )
-        try? workspaceStore.save(workspace)
+        do {
+            try workspaceStore.save(workspace)
+            persistenceErrorMessage = nil
+        } catch {
+            persistenceErrorMessage = String(
+                localized: "Terminal workspace could not be saved: \(error.localizedDescription)"
+            )
+        }
     }
 
     func restoreWorkspace(
@@ -590,7 +671,8 @@ final class TerminalWorkspaceModel: ObservableObject {
                         alias: persistedSession.alias,
                         groupID: persistedSession.groupID,
                         layout: restoredLayout,
-                        activePaneID: persistedSession.activePaneID
+                        activePaneID: persistedSession.activePaneID,
+                        customTitle: persistedSession.customTitle
                     )
                     session.synchronizedPaneIDs = Set(persistedSession.synchronizedPaneIDs)
                     restoredSessions.append(session)

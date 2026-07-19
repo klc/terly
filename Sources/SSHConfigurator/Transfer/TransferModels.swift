@@ -216,8 +216,8 @@ final class TransferQueue: ObservableObject {
         items[index] = item
     }
 
-    func nextWaitingItem() -> TransferItem? {
-        items.first { $0.state == .waiting }
+    func nextWaitingItem(excluding excludedItemIDs: Set<UUID> = []) -> TransferItem? {
+        items.first { $0.state == .waiting && !excludedItemIDs.contains($0.id) }
     }
 
     func clearTerminated() {

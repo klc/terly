@@ -4,7 +4,7 @@ import XCTest
 
 @MainActor
 final class SyncCoordinatorTests: XCTestCase {
-    private var root: URL!
+    nonisolated(unsafe) private var root: URL!
 
     override func setUp() {
         super.setUp()

@@ -1,8 +1,11 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
-/// Normalized (0–1) geometry for one split boundary, produced alongside pane
-/// frames by `layoutGeometry(for:in:)` so dividers can be drawn/dragged.
+/// Normalized (0–1) geometry for one split boundary, produced by
+/// `TerminalWorkspaceView.dividerGeometry(for:in:)` so dividers can be
+/// drawn/dragged; pane frames themselves come from
+/// `TerminalPaneLayout.normalizedFrames()`.
 private struct SplitDividerGeometry: Identifiable {
     let id: UUID              // split node id
     let axis: TerminalSplitAxis
@@ -13,6 +16,15 @@ private struct SplitDividerGeometry: Identifiable {
 private struct PaneLayoutGeometry {
     var frames: [TerminalPane.ID: CGRect] = [:]
     var dividers: [SplitDividerGeometry] = []
+}
+
+/// Faz 2: in-progress pane drag-to-swap. `target` is re-derived on every
+/// `onChanged` tick by hit-testing `location` against the current normalized
+/// frames; `nil` while hovering over the source pane itself or empty space.
+private struct PaneDragState {
+    let source: TerminalPane.ID
+    var location: CGPoint
+    var target: TerminalPane.ID?
 }
 
 /// Transparent AppKit view that owns a cursor rect for the divider hit strip.
@@ -56,6 +68,8 @@ struct TerminalWorkspaceView: View {
     let engine: any EmbeddedTerminalEngine
     let isActive: Bool
     let isVisible: Bool
+    let onRequestTransfer: (String) -> Void
+    let onDropFilesForUpload: ([URL], String) -> Void
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
     @State private var searchTerm = ""
@@ -64,6 +78,11 @@ struct TerminalWorkspaceView: View {
     @FocusState private var searchFieldFocused: Bool
     @State private var transientRatios: [UUID: Double] = [:]
     @State private var hoveredDividerID: UUID?
+    @State private var paneDrag: PaneDragState?
+    @State private var fileDropTargetPaneID: TerminalPane.ID?
+    @State private var renamingTabID: TerminalSession.ID?
+    @State private var renamingTabTitle = ""
+    @FocusState private var renameFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -84,6 +103,7 @@ struct TerminalWorkspaceView: View {
                 .background(terminalBackground)
                 .onChange(of: model.selectedSessionID) { _, _ in
                     closeSearch(returningFocus: false)
+                    paneDrag = nil
                 }
                 .onChange(of: session.activePaneID) { _, _ in
                     closeSearch(returningFocus: false)
@@ -97,6 +117,7 @@ struct TerminalWorkspaceView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .background(tabSelectionShortcuts())
     }
 
     private var terminalBackground: Color {
@@ -108,23 +129,40 @@ struct TerminalWorkspaceView: View {
             HStack(spacing: 6) {
                 ForEach(model.sessions) { session in
                     HStack(spacing: 5) {
-                        Button {
-                            model.selectedSessionID = session.id
-                        } label: {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(statusColor(session.status))
-                                    .frame(width: 7, height: 7)
-                                Text(session.displayName)
-                                    .lineLimit(1)
-                                if session.panes.count > 1 {
-                                    Text("\(session.panes.count)")
-                                        .font(.caption2.monospacedDigit())
-                                        .foregroundStyle(.secondary)
-                                }
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(statusColor(session.status))
+                                .frame(width: 7, height: 7)
+                            Text(session.displayTitle)
+                                .lineLimit(1)
+                            if session.panes.count > 1 {
+                                Text("\(session.panes.count)")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(.secondary)
                             }
                         }
-                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            TapGesture(count: 2)
+                                .exclusively(before: TapGesture(count: 1))
+                                .onEnded { value in
+                                    switch value {
+                                    case .first:
+                                        beginRenaming(session)
+                                    case .second:
+                                        model.selectedSessionID = session.id
+                                    }
+                                }
+                        )
+                        .popover(
+                            isPresented: Binding(
+                                get: { renamingTabID == session.id },
+                                set: { if !$0 { renamingTabID = nil } }
+                            ),
+                            arrowEdge: .bottom
+                        ) {
+                            renamePopover(for: session)
+                        }
 
                         Button {
                             model.closeTab(session.id)
@@ -143,8 +181,25 @@ struct TerminalWorkspaceView: View {
                             : Color.secondary.opacity(0.08),
                         in: RoundedRectangle(cornerRadius: 7)
                     )
+                    .draggable(session.id.uuidString)
+                    .dropDestination(for: String.self) { payloads, _ in
+                        guard let rawSessionID = payloads.first,
+                              let sourceID = UUID(uuidString: rawSessionID),
+                              sourceID != session.id,
+                              model.sessions.contains(where: { $0.id == sourceID }) else {
+                            return false
+                        }
+                        model.moveSession(sourceID, before: session.id)
+                        return true
+                    }
+                    .contextMenu {
+                        Button("Rename") {
+                            beginRenaming(session)
+                        }
+                    }
                 }
             }
+            .animation(.default, value: model.sessions.map(\.id))
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         }
@@ -155,7 +210,7 @@ struct TerminalWorkspaceView: View {
         HStack(spacing: 10) {
             Image(systemName: "terminal.fill")
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.displayName)
+                Text(session.displayTitle)
                     .font(.headline)
                 Text(sessionStatusText(session))
                     .font(.caption)
@@ -191,6 +246,16 @@ struct TerminalWorkspaceView: View {
                 .help("Clear synchronized terminal selection")
             }
 
+            if session.hostID != -1 {
+                let transferAlias = session.activePane?.alias ?? session.alias
+                Button("Transfer files", systemImage: "arrow.left.arrow.right") {
+                    onRequestTransfer(transferAlias)
+                }
+                .labelStyle(.iconOnly)
+                .disabled(!SSHLaunchPlanBuilder.isConcreteAlias(transferAlias))
+                .help("Open file transfer for the active pane's connection")
+            }
+
             Button("Split vertically", systemImage: "rectangle.split.2x1") {
                 model.splitActivePane(
                     in: session.id,
@@ -200,6 +265,7 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Split the active terminal vertically; opens the same connection on the right")
+            .keyboardShortcut("d", modifiers: .command)
 
             Button("Split horizontally", systemImage: "rectangle.split.1x2") {
                 model.splitActivePane(
@@ -210,8 +276,24 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Split the active terminal horizontally; opens the same connection below")
+            .keyboardShortcut("d", modifiers: [.command, .shift])
 
             if session.panes.count > 1 {
+                let isZoomed = session.zoomedPaneID != nil
+                Button(
+                    // Ternary of two literals resolves to the `StringProtocol`
+                    // `Button` overload instead of `LocalizedStringKey`, which
+                    // would silently skip the catalog — `String(localized:)`
+                    // forces the lookup explicitly on both branches.
+                    isZoomed ? String(localized: "Restore panes") : String(localized: "Zoom pane"),
+                    systemImage: isZoomed ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
+                ) {
+                    model.toggleZoom(in: session.id)
+                }
+                .labelStyle(.iconOnly)
+                .help("Temporarily expand the active pane to fill the window")
+                .keyboardShortcut(.return, modifiers: [.command, .shift])
+
                 Button("Close pane", systemImage: "rectangle.badge.xmark", role: .destructive) {
                     model.closePane(session.activePaneID, in: session.id)
                 }
@@ -238,11 +320,66 @@ struct TerminalWorkspaceView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
+        .background(directionalPaneShortcuts(session))
+    }
+
+    /// Faz 5: ⌘⌥arrow directional pane navigation. Invisible keyboard-shortcut
+    /// carriers — same `.opacity(0)` hidden-button pattern already used for
+    /// the remote file browser's Delete shortcut (`RemoteFileBrowserView`).
+    /// `model.selectPane(direction:in:)` already no-ops when nothing lies in
+    /// that direction, so these stay unconditionally enabled.
+    private func directionalPaneShortcuts(_ session: TerminalSession) -> some View {
+        Group {
+            Button("Select pane to the left") {
+                model.selectPane(direction: .left, in: session.id)
+            }
+            .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+
+            Button("Select pane to the right") {
+                model.selectPane(direction: .right, in: session.id)
+            }
+            .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+
+            Button("Select pane above") {
+                model.selectPane(direction: .up, in: session.id)
+            }
+            .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+
+            Button("Select pane below") {
+                model.selectPane(direction: .down, in: session.id)
+            }
+            .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+            .frame(width: 0, height: 0)
+        }
+        .opacity(0)
+    }
+
+    /// Faz 5: ⌘1–9 tab selection. Same invisible-button pattern as
+    /// `directionalPaneShortcuts`; `KeyEquivalent` needs a concrete per-index
+    /// literal since there's no String → KeyEquivalent conversion, hence the
+    /// fixed lookup table instead of building the character from `index + 1`.
+    private static let tabSelectionShortcutKeys: [KeyEquivalent] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+    private func tabSelectionShortcuts() -> some View {
+        Group {
+            ForEach(0..<min(Self.tabSelectionShortcutKeys.count, model.sessions.count), id: \.self) { index in
+                let session = model.sessions[index]
+                Button("Select tab \(index + 1)") {
+                    model.selectedSessionID = session.id
+                }
+                .keyboardShortcut(Self.tabSelectionShortcutKeys[index], modifiers: .command)
+                .frame(width: 0, height: 0)
+            }
+        }
+        .opacity(0)
     }
 
     private func sessionSurface(_ session: TerminalSession) -> some View {
         GeometryReader { geometry in
-            let geometryInfo = layoutGeometry(for: session.layout)
+            let geometryInfo = layoutGeometry(for: session.layout, zoomedPaneID: session.zoomedPaneID)
 
             ZStack(alignment: .topLeading) {
                 ForEach(session.panes) { pane in
@@ -251,22 +388,51 @@ struct TerminalWorkspaceView: View {
                         model.selectedSessionID == session.id &&
                         session.activePaneID == pane.id
 
-                    paneSurface(pane, in: session, isActive: paneIsActive)
-                        .frame(
-                            width: max(1, geometry.size.width * normalizedFrame.width - 2),
-                            height: max(1, geometry.size.height * normalizedFrame.height - 2)
-                        )
-                        .position(
-                            x: geometry.size.width * normalizedFrame.midX,
-                            y: geometry.size.height * normalizedFrame.midY
-                        )
+                    paneSurface(
+                        pane,
+                        in: session,
+                        isActive: paneIsActive,
+                        geometry: geometry,
+                        paneFrames: geometryInfo.frames
+                    )
+                    .frame(
+                        width: max(1, geometry.size.width * normalizedFrame.width - 2),
+                        height: max(1, geometry.size.height * normalizedFrame.height - 2)
+                    )
+                    .position(
+                        x: geometry.size.width * normalizedFrame.midX,
+                        y: geometry.size.height * normalizedFrame.midY
+                    )
                 }
 
                 ForEach(geometryInfo.dividers) { divider in
                     splitDividerHandle(divider, in: geometry, sessionID: session.id)
                 }
             }
+            .coordinateSpace(name: "paneGrid")
         }
+    }
+
+    /// Hit-tests a `paneGrid`-space point against the current normalized pane
+    /// frames, skipping `source` (a pane can't be dropped onto itself).
+    private func paneID(
+        at location: CGPoint,
+        in geometry: GeometryProxy,
+        frames: [TerminalPane.ID: CGRect],
+        excluding source: TerminalPane.ID
+    ) -> TerminalPane.ID? {
+        for (candidateID, normalizedFrame) in frames where candidateID != source {
+            let frame = CGRect(
+                x: geometry.size.width * normalizedFrame.minX,
+                y: geometry.size.height * normalizedFrame.minY,
+                width: geometry.size.width * normalizedFrame.width,
+                height: geometry.size.height * normalizedFrame.height
+            )
+            if frame.contains(location) {
+                return candidateID
+            }
+        }
+        return nil
     }
 
     /// A near-invisible hit strip straddling a split boundary: drag to resize,
@@ -312,7 +478,7 @@ struct TerminalWorkspaceView: View {
             model.setSplitRatio(0.5, splitID: divider.id, in: sessionID)
         }
         .gesture(
-            DragGesture(minimumDistance: 2)
+            DragGesture(minimumDistance: 2, coordinateSpace: .named("paneGrid"))
                 .onChanged { value in
                     let rawRatio = isVertical
                         ? (value.location.x / geometry.size.width - divider.containerFrame.minX) / divider.containerFrame.width
@@ -334,9 +500,16 @@ struct TerminalWorkspaceView: View {
     private func paneSurface(
         _ pane: TerminalPane,
         in session: TerminalSession,
-        isActive: Bool
+        isActive: Bool,
+        geometry: GeometryProxy,
+        paneFrames: [TerminalPane.ID: CGRect]
     ) -> some View {
-        VStack(spacing: 0) {
+        let isDragSource = paneDrag?.source == pane.id
+        let isDragTarget = paneDrag?.target == pane.id
+        let isFileDropTarget = fileDropTargetPaneID == pane.id
+        let canUploadDroppedFiles = session.hostID != -1 && SSHLaunchPlanBuilder.isConcreteAlias(pane.alias)
+
+        return VStack(spacing: 0) {
             HStack(spacing: 7) {
                 HStack(spacing: 7) {
                     Circle()
@@ -361,6 +534,29 @@ struct TerminalWorkspaceView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
+                .opacity(isDragSource ? 0.6 : 1)
+                .help("Drag onto another pane to swap them")
+                .gesture(
+                    DragGesture(minimumDistance: 8, coordinateSpace: .named("paneGrid"))
+                        .onChanged { value in
+                            // Faz 6: pane drag-swap is disabled while zoomed —
+                            // every other pane is collapsed to zero size, so
+                            // there's nothing sane to hit-test against anyway.
+                            guard session.zoomedPaneID == nil else { return }
+                            let target = paneID(
+                                at: value.location,
+                                in: geometry,
+                                frames: paneFrames,
+                                excluding: pane.id
+                            )
+                            paneDrag = PaneDragState(source: pane.id, location: value.location, target: target)
+                        }
+                        .onEnded { _ in
+                            defer { paneDrag = nil }
+                            guard session.zoomedPaneID == nil, let target = paneDrag?.target else { return }
+                            model.swapPanes(pane.id, target, in: session.id)
+                        }
+                )
 
                 Button {
                     model.closePane(pane.id, in: session.id)
@@ -389,6 +585,7 @@ struct TerminalWorkspaceView: View {
                     // back on every state change; closing the bar restores focus.
                     isActive: isActive && searchPaneID != pane.id,
                     isVisible: isVisible && model.selectedSessionID == session.id,
+                    isVisibleInLayout: session.zoomedPaneID == nil || session.zoomedPaneID == pane.id,
                     onStartupEvent: { event in
                         model.startupEvent(event, sessionID: session.id, paneID: pane.id)
                     },
@@ -428,6 +625,40 @@ struct TerminalWorkspaceView: View {
                     lineWidth: isActive || session.synchronizedPaneIDs.contains(pane.id) ? 1.5 : 1
                 )
         }
+        .overlay {
+            if isDragTarget {
+                Rectangle()
+                    .fill(Color.accentColor.opacity(0.25))
+                Rectangle()
+                    .stroke(Color.accentColor, lineWidth: 2)
+            }
+        }
+        .overlay {
+            if isFileDropTarget && canUploadDroppedFiles {
+                ZStack {
+                    Color.accentColor.opacity(0.20)
+                    Rectangle()
+                        .stroke(Color.accentColor, lineWidth: 2)
+                    Text("Drop to upload: \(pane.alias)")
+                        .font(.headline)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                }
+                .allowsHitTesting(false)
+            }
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            guard canUploadDroppedFiles, !urls.isEmpty else { return false }
+            onDropFilesForUpload(urls, pane.alias)
+            return true
+        } isTargeted: { isTargeted in
+            if isTargeted && canUploadDroppedFiles {
+                fileDropTargetPaneID = pane.id
+            } else if fileDropTargetPaneID == pane.id {
+                fileDropTargetPaneID = nil
+            }
+        }
         .contentShape(Rectangle())
         .simultaneousGesture(
             TapGesture().onEnded {
@@ -444,6 +675,40 @@ struct TerminalWorkspaceView: View {
         )
     }
 
+    private func beginRenaming(_ session: TerminalSession) {
+        model.selectedSessionID = session.id
+        renamingTabTitle = session.customTitle ?? ""
+        renamingTabID = session.id
+    }
+
+    private func finishRenaming(_ session: TerminalSession) {
+        model.renameSession(session.id, title: renamingTabTitle)
+        renamingTabID = nil
+    }
+
+    private func renamePopover(for session: TerminalSession) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            TextField("Tab name", text: $renamingTabTitle)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 240)
+                .focused($renameFieldFocused)
+                .onSubmit { finishRenaming(session) }
+
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) {
+                    renamingTabID = nil
+                }
+                Button("Rename") {
+                    finishRenaming(session)
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(14)
+        .onAppear { renameFieldFocused = true }
+    }
+
     private func runStartupAgain(in session: TerminalSession) {
         let paneID = session.activePaneID
         guard let command = model.prepareManualStartup(
@@ -456,45 +721,85 @@ struct TerminalWorkspaceView: View {
         }
     }
 
-    /// Single recursive walk producing both normalized pane frames and the
-    /// divider geometry needed to draw/drag split boundaries. `effectiveRatio`
-    /// reads `transientRatios` first so an in-progress drag resizes panes
-    /// live without writing to the model on every tick.
+    /// Faz 5: pane frames now come from `TerminalPaneLayout.normalizedFrames()`
+    /// (moved to the model layer so directional pane navigation can hit-test
+    /// the same geometry); divider geometry stays view-side via
+    /// `dividerGeometry(for:)`. `effectiveLayout(for:)` bakes any in-progress
+    /// divider drag (`transientRatios`) into a throwaway copy of the layout
+    /// first, so both walks agree during a live drag exactly like the old
+    /// combined walk did.
+    ///
+    /// Faz 6: while `zoomedPaneID` is set, the zoomed pane takes the full
+    /// (0,0,1,1) frame, every other pane collapses to zero size, and there
+    /// are no dividers to draw/drag.
     private func layoutGeometry(
         for layout: TerminalPaneLayout,
-        in frame: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        zoomedPaneID: TerminalPane.ID?
     ) -> PaneLayoutGeometry {
+        let displayLayout = effectiveLayout(for: layout)
+
+        if let zoomedPaneID, displayLayout.pane(id: zoomedPaneID) != nil {
+            var frames: [TerminalPane.ID: CGRect] = [:]
+            for pane in displayLayout.panes {
+                frames[pane.id] = pane.id == zoomedPaneID
+                    ? CGRect(x: 0, y: 0, width: 1, height: 1)
+                    : .zero
+            }
+            return PaneLayoutGeometry(frames: frames, dividers: [])
+        }
+
+        return PaneLayoutGeometry(
+            frames: displayLayout.normalizedFrames(),
+            dividers: dividerGeometry(for: displayLayout)
+        )
+    }
+
+    /// Bakes `transientRatios` (an in-progress divider drag) into `layout` via
+    /// the model's own `updatingRatio`, so `normalizedFrames()` and
+    /// `dividerGeometry(for:)` both read the live ratio without either of them
+    /// needing to know about this view-only `@State`.
+    private func effectiveLayout(for layout: TerminalPaneLayout) -> TerminalPaneLayout {
+        guard !transientRatios.isEmpty else { return layout }
+        return transientRatios.reduce(layout) { partial, entry in
+            partial.updatingRatio(splitID: entry.key, ratio: entry.value)
+        }
+    }
+
+    /// Divider-only recursive walk: the boundary/container-frame math needed
+    /// to draw and drag split handles. Numerically identical to the pane-frame
+    /// math in `TerminalPaneLayout.normalizedFrames()` — duplicated here
+    /// because `SplitDividerGeometry` is a view-only type dividers stay
+    /// view-side per the Faz 5 plan.
+    private func dividerGeometry(
+        for layout: TerminalPaneLayout,
+        in frame: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+    ) -> [SplitDividerGeometry] {
         switch layout {
-        case let .pane(pane):
-            return PaneLayoutGeometry(frames: [pane.id: frame], dividers: [])
+        case .pane:
+            return []
 
         case let .split(id, axis, ratio, first, second):
-            let effectiveRatio = transientRatios[id] ?? ratio
             let firstFrame: CGRect
             let secondFrame: CGRect
             let lineFrame: CGRect
 
             switch axis {
             case .vertical:
-                let firstWidth = frame.width * effectiveRatio
+                let firstWidth = frame.width * ratio
                 firstFrame = CGRect(x: frame.minX, y: frame.minY, width: firstWidth, height: frame.height)
                 secondFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: frame.width - firstWidth, height: frame.height)
                 lineFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: 0, height: frame.height)
             case .horizontal:
-                let firstHeight = frame.height * effectiveRatio
+                let firstHeight = frame.height * ratio
                 firstFrame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: firstHeight)
                 secondFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: frame.height - firstHeight)
                 lineFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: 0)
             }
 
-            var geometry = layoutGeometry(for: first, in: firstFrame)
-            let secondGeometry = layoutGeometry(for: second, in: secondFrame)
-            geometry.frames.merge(secondGeometry.frames) { current, _ in current }
-            geometry.dividers.append(
-                SplitDividerGeometry(id: id, axis: axis, containerFrame: frame, lineFrame: lineFrame)
-            )
-            geometry.dividers.append(contentsOf: secondGeometry.dividers)
-            return geometry
+            var dividers = dividerGeometry(for: first, in: firstFrame)
+            dividers.append(SplitDividerGeometry(id: id, axis: axis, containerFrame: frame, lineFrame: lineFrame))
+            dividers.append(contentsOf: dividerGeometry(for: second, in: secondFrame))
+            return dividers
         }
     }
 

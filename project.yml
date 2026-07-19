@@ -45,9 +45,8 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
         CFBundleLocalizations: [en, tr]
-        # Sparkle appcast/EdDSA anahtarları: gerçek anahtarlar Mustafa'nın `generate_keys`
-        # çıktısından gelecek (bkz. docs/RELEASING.md). Şimdilik placeholder — güncelleme
-        # denetimi bu haliyle çalışmaz, Ayarlar > Güncellemeler bunu algılayıp uyarır.
+        # Sparkle appcast/EdDSA public key. Private key yalnız GitHub Actions
+        # secret'ında tutulur; rotasyon adımları için bkz. docs/RELEASING.md.
         SUFeedURL: https://klc.github.io/terly/appcast.xml
         SUPublicEDKey: ktDoBjl4FjOjtayFm+65Efioe+cPONn+s5xXw8lvPo4=
         SUEnableAutomaticChecks: false
@@ -58,8 +57,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mkilic.Terly
         PRODUCT_NAME: Terly
         PRODUCT_MODULE_NAME: SSHConfigurator
-        MARKETING_VERSION: 1.0.0
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.1.0
+        CURRENT_PROJECT_VERSION: 2
         ENABLE_HARDENED_RUNTIME: YES
         # Yerel/geliştirme imzası ad-hoc kalır (takım/kimlik gerekmez); gerçek Developer ID
         # imzası WP9 release.yml içinde xcodebuild -exportOptionsPlist / CODE_SIGN_IDENTITY

@@ -12,6 +12,13 @@ final class TransferQueueEngine: ObservableObject {
     /// reading there is the same object, so there's no separate sync step.
     let historyLibrary: TransferHistoryLibrary
     private var runners: [UUID: TransferItemRunner] = [:]
+    /// Identifies the currently running attempt for each item. A cancelled
+    /// process can still deliver its completion callback; comparing the token
+    /// prevents that stale callback from mutating a newer retry attempt.
+    private var activeAttemptTokens: [UUID: UUID] = [:]
+    /// Items waiting for their exponential-backoff delay must remain in the
+    /// queue without being picked up by the regular scheduler.
+    private var retryTasks: [UUID: Task<Void, Never>] = [:]
     private let checksumVerifier: any ChecksumVerifying
     private var checksumTasks: [UUID: Task<Void, Never>] = [:]
     /// Builds the `TransferItemRunner` for each started item. Defaults to a
@@ -20,6 +27,7 @@ final class TransferQueueEngine: ObservableObject {
     /// enqueue -> start -> completion -> history-record path can be exercised
     /// end-to-end without ever launching a real process.
     private let runnerFactory: @MainActor () -> TransferItemRunner
+    private let retryDelayNanoseconds: @MainActor (Int) -> UInt64
 
     // MARK: - Progress throttling
 
@@ -41,12 +49,17 @@ final class TransferQueueEngine: ObservableObject {
         queue: TransferQueue,
         checksumVerifier: any ChecksumVerifying = TransferChecksumVerifier(),
         historyLibrary: TransferHistoryLibrary = TransferHistoryLibrary(),
-        runnerFactory: @escaping @MainActor () -> TransferItemRunner = { TransferItemRunner() }
+        runnerFactory: @escaping @MainActor () -> TransferItemRunner = { TransferItemRunner() },
+        retryDelayNanoseconds: @escaping @MainActor (Int) -> UInt64 = { retryCount in
+            let delay = retryBaseDelay * pow(2.0, Double(retryCount - 1))
+            return UInt64(delay * 1_000_000_000)
+        }
     ) {
         self.queue = queue
         self.checksumVerifier = checksumVerifier
         self.historyLibrary = historyLibrary
         self.runnerFactory = runnerFactory
+        self.retryDelayNanoseconds = retryDelayNanoseconds
     }
 
     // MARK: - Public API
@@ -61,6 +74,8 @@ final class TransferQueueEngine: ObservableObject {
     func cancel(itemID: UUID) {
         guard let index = queue.items.firstIndex(where: { $0.id == itemID }) else { return }
         var item = queue.items[index]
+        cancelScheduledRetry(itemID: itemID)
+        activeAttemptTokens.removeValue(forKey: itemID)
         runners[itemID]?.cancel()
         runners.removeValue(forKey: itemID)
         lastProgressPublish.removeValue(forKey: itemID)
@@ -72,6 +87,9 @@ final class TransferQueueEngine: ObservableObject {
 
     /// Cancels all waiting and active items, plus any checksum verification in flight.
     func cancelAll() {
+        activeAttemptTokens.removeAll()
+        for task in retryTasks.values { task.cancel() }
+        retryTasks.removeAll()
         for runner in runners.values { runner.cancel() }
         runners.removeAll()
         for task in checksumTasks.values { task.cancel() }
@@ -89,6 +107,8 @@ final class TransferQueueEngine: ObservableObject {
     /// Retries a specific failed or cancelled item immediately.
     func retry(itemID: UUID) {
         guard let index = queue.items.firstIndex(where: { $0.id == itemID }) else { return }
+        cancelScheduledRetry(itemID: itemID)
+        activeAttemptTokens.removeValue(forKey: itemID)
         var item = queue.items[index]
         item.resetForRetry()
         queue.update(item)
@@ -99,6 +119,8 @@ final class TransferQueueEngine: ObservableObject {
     /// in-flight checksum verifications first.
     func clearFinished() {
         for item in queue.items where item.isTerminal {
+            cancelScheduledRetry(itemID: item.id)
+            activeAttemptTokens.removeValue(forKey: item.id)
             checksumTasks[item.id]?.cancel()
             checksumTasks.removeValue(forKey: item.id)
         }
@@ -108,8 +130,9 @@ final class TransferQueueEngine: ObservableObject {
     // MARK: - Scheduling
 
     private func scheduleNext() {
+        let delayedItemIDs = Set(retryTasks.keys)
         while queue.activeCount < queue.concurrencyLimit,
-              let item = queue.nextWaitingItem() {
+              let item = queue.nextWaitingItem(excluding: delayedItemIDs) {
             startItem(item)
         }
     }
@@ -121,19 +144,22 @@ final class TransferQueueEngine: ObservableObject {
 
         let runner = runnerFactory()
         runners[item.id] = runner
+        let attemptToken = UUID()
+        activeAttemptTokens[item.id] = attemptToken
 
         let (launched, error) = runner.start(
             item: mutable,
             onProgress: { [weak self] update in
-                self?.handleProgress(itemID: item.id, update: update)
+                self?.handleProgress(itemID: item.id, attemptToken: attemptToken, update: update)
             },
             onCompletion: { [weak self] result in
-                self?.handleCompletion(itemID: item.id, result: result)
+                self?.handleCompletion(itemID: item.id, attemptToken: attemptToken, result: result)
             }
         )
 
         if !launched {
             runners.removeValue(forKey: item.id)
+            activeAttemptTokens.removeValue(forKey: item.id)
             var failed = mutable
             let message = error ?? String(localized: "Failed to start.")
             failed.markFailed(message)
@@ -145,7 +171,12 @@ final class TransferQueueEngine: ObservableObject {
 
     // MARK: - Callbacks
 
-    private func handleProgress(itemID: UUID, update: SCPTransferProgressUpdate) {
+    private func handleProgress(
+        itemID: UUID,
+        attemptToken: UUID,
+        update: SCPTransferProgressUpdate
+    ) {
+        guard activeAttemptTokens[itemID] == attemptToken else { return }
         guard let index = queue.items.firstIndex(where: { $0.id == itemID }) else { return }
         var item = queue.items[index]
         guard item.state == .active else { return }
@@ -166,7 +197,13 @@ final class TransferQueueEngine: ObservableObject {
         queue.update(item)
     }
 
-    private func handleCompletion(itemID: UUID, result: SCPTransferCompletion) {
+    private func handleCompletion(
+        itemID: UUID,
+        attemptToken: UUID,
+        result: SCPTransferCompletion
+    ) {
+        guard activeAttemptTokens[itemID] == attemptToken else { return }
+        activeAttemptTokens.removeValue(forKey: itemID)
         runners.removeValue(forKey: itemID)
         lastProgressPublish.removeValue(forKey: itemID)
         guard let index = queue.items.firstIndex(where: { $0.id == itemID }) else {
@@ -174,6 +211,10 @@ final class TransferQueueEngine: ObservableObject {
             return
         }
         var item = queue.items[index]
+        guard item.state == .active else {
+            scheduleNext()
+            return
+        }
         switch result {
         case .succeeded:
             item.markSucceeded()
@@ -185,12 +226,7 @@ final class TransferQueueEngine: ObservableObject {
                 item.incrementRetryCount()
                 item.resetForRetry()
                 queue.update(item)
-                let delay = Self.retryBaseDelay * pow(2.0, Double(item.retryCount - 1))
-                Task { [weak self] in
-                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                    guard let self else { return }
-                    self.scheduleNext()
-                }
+                scheduleRetry(for: item.id, retryCount: item.retryCount)
             } else {
                 item.markFailed(message)
                 queue.update(item)
@@ -198,6 +234,26 @@ final class TransferQueueEngine: ObservableObject {
             }
         }
         scheduleNext()
+    }
+
+    private func scheduleRetry(for itemID: UUID, retryCount: Int) {
+        cancelScheduledRetry(itemID: itemID)
+        let delay = retryDelayNanoseconds(retryCount)
+        retryTasks[itemID] = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: delay)
+            } catch {
+                return
+            }
+            guard let self, !Task.isCancelled else { return }
+            self.retryTasks.removeValue(forKey: itemID)
+            self.scheduleNext()
+        }
+    }
+
+    private func cancelScheduledRetry(itemID: UUID) {
+        retryTasks[itemID]?.cancel()
+        retryTasks.removeValue(forKey: itemID)
     }
 
     // MARK: - History recording

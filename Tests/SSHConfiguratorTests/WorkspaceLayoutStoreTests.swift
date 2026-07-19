@@ -5,6 +5,7 @@ import Foundation
 final class MockWorkspaceLayoutStore: WorkspaceLayoutPersisting {
     var savedWorkspace: PersistedWorkspace?
     var shouldFailLoad = false
+    var shouldFailSave = false
 
     func load() throws -> PersistedWorkspace {
         if shouldFailLoad {
@@ -14,6 +15,13 @@ final class MockWorkspaceLayoutStore: WorkspaceLayoutPersisting {
     }
 
     func save(_ workspace: PersistedWorkspace) throws {
+        if shouldFailSave {
+            throw NSError(
+                domain: "WorkspaceLayoutStoreTests",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "disk full"]
+            )
+        }
         savedWorkspace = workspace
     }
 }
@@ -96,6 +104,25 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
         let pane = try JSONDecoder().decode(PersistedPane.self, from: data)
 
         XCTAssertFalse(pane.skippedAutomaticStartup)
+    }
+
+    func testLegacyPersistedSessionDefaultsCustomTitleToNil() throws {
+        let paneID = UUID()
+        let sessionID = UUID()
+        let data = try XCTUnwrap("""
+        {
+            "id":"\(sessionID.uuidString)",
+            "hostID":1,
+            "alias":"prod",
+            "layout":{"type":"pane","pane":{"id":"\(paneID.uuidString)","alias":"prod"}},
+            "activePaneID":"\(paneID.uuidString)",
+            "synchronizedPaneIDs":[]
+        }
+        """.data(using: .utf8))
+
+        let session = try JSONDecoder().decode(PersistedSession.self, from: data)
+
+        XCTAssertNil(session.customTitle)
     }
     
     @MainActor

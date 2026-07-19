@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import XCTest
 @testable import SSHConfigurator
@@ -703,6 +704,390 @@ final class TerminalWorkspaceModelTests: XCTestCase {
 
         XCTAssertNil(layout.swappingPanes(paneA.id, paneA.id))
         XCTAssertNil(layout.swappingPanes(paneA.id, UUID()))
+    }
+
+    // MARK: - Faz 2: pane drag-and-drop swap
+
+    @MainActor
+    func testSwapPanesExchangesTreePositions() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let firstPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let secondPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        model.swapPanes(firstPaneID, secondPaneID, in: sessionID)
+
+        let session = try! XCTUnwrap(model.selectedSession)
+        XCTAssertEqual(session.panes.map(\.id), [secondPaneID, firstPaneID])
+        XCTAssertEqual(Set(session.panes.map(\.id)), Set([firstPaneID, secondPaneID]))
+    }
+
+    @MainActor
+    func testSwapPanesKeepsActiveAndSyncIDs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let firstPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let secondPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        model.selectPane(firstPaneID, in: sessionID, extendingSynchronization: true)
+        let activePaneIDBeforeSwap = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        let syncedIDsBeforeSwap = try! XCTUnwrap(model.selectedSession?.synchronizedPaneIDs)
+
+        model.swapPanes(firstPaneID, secondPaneID, in: sessionID)
+
+        XCTAssertEqual(model.selectedSession?.activePaneID, activePaneIDBeforeSwap)
+        XCTAssertEqual(model.selectedSession?.synchronizedPaneIDs, syncedIDsBeforeSwap)
+    }
+
+    @MainActor
+    func testSwapPanesIgnoresUnknownOrIdenticalIDs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let firstPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let layoutBefore = try! XCTUnwrap(model.selectedSession?.layout)
+
+        model.swapPanes(firstPaneID, firstPaneID, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.layout, layoutBefore)
+
+        model.swapPanes(firstPaneID, UUID(), in: sessionID)
+        XCTAssertEqual(model.selectedSession?.layout, layoutBefore)
+    }
+
+    // MARK: - Faz 3: tab drag-and-drop reorder
+
+    @MainActor
+    func testMoveSessionReordersTabs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "prod-db", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 3, alias: "prod-worker", hasUnsavedChanges: false))
+        let firstID = model.sessions[0].id
+        let thirdID = model.sessions[2].id
+
+        model.moveSession(thirdID, before: firstID)
+
+        XCTAssertEqual(model.sessions.map(\.alias), ["prod-worker", "prod-api", "prod-db"])
+    }
+
+    @MainActor
+    func testMoveSessionKeepsSelection() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "prod-db", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 3, alias: "prod-worker", hasUnsavedChanges: false))
+        let selectedID = try! XCTUnwrap(model.selectedSessionID)
+        let firstID = model.sessions[0].id
+
+        model.moveSession(selectedID, before: firstID)
+
+        XCTAssertEqual(model.selectedSessionID, selectedID)
+        XCTAssertEqual(model.sessions.map(\.id).first, selectedID)
+    }
+
+    @MainActor
+    func testMoveSessionIgnoresUnknownIDs() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "prod-db", hasUnsavedChanges: false))
+        let aliasesBefore = model.sessions.map(\.alias)
+        let firstID = model.sessions[0].id
+
+        model.moveSession(UUID(), before: firstID)
+        XCTAssertEqual(model.sessions.map(\.alias), aliasesBefore)
+
+        model.moveSession(firstID, before: UUID())
+        XCTAssertEqual(model.sessions.map(\.alias), aliasesBefore)
+
+        model.moveSession(firstID, before: firstID)
+        XCTAssertEqual(model.sessions.map(\.alias), aliasesBefore)
+    }
+
+    // MARK: - Faz 5: normalizedFrames + directional pane navigation
+
+    func testNormalizedFramesOfNestedSplitMatchesExpectedRects() {
+        let paneA = TerminalPane(
+            alias: "a",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let paneB = TerminalPane(
+            alias: "b",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let paneC = TerminalPane(
+            alias: "c",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: [],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        // Left half: paneA. Right half split horizontally 25/75 into paneB (top)/paneC (bottom).
+        let layout = TerminalPaneLayout.split(
+            id: UUID(),
+            axis: .vertical,
+            ratio: 0.5,
+            first: .pane(paneA),
+            second: .split(
+                id: UUID(),
+                axis: .horizontal,
+                ratio: 0.25,
+                first: .pane(paneB),
+                second: .pane(paneC)
+            )
+        )
+
+        let frames = layout.normalizedFrames()
+
+        XCTAssertEqual(frames[paneA.id], CGRect(x: 0, y: 0, width: 0.5, height: 1))
+        XCTAssertEqual(frames[paneB.id], CGRect(x: 0.5, y: 0, width: 0.5, height: 0.25))
+        XCTAssertEqual(frames[paneC.id], CGRect(x: 0.5, y: 0.25, width: 0.5, height: 0.75))
+    }
+
+    @MainActor
+    func testSelectPaneDirectionalPicksNearestInDirection() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let topLeftID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        // Vertical split: topLeft (left half, unchanged ID) | new pane (right half, active).
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let topRightID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        // Split the left half horizontally: topLeft (top) | bottomLeft (bottom, active).
+        model.selectPane(topLeftID, in: sessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .horizontal))
+        let bottomLeftID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        // Split the right half horizontally: topRight (top) | bottomRight (bottom, active).
+        model.selectPane(topRightID, in: sessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .horizontal))
+        let bottomRightID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        // 2x2 grid: [topLeft, topRight] / [bottomLeft, bottomRight]. Exercise all 4 directions.
+        model.selectPane(topLeftID, in: sessionID)
+        model.selectPane(direction: .right, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, topRightID)
+
+        model.selectPane(topLeftID, in: sessionID)
+        model.selectPane(direction: .down, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, bottomLeftID)
+
+        model.selectPane(bottomRightID, in: sessionID)
+        model.selectPane(direction: .left, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, bottomLeftID)
+
+        model.selectPane(bottomRightID, in: sessionID)
+        model.selectPane(direction: .up, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, topRightID)
+    }
+
+    @MainActor
+    func testSelectPaneDirectionalNoOpAtEdge() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let leftID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let rightID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        // Rightmost pane: nothing further right, and this is a purely
+        // horizontal grid, so up/down are also no-ops.
+        model.selectPane(direction: .right, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, rightID)
+        model.selectPane(direction: .up, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, rightID)
+        model.selectPane(direction: .down, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, rightID)
+
+        // Leftmost pane: nothing further left.
+        model.selectPane(leftID, in: sessionID)
+        model.selectPane(direction: .left, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.activePaneID, leftID)
+    }
+
+    // MARK: - Faz 8: tab rename
+
+    @MainActor
+    func testRenameSessionSetsAndClearsCustomTitle() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+
+        model.renameSession(sessionID, title: "  Production API  ")
+        XCTAssertEqual(model.selectedSession?.customTitle, "Production API")
+        XCTAssertEqual(model.selectedSession?.displayTitle, "Production API")
+
+        model.renameSession(sessionID, title: "")
+        XCTAssertNil(model.selectedSession?.customTitle)
+    }
+
+    @MainActor
+    func testRenameSessionPersistsRoundTrip() {
+        let store = MockWorkspaceLayoutStore()
+        let model = TerminalWorkspaceModel(
+            launchPlanBuilder: SSHLaunchPlanBuilder(
+                sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                baseEnvironment: ["PATH": "/usr/bin:/bin"],
+                currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+            ),
+            workspaceStore: store
+        )
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        model.renameSession(sessionID, title: "Production")
+        model.flushPendingSave()
+
+        let restoredModel = TerminalWorkspaceModel(
+            launchPlanBuilder: SSHLaunchPlanBuilder(
+                sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                baseEnvironment: ["PATH": "/usr/bin:/bin"],
+                currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+            ),
+            workspaceStore: store
+        )
+        restoredModel.restoreWorkspace()
+
+        XCTAssertEqual(restoredModel.selectedSessionID, sessionID)
+        XCTAssertEqual(restoredModel.selectedSession?.customTitle, "Production")
+        XCTAssertEqual(restoredModel.selectedSession?.displayTitle, "Production")
+    }
+
+    @MainActor
+    func testWorkspaceSaveFailureIsExposedAndDismissable() {
+        let store = MockWorkspaceLayoutStore()
+        store.shouldFailSave = true
+        let model = TerminalWorkspaceModel(
+            launchPlanBuilder: SSHLaunchPlanBuilder(
+                sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                baseEnvironment: ["PATH": "/usr/bin:/bin"],
+                currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+            ),
+            workspaceStore: store
+        )
+
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        model.flushPendingSave()
+
+        XCTAssertTrue(model.persistenceErrorMessage?.contains("disk full") == true)
+        model.dismissPersistenceError()
+        XCTAssertNil(model.persistenceErrorMessage)
+    }
+
+    @MainActor
+    func testEmptyTitleRevertsToAlias() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+
+        model.renameSession(sessionID, title: "Custom")
+        model.renameSession(sessionID, title: "  \n\t ")
+
+        XCTAssertNil(model.selectedSession?.customTitle)
+        XCTAssertEqual(model.selectedSession?.displayTitle, "prod")
+    }
+
+    // MARK: - Faz 6: pane zoom
+
+    @MainActor
+    func testToggleZoomSetsAndClears() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+
+        // Single-pane session: no-op.
+        model.toggleZoom(in: sessionID)
+        XCTAssertNil(model.selectedSession?.zoomedPaneID)
+
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let activeID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertEqual(model.selectedSession?.zoomedPaneID, activeID)
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertNil(model.selectedSession?.zoomedPaneID)
+    }
+
+    @MainActor
+    func testSplitOrCloseExitsZoom() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertNotNil(model.selectedSession?.zoomedPaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .horizontal))
+        XCTAssertNil(model.selectedSession?.zoomedPaneID, "splitActivePane should exit zoom")
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertNotNil(model.selectedSession?.zoomedPaneID)
+        let paneIDs = try! XCTUnwrap(model.selectedSession?.panes.map(\.id))
+        model.swapPanes(paneIDs[0], paneIDs[1], in: sessionID)
+        XCTAssertNil(model.selectedSession?.zoomedPaneID, "swapPanes should exit zoom")
+    }
+
+    @MainActor
+    func testCloseZoomedPaneClearsZoom() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let zoomedID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertEqual(model.selectedSession?.zoomedPaneID, zoomedID)
+
+        model.closePane(zoomedID, in: sessionID)
+
+        XCTAssertNil(model.selectedSession?.zoomedPaneID)
+    }
+
+    /// `nearestPane` hit-tests the real (unzoomed) geometry, so navigating
+    /// while zoomed must exit zoom — otherwise the newly active pane would be
+    /// a still-hidden one and focus would have nowhere visible to land. A
+    /// no-op navigation (nothing in that direction) must leave zoom alone.
+    @MainActor
+    func testSelectPaneDirectionalExitsZoom() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let leftID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+        let rightID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertEqual(model.selectedSession?.zoomedPaneID, rightID)
+
+        model.selectPane(direction: .left, in: sessionID)
+
+        XCTAssertEqual(model.selectedSession?.activePaneID, leftID)
+        XCTAssertNil(model.selectedSession?.zoomedPaneID, "directional nav should exit zoom")
+
+        model.toggleZoom(in: sessionID)
+        XCTAssertEqual(model.selectedSession?.zoomedPaneID, leftID)
+
+        // Leftmost pane, nothing further left: a no-op navigation must not
+        // exit zoom either.
+        model.selectPane(direction: .left, in: sessionID)
+        XCTAssertEqual(model.selectedSession?.zoomedPaneID, leftID, "no-op nav must not exit zoom")
     }
 
     @MainActor

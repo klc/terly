@@ -24,6 +24,9 @@ struct ContentView: View {
     @State private var showingQuickAccess = false
     @State private var pendingQuickAccessRoute: QuickAccessRoute?
     @State private var showingSnippetPalette = false
+    @State private var pendingDroppedUpload: PendingDroppedUpload?
+    @State private var droppedUploadErrorMessage: String?
+    private let uploadPreflight = UploadPreflight()
 
     var body: some View {
         NavigationSplitView {
@@ -58,7 +61,9 @@ struct ContentView: View {
                 tunnelWorkspace: tunnelWorkspace,
                 snippets: snippets,
                 runbooks: runbooks,
-                isHostSettingsSheetPresented: editingHostSelection != nil
+                isHostSettingsSheetPresented: editingHostSelection != nil,
+                onRequestTransfer: { showTransfer(forAlias: $0) },
+                onDropFilesForUpload: uploadDroppedFiles
             )
             .frame(minWidth: 680, minHeight: 460)
         }
@@ -110,6 +115,15 @@ struct ContentView: View {
         } message: {
             Text(terminalWorkspace.errorMessage ?? "")
         }
+        .modifier(DroppedUploadSafetyAlerts(
+            pendingUpload: $pendingDroppedUpload,
+            errorMessage: $droppedUploadErrorMessage,
+            onConfirm: { pending in
+                transferEngine.enqueue(pending.items)
+                showTransfer(forAlias: pending.alias)
+            }
+        ))
+        .modifier(WorkspacePersistenceAlert(model: terminalWorkspace))
         .alert(
             "Startup flow could not be saved",
             isPresented: Binding(
@@ -314,6 +328,66 @@ struct ContentView: View {
     private func requestDeleteHost(_ host: SSHHostBlock) {
         model.selectedItem = .host(host.id)
         showingDeleteConfirmation = true
+    }
+
+    private func showTransfer(forAlias alias: String) {
+        guard SSHLaunchPlanBuilder.isConcreteAlias(alias) else { return }
+        let hostID = model.hosts.first { $0.patterns.contains(alias) }?.id ?? alias.hashValue
+        transferSelection = SCPTransferSelection(id: hostID, alias: alias)
+    }
+
+    private func uploadDroppedFiles(_ urls: [URL], alias: String) {
+        guard SSHLaunchPlanBuilder.isConcreteAlias(alias) else { return }
+        guard !model.hasChanges else {
+            showTransfer(forAlias: alias)
+            return
+        }
+
+        let remoteDirectory = SCPTransferSheet.rememberedRemoteDirectory(alias: alias) ?? "."
+        let items = urls.map { url in
+            let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+            return TransferItem(
+                direction: .upload,
+                alias: alias,
+                localURL: url,
+                remotePath: RemotePath.appending(url.lastPathComponent, to: remoteDirectory),
+                isDirectory: isDirectory,
+                transferProtocol: .scp,
+                verifyChecksum: false
+            )
+        }
+        guard !items.isEmpty else { return }
+        let duplicates = UploadPreflight.duplicateDestinationNames(in: items)
+        guard duplicates.isEmpty else {
+            droppedUploadErrorMessage = String(
+                localized: "Multiple dropped items would upload to the same destination: \(duplicates.joined(separator: ", ")). Rename or remove the duplicates and try again."
+            )
+            return
+        }
+
+        Task { @MainActor in
+            do {
+                let result = try await uploadPreflight.inspect(
+                    alias: alias,
+                    remoteDirectory: remoteDirectory,
+                    items: items
+                )
+                if result.requiresOverwriteConfirmation {
+                    pendingDroppedUpload = PendingDroppedUpload(
+                        alias: alias,
+                        items: items,
+                        collisionNames: result.existingRemoteNames
+                    )
+                } else {
+                    transferEngine.enqueue(items)
+                    showTransfer(forAlias: alias)
+                }
+            } catch {
+                droppedUploadErrorMessage = String(
+                    localized: "The remote destination could not be checked: \(error.localizedDescription)"
+                )
+            }
+        }
     }
 
     private func showTransfer(for host: SSHHostBlock?) {
@@ -858,6 +932,8 @@ private struct ContentDetailView: View {
     @ObservedObject var snippets: SnippetLibrary
     @ObservedObject var runbooks: RunbookLibrary
     let isHostSettingsSheetPresented: Bool
+    let onRequestTransfer: (String) -> Void
+    let onDropFilesForUpload: ([URL], String) -> Void
 
     var body: some View {
         if let document = model.document {
@@ -869,7 +945,9 @@ private struct ContentDetailView: View {
                         startupLibrary: startupFlows,
                         engine: terminalEngine,
                         isActive: terminalIsVisible && !isHostSettingsSheetPresented,
-                        isVisible: terminalIsVisible
+                        isVisible: terminalIsVisible,
+                        onRequestTransfer: onRequestTransfer,
+                        onDropFilesForUpload: onDropFilesForUpload
                     )
                     .opacity(terminalIsVisible ? 1 : 0)
                     .allowsHitTesting(terminalIsVisible)
@@ -970,6 +1048,69 @@ private struct ConnectionGroupEditorSelection: Identifiable {
 private struct SCPTransferSelection: Identifiable {
     let id: Int
     let alias: String
+}
+
+private struct PendingDroppedUpload {
+    let alias: String
+    let items: [TransferItem]
+    let collisionNames: [String]
+}
+
+private struct DroppedUploadSafetyAlerts: ViewModifier {
+    @Binding var pendingUpload: PendingDroppedUpload?
+    @Binding var errorMessage: String?
+    let onConfirm: (PendingDroppedUpload) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .alert(
+                "Upload could not be prepared",
+                isPresented: Binding(
+                    get: { errorMessage != nil },
+                    set: { if !$0 { errorMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+            .confirmationDialog(
+                "Overwrite remote items?",
+                isPresented: Binding(
+                    get: { pendingUpload != nil },
+                    set: { if !$0 { pendingUpload = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Overwrite and upload", role: .destructive) {
+                    guard let pendingUpload else { return }
+                    onConfirm(pendingUpload)
+                    self.pendingUpload = nil
+                }
+                Button("Cancel", role: .cancel) { pendingUpload = nil }
+            } message: {
+                let names = pendingUpload?.collisionNames.joined(separator: ", ") ?? ""
+                Text("These items already exist in the remote directory and will be replaced: \(names)")
+            }
+    }
+}
+
+private struct WorkspacePersistenceAlert: ViewModifier {
+    @ObservedObject var model: TerminalWorkspaceModel
+
+    func body(content: Content) -> some View {
+        content.alert(
+            "Workspace could not be saved",
+            isPresented: Binding(
+                get: { model.persistenceErrorMessage != nil },
+                set: { if !$0 { model.dismissPersistenceError() } }
+            )
+        ) {
+            Button("OK", role: .cancel) { model.dismissPersistenceError() }
+        } message: {
+            Text(model.persistenceErrorMessage ?? "")
+        }
+    }
 }
 
 private struct SSHDiagnosticSelection: Identifiable {

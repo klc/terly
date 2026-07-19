@@ -39,7 +39,11 @@ struct SSHConfiguratorApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(syncCoordinator)
-                .onReceive(NotificationCenter.default.publisher(for: .syncableDataDidChange)) { _ in
+                .onReceive(
+                    NotificationCenter.default
+                        .publisher(for: .syncableDataDidChange)
+                        .receive(on: RunLoop.main)
+                ) { _ in
                     syncCoordinator.noteChange()
                 }
                 .task {

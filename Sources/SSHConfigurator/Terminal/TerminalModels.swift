@@ -1,8 +1,14 @@
+import CoreGraphics
 import Foundation
 
 enum TerminalEngineIdentifier: String, Sendable {
     case swiftTerm = "swiftterm"
     case ghostty = "ghostty"
+}
+
+/// Faz 5: ⌘⌥arrow directional pane navigation.
+enum PaneDirection: Equatable, Sendable {
+    case left, right, up, down
 }
 
 struct TerminalProcessConfiguration: Equatable, Sendable {
@@ -251,31 +257,99 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
 
         return swap(self)
     }
+
+    /// Normalized (0–1) frame per pane, respecting each split's `ratio`. Pure
+    /// geometry, no view/state dependency — moved here from
+    /// `TerminalWorkspaceView.layoutGeometry` (Faz 5) so it's directly
+    /// testable and `nearestPane(from:direction:)` can hit-test the same
+    /// frames the view draws. Divider geometry stays view-side.
+    func normalizedFrames(in frame: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)) -> [TerminalPane.ID: CGRect] {
+        switch self {
+        case let .pane(pane):
+            return [pane.id: frame]
+
+        case let .split(_, axis, ratio, first, second):
+            let firstFrame: CGRect
+            let secondFrame: CGRect
+
+            switch axis {
+            case .vertical:
+                let firstWidth = frame.width * ratio
+                firstFrame = CGRect(x: frame.minX, y: frame.minY, width: firstWidth, height: frame.height)
+                secondFrame = CGRect(x: frame.minX + firstWidth, y: frame.minY, width: frame.width - firstWidth, height: frame.height)
+            case .horizontal:
+                let firstHeight = frame.height * ratio
+                firstFrame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: firstHeight)
+                secondFrame = CGRect(x: frame.minX, y: frame.minY + firstHeight, width: frame.width, height: frame.height - firstHeight)
+            }
+
+            var frames = first.normalizedFrames(in: firstFrame)
+            frames.merge(second.normalizedFrames(in: secondFrame)) { current, _ in current }
+            return frames
+        }
+    }
+
+    /// Faz 5: from `paneID`'s center, the pane whose center is nearest in
+    /// `direction` — a strict half-plane filter (nothing behind/level with
+    /// the source counts) followed by nearest-by-squared-distance. Returns
+    /// `nil` when nothing lies that way (edge of the grid) or `paneID` isn't
+    /// part of this layout.
+    func nearestPane(from paneID: TerminalPane.ID, direction: PaneDirection) -> TerminalPane.ID? {
+        let frames = normalizedFrames()
+        guard let sourceFrame = frames[paneID] else { return nil }
+        let sourceCenter = CGPoint(x: sourceFrame.midX, y: sourceFrame.midY)
+        let epsilon: CGFloat = 0.001
+
+        let candidates: [(id: TerminalPane.ID, distanceSquared: CGFloat)] = frames.compactMap { id, candidateFrame in
+            guard id != paneID else { return nil }
+            let center = CGPoint(x: candidateFrame.midX, y: candidateFrame.midY)
+            let isInDirection: Bool
+            switch direction {
+            case .left: isInDirection = center.x < sourceCenter.x - epsilon
+            case .right: isInDirection = center.x > sourceCenter.x + epsilon
+            case .up: isInDirection = center.y < sourceCenter.y - epsilon
+            case .down: isInDirection = center.y > sourceCenter.y + epsilon
+            }
+            guard isInDirection else { return nil }
+            let dx = center.x - sourceCenter.x
+            let dy = center.y - sourceCenter.y
+            return (id, dx * dx + dy * dy)
+        }
+
+        return candidates.min { $0.distanceSquared < $1.distanceSquared }?.id
+    }
 }
 
 struct TerminalSession: Identifiable, Equatable, Sendable {
     let id: UUID
     let hostID: Int
     let alias: String
+    var customTitle: String?
     let groupID: UUID?
     var layout: TerminalPaneLayout
     var activePaneID: TerminalPane.ID
     var synchronizedPaneIDs: Set<TerminalPane.ID>
+    /// Faz 6: pane zoom. Session-local UI state only — never persisted (not
+    /// part of `PersistedSession`), so a relaunch always starts unzoomed.
+    var zoomedPaneID: TerminalPane.ID?
 
     init(
         id: UUID = UUID(),
         hostID: Int,
         alias: String,
         initialPane: TerminalPane,
-        groupID: UUID? = nil
+        groupID: UUID? = nil,
+        customTitle: String? = nil
     ) {
         self.id = id
         self.hostID = hostID
         self.alias = alias
+        self.customTitle = customTitle
         self.groupID = groupID
         layout = .pane(initialPane)
         activePaneID = initialPane.id
         synchronizedPaneIDs = []
+        zoomedPaneID = nil
     }
 
     init(
@@ -284,15 +358,18 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
         alias: String,
         groupID: UUID? = nil,
         layout: TerminalPaneLayout,
-        activePaneID: TerminalPane.ID
+        activePaneID: TerminalPane.ID,
+        customTitle: String? = nil
     ) {
         self.id = id
         self.hostID = hostID
         self.alias = alias
+        self.customTitle = customTitle
         self.groupID = groupID
         self.layout = layout
         self.activePaneID = activePaneID
         synchronizedPaneIDs = []
+        zoomedPaneID = nil
     }
 
     var panes: [TerminalPane] { layout.panes }
@@ -483,6 +560,10 @@ extension TerminalSession {
             return String(localized: "Local Terminal")
         }
         return alias
+    }
+
+    var displayTitle: String {
+        customTitle ?? displayName
     }
 }
 

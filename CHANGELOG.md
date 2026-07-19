@@ -1,85 +1,119 @@
 # Changelog
 
-Bu dosya Terly'nin sürüm geçmişini özetler. Biçim gevşek biçimde
-[Keep a Changelog](https://keepachangelog.com/) esinlidir; sürüm başlıkları
-`release.yml` tarafından GitHub Release notlarına ve Sparkle appcast'ine
-otomatik olarak aktarılır (bkz. `docs/RELEASING.md`).
+This file summarizes Terly's release history. Its format is loosely inspired by
+[Keep a Changelog](https://keepachangelog.com/); release sections are
+automatically included in GitHub Release notes and the Sparkle appcast by
+`release.yml` (see `docs/RELEASING.md`).
+
+## 1.1.0
+
+A usability release that makes the terminal workspace and file transfers faster,
+safer, and more persistent.
+
+### Added
+- Resize terminal panes by dragging, reset them to a 50/50 split with a
+  double-click, and rearrange panes by dragging.
+- Reorder tabs by dragging, rename them with a double-click, and restore their
+  order and names when the workspace is reopened.
+- New keyboard shortcuts for pane zoom, directional pane navigation, and tab
+  selection.
+- Open file transfers from the active terminal connection and upload files or
+  folders by dropping them from Finder onto a terminal pane.
+
+### Fixed
+- Prevented a cancelled transfer from restarting or being recorded more than
+  once when a late process callback arrived.
+- Fixed automatic transfer retries starting immediately instead of respecting
+  the 2/4-second exponential backoff.
+- Restored remote destination checks and overwrite confirmation for uploads
+  started from the form or Finder drop; selections targeting the same remote
+  path are now rejected.
+- Fixed pane resize calculations to use the coordinate space of the entire
+  terminal grid.
+- Removed stale drag state left by cancelled tab drags and now accept only valid
+  session UUID payloads.
+- Terminal workspace persistence errors are now shown to the user instead of
+  being silently ignored.
+- Moved sync change notifications onto the main run loop, removing the warning
+  caused by updating `@Published` state from a background thread.
 
 ## 1.0.0
 
-İlk sürüm. `~/.ssh/config` yönetimi, gömülü terminal, dosya aktarımı, tünel
-ve runbook'ları bir araya getiren yerel SwiftUI SSH çalışma alanı.
+Initial release. A native SwiftUI SSH workspace combining `~/.ssh/config`
+management, an embedded terminal, file transfers, tunnels, and runbooks.
 
-### Config yönetimi
-- Config'i kayıpsız ayrıştırır; yorumlar ve bilinmeyen direktifler korunur.
-- Host, `Match` bloğu ve global direktifler için form tabanlı düzenleme;
-  host alias'ları çok seviyeli gruplanır.
-- Write-through kaydetme: her düzenleme anında yedeklenip diske yazılır; ham
-  config editörü ve değişiklik geçmişi/önizlemesi menü çubuğundan açılır.
-- Harici değişiklik algılama, yedek geçmişi/geri yükleme, atomik yazım ve
-  `0600` dosya izinleri.
-- `ssh -G` ile geçici doğrulama; `Match exec` için açık onay.
+### Configuration management
+- Losslessly parses SSH configuration files while preserving comments and
+  unknown directives.
+- Form-based editing for hosts, `Match` blocks, and global directives, with
+  multi-level grouping for host aliases.
+- Write-through saving: every edit is backed up and written to disk immediately;
+  the raw configuration editor and change history/preview are available from
+  the menu bar.
+- External change detection, backup history and restoration, atomic writes, and
+  `0600` file permissions.
+- Temporary validation with `ssh -G` and explicit confirmation for `Match exec`.
 
-### Bağlantı tanılama ve güven merkezi
-- Çözümlenmiş `ssh -G` ayarları, DNS, ProxyJump, IdentityFile izinleri, SSH
-  agent ve `known_hosts` fingerprint kontrolü; uçtan uca bağlantı testi.
-- Redakte edilmiş tanılama raporunu panoya kopyalama; tüm ağ adımlarında
-  timeout ve iptal desteği.
+### Connection diagnostics and trust center
+- Resolved `ssh -G` settings, DNS, ProxyJump, IdentityFile permissions, SSH
+  agent and `known_hosts` fingerprint checks, and an end-to-end connection test.
+- Copy a redacted diagnostics report to the clipboard, with timeout and
+  cancellation support for every network step.
 
 ### Terminal
-- Uygulama içi SwiftTerm tabanlı terminal; her bağlantı ayrı sekmede kendi
-  SSH sürecinde çalışır.
-- Yatay/dikey bölünebilen paneller; `⌘` ile senkron seçim ve girdi paylaşımı.
-- Yazı tipi/boyut ve renk teması ayarları (Sistem, Solarized Dark/Light,
-  Dracula, Nord, One Dark, Gruvbox Dark) canlı önizlemeyle.
-- Terminal içi arama (`⌘F`).
-- Beklenmedik kopmalarda durum şeridi, tek tık yeniden bağlanma ve artan
-  bekleme ile opt-in otomatik yeniden bağlanma; ağ dönüşü algılama.
+- Embedded SwiftTerm-based terminal; each connection runs in its own SSH process
+  on a separate tab.
+- Horizontally and vertically splittable panes with `⌘`-based synchronized
+  selection and input sharing.
+- Font, size, and color theme settings (System, Solarized Dark/Light, Dracula,
+  Nord, One Dark, and Gruvbox Dark) with live preview.
+- In-terminal search (`⌘F`).
+- A status bar for unexpected disconnections, one-click reconnect, optional
+  automatic reconnect with exponential backoff, and network recovery detection.
 
-### Bağlantı grupları ve hızlı erişim
-- İsimlendirilmiş bağlantı grupları; ayrı sekme veya tek sekmede bölme
-  olarak birlikte açma.
-- `⌘K` hızlı erişim: alias/`HostName`/`User`/grup adına göre fuzzy arama,
-  favoriler ve son kullanılanlar.
+### Connection groups and Quick Access
+- Named connection groups that can open together in separate tabs or as panes
+  within a single tab.
+- `⌘K` Quick Access with fuzzy search by alias, `HostName`, `User`, or group
+  name, plus favorites and recent items.
 
-### Başlangıç akışı ve anahtar kurulumu
-- Host bazında başlangıç akışı: kullanıcı değiştirme, dizine geçme, shell
-  komutu adımları; önizleme ve tek seferlik atlama.
-- Anahtar Kurulumu sihirbazı: `ssh-keygen` ile ed25519 anahtar üretimi,
-  isteğe bağlı agent'a ekleme, `authorized_keys`'e güvenli kopyalama
-  (`ssh-copy-id` kullanılmaz); private key hiçbir kod yolunda okunmaz.
-- `SSH_ASKPASS` köprüsü: parolalı/agent'sız hostlarda SCP/SFTP/checksum
-  için gizli girişli parola diyaloğu ve ayrı host-key onay diyaloğu; parola
-  hiçbir yerde kalıcı saklanmaz.
+### Startup flows and key setup
+- Per-host startup flows with user switching, directory changes, and shell
+  command steps, including preview and one-time skip.
+- Key Setup Wizard for generating ed25519 keys with `ssh-keygen`, optionally
+  adding them to the agent, and securely copying them to `authorized_keys`
+  (`ssh-copy-id` is not used); private keys are never read by any code path.
+- `SSH_ASKPASS` bridge with a secure password dialog for SCP/SFTP/checksum
+  operations on password-protected or agentless hosts, plus a separate host-key
+  confirmation dialog; passwords are never persisted.
 
-### Dosya aktarımı
-- SCP/SFTP ile tekil dosya ve klasör yükleme/indirme; eşzamanlılık sınırlı
-  kuyruk, otomatik yeniden deneme, üzerine yazma onayı.
-- Uzak dizin tarayıcısında Yeni Klasör, Yeniden Adlandır, Sil (yalnız boş
-  klasör; özyinelemeli silme yok).
-- Kalıcı aktarım geçmişi (son 200 kayıt), yeniden aktarma, yol maskeleme ve
-  iptal edilen aktarımlar için kısmi dosya temizliği.
-- Opsiyonel aktarım sonrası checksum doğrulaması.
+### File transfers
+- Upload and download individual files and folders over SCP/SFTP, with a
+  concurrency-limited queue, automatic retries, and overwrite confirmation.
+- New Folder, Rename, and Delete actions in the remote directory browser
+  (deletion is limited to empty folders; recursive deletion is not supported).
+- Persistent transfer history for the latest 200 records, retry support, path
+  redaction, and partial-file cleanup for cancelled transfers.
+- Optional post-transfer checksum verification.
 
-### Tünel yöneticisi ve snippet'ler
-- Local/Remote/Dynamic port forwarding; tek tek başlatma/durdurma ve
-  bağlantıya bağlı otomatik başlatma.
-- `⌘S` snippet paleti; secret değerler Keychain'de saklanır.
+### Tunnel manager and snippets
+- Local, remote, and dynamic port forwarding with individual start/stop controls
+  and connection-triggered automatic startup.
+- `⌘S` snippet palette; secret values are stored in Keychain.
 
-### Runbook'lar
-- Onaylı, çoklu host'ta güvenli komut çalıştırma (runbook'lar).
+### Runbooks
+- Confirmed, safe command execution across multiple hosts.
 
-### Test ve CI
-- `SSHConfigCore` ve uygulama için birim testleri (`swift test` ve
-  `xcodebuild test`), XCUITest tabanlı UI smoke testi, sahte process
-  çalıştırıcısıyla aktarım kuyruğu/reconnect entegrasyon testleri ve
-  1000 host'luk config için performans regresyon testi.
+### Testing and CI
+- Unit tests for `SSHConfigCore` and the application (`swift test` and
+  `xcodebuild test`), an XCUITest UI smoke test, transfer queue and reconnect
+  integration tests using fake process executors, and a performance regression
+  test for configurations containing 1,000 hosts.
 
-### Sürümleme ve dağıtım
-- `project.yml`'de sürüm bilgisi (`MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`)
-  ve Hardened Runtime; yerel geliştirme derlemesi ad-hoc imzalı kalır.
-- Sparkle entegrasyonu: Ayarlar penceresinde "Güncellemeleri Denetle" ve
-  otomatik denetim seçeneği (gerçek anahtarlar Mustafa'nın sağlamasına
-  bağlıdır — bkz. `docs/RELEASING.md`).
-- Tag tetiklemeli `release.yml`: imzalama, notarization, DMG/ZIP paketleme
-  ve appcast yayınlama iş akışı (secret'lar girilince uçtan uca çalışır).
+### Versioning and distribution
+- Version metadata (`MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`) and Hardened
+  Runtime in `project.yml`; local development builds remain ad-hoc signed.
+- Sparkle integration with “Check for Updates” and automatic update options in
+  Settings (real keys must be supplied by Mustafa; see `docs/RELEASING.md`).
+- Tag-triggered `release.yml` workflow for signing, notarization, DMG/ZIP
+  packaging, and appcast publishing once all required secrets are configured.
