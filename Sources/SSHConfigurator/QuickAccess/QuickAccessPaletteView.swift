@@ -46,7 +46,7 @@ struct QuickAccessPaletteView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
-            TextField("Alias, HostName, User veya grup ara", text: $query)
+            TextField("Search alias, HostName, User, or group", text: $query)
                 .textFieldStyle(.plain)
                 .font(.title3)
                 .focused($searchIsFocused)
@@ -67,7 +67,7 @@ struct QuickAccessPaletteView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .accessibilityLabel("Aramayı temizle")
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(16)
@@ -107,16 +107,16 @@ struct QuickAccessPaletteView: View {
 
     private var keyboardHelp: some View {
         HStack(spacing: 18) {
-            Label("Seç", systemImage: "arrow.up.arrow.down")
-            Label("Bağlan", systemImage: "return")
-            Label("Kapat", systemImage: "escape")
+            Label("Select", systemImage: "arrow.up.arrow.down")
+            Label("Connect", systemImage: "return")
+            Label("Close", systemImage: "escape")
             Spacer()
             Text("⌘K")
                 .font(.caption.monospaced())
                 .padding(.horizontal, 7)
                 .padding(.vertical, 3)
                 .background(.quaternary, in: RoundedRectangle(cornerRadius: 5))
-            Button("Kapat (Esc)") { dismiss() }
+            Button("Close (Esc)") { dismiss() }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
         }
@@ -196,7 +196,7 @@ private struct QuickAccessResultRow: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(entry.isFavorite ? .yellow : .secondary)
-            .help(entry.isFavorite ? "Favorilerden çıkar" : "Favorilere ekle")
+            .help(entry.isFavorite ? "Remove from favorites" : "Add to favorites")
 
             ForEach(QuickAccessActionPolicy.availableActions(for: entry), id: \.self) { action in
                 Button {
@@ -228,10 +228,10 @@ private struct QuickAccessResultRow: View {
 
     private func label(for action: QuickAccessAction) -> String {
         switch action {
-        case .connect: "Bağlan"
-        case .settings: "Ayarları aç"
-        case .transfer: "Dosya aktar"
-        case .diagnostics: "Tanılama"
+        case .connect: String(localized: "Connect")
+        case .settings: String(localized: "Open settings")
+        case .transfer: String(localized: "Transfer files")
+        case .diagnostics: String(localized: "Diagnostics")
         }
     }
 

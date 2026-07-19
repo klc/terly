@@ -134,7 +134,11 @@ enum SSHProcessEnvironment {
     /// `terly-askpass.sh` helper and forces its use with
     /// `SSH_ASKPASS_REQUIRE=force` (so it fires even though the process has
     /// no controlling terminal); `DISPLAY` is set because some OpenSSH
-    /// builds still gate askpass usage on it being present.
+    /// builds still gate askpass usage on it being present. The
+    /// `TERLY_ASKPASS_*` variables carry the helper's dialog title/button
+    /// text through in the user's current app locale — the shell script has
+    /// no access to the String Catalog itself, so this is how its Turkish
+    /// translations reach it.
     ///
     /// If the helper can't be located (e.g. running under `swift test`,
     /// where there is no app bundle), none of the three variables are set —
@@ -149,6 +153,12 @@ enum SSHProcessEnvironment {
             environment["SSH_ASKPASS"] = askpassURL.path
             environment["SSH_ASKPASS_REQUIRE"] = "force"
             environment["DISPLAY"] = ":0"
+            environment["TERLY_ASKPASS_CONFIRM_TITLE"] = String(localized: "Terly — Server Identity Confirmation")
+            environment["TERLY_ASKPASS_YES"] = String(localized: "Yes")
+            environment["TERLY_ASKPASS_NO"] = String(localized: "No")
+            environment["TERLY_ASKPASS_AUTH_TITLE"] = String(localized: "Terly — Authentication")
+            environment["TERLY_ASKPASS_OK"] = String(localized: "OK")
+            environment["TERLY_ASKPASS_CANCEL"] = String(localized: "Cancel")
         }
         return environment
     }

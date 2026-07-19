@@ -49,7 +49,7 @@ struct SheetHeader<Accessory: View>: View {
             }
             Spacer()
             accessory()
-            Button("Kapat", action: onClose)
+            Button("Close", action: onClose)
                 .keyboardShortcut(.cancelAction)
         }
         .padding()

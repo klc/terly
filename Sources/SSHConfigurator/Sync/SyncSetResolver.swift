@@ -79,7 +79,7 @@ struct SyncSetResolver: Sendable {
     ) {
         guard depth < Self.maxIncludeDepth else {
             warnings.append(SyncSetWarning(
-                message: "Include zinciri \(Self.maxIncludeDepth) seviyeden derin, gerisi atlandı: \(fileURL.path)"
+                message: String(localized: "Include chain is deeper than \(Self.maxIncludeDepth) levels, skipping the rest: \(fileURL.path)")
             ))
             return
         }
@@ -91,7 +91,7 @@ struct SyncSetResolver: Sendable {
                 for candidate in expand(pattern: pattern) {
                     guard isContained(candidate) else {
                         warnings.append(SyncSetWarning(
-                            message: "Include ~/.ssh dışına çıkıyor, atlandı: \(candidate.path)"
+                            message: String(localized: "Include points outside ~/.ssh, skipping: \(candidate.path)")
                         ))
                         continue
                     }
@@ -103,7 +103,7 @@ struct SyncSetResolver: Sendable {
 
                     guard !Self.isSensitiveFilename(candidate) else {
                         warnings.append(SyncSetWarning(
-                            message: "Include özel anahtar/known_hosts benzeri bir dosyaya işaret ediyor, atlandı: \(candidate.path)"
+                            message: String(localized: "Include points to what looks like a private key or known_hosts file, skipping: \(candidate.path)")
                         ))
                         continue
                     }

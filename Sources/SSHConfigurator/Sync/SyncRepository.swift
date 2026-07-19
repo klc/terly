@@ -7,7 +7,7 @@ enum SyncRepositoryError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case let .unexpectedRepoLayout(path):
-            return "Sync deposunda beklenmeyen dosya yolu: \(path)"
+            return String(localized: "Unexpected file path in the sync repository: \(path)")
         }
     }
 }

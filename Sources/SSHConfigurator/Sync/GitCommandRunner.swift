@@ -16,14 +16,14 @@ enum GitSyncError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case let .launchFailed(message):
-            return "git çalıştırılamadı: \(message)"
+            return String(localized: "Couldn't run git: \(message)")
         case let .commandFailed(command, exitCode, output):
             let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
-            return "git \(command) başarısız oldu (çıkış kodu \(exitCode))\(trimmed.isEmpty ? "" : ": \(trimmed)")"
+            return String(localized: "git \(command) failed (exit code \(exitCode))\(trimmed.isEmpty ? "" : ": \(trimmed)")")
         case .diverged:
-            return "Yerel ve uzak geçmiş ayrıştı (diverged). Fast-forward pull uygulanamaz — bir çözüm seçilmeli."
+            return String(localized: "Local and remote history have diverged. A fast-forward pull isn't possible — a resolution must be chosen.")
         case .noRemoteConfigured:
-            return "Senkronizasyon için önce bir uzak repo adresi ayarlanmalı."
+            return String(localized: "A remote repo address must be set before syncing.")
         }
     }
 }

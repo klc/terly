@@ -28,7 +28,7 @@ struct SnippetEditorView: View {
         NavigationStack {
             Form {
                 Section("Key") {
-                    TextField("Anahtar", text: $snippet.key, prompt: Text("Örn. release"))
+                    TextField("Key", text: $snippet.key, prompt: Text("e.g. release"))
                         .editorFieldStyle()
                 }
 
@@ -36,9 +36,9 @@ struct SnippetEditorView: View {
                     TextEditor(text: $snippet.value)
                         .font(.body.monospaced())
                         .frame(minHeight: 140)
-                    Toggle("Gizli değer (Keychain'de saklanır)", isOn: $snippet.isSecret)
+                    Toggle("Secret value (stored in Keychain)", isOn: $snippet.isSecret)
                     if snippet.isSecret {
-                        Text("Bu değer diskteki JSON dosyasına yazılmaz; sistem Keychain'inde saklanır.")
+                        Text("This value isn't written to the JSON file on disk; it's stored in the system Keychain.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -51,7 +51,7 @@ struct SnippetEditorView: View {
                         }) {
                             HStack {
                                 Spacer()
-                                Text("Snippet'i Sil")
+                                Text("Delete Snippet")
                                 Spacer()
                             }
                         }
@@ -59,25 +59,25 @@ struct SnippetEditorView: View {
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(trimmedKey.isEmpty ? "Yeni Snippet" : "Snippet Düzenle")
+            .navigationTitle(trimmedKey.isEmpty ? "New Snippet" : "Edit Snippet")
             .confirmationDialog(
-                "Snippet'i silmek istediğinize emin misiniz?",
+                "Are you sure you want to delete this snippet?",
                 isPresented: $showingDeleteConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Sil", role: .destructive) {
+                Button("Delete", role: .destructive) {
                     onDelete?()
                 }
-                Button("Vazgeç", role: .cancel) {}
+                Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Bu işlem geri alınamaz.")
+                Text("This action cannot be undone.")
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("İptal", action: onCancel)
+                    Button("Cancel", action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Kaydet") {
+                    Button("Save") {
                         var trimmed = snippet
                         trimmed.key = trimmedKey
                         onSave(trimmed)

@@ -26,13 +26,13 @@ final class SnippetLibrary: ObservableObject {
                     loaded[index].value = try secretStore.loadSecret(for: loaded[index].id)
                 } catch {
                     loaded[index].value = ""
-                    unreadableKeys.append(loaded[index].key.isEmpty ? "(isimsiz)" : loaded[index].key)
+                    unreadableKeys.append(loaded[index].key.isEmpty ? String(localized: "(unnamed)") : loaded[index].key)
                 }
             }
             snippets = loaded
             errorMessage = unreadableKeys.isEmpty
                 ? nil
-                : "Şu snippet'lerin gizli değeri Keychain'den okunamadı: \(unreadableKeys.joined(separator: ", "))"
+                : String(localized: "The secret value of these snippets couldn't be read from the Keychain: \(unreadableKeys.joined(separator: ", "))")
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -23,30 +23,30 @@ struct TunnelEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Tünel Bilgileri") {
-                    TextField("Adı", text: $tunnel.name, prompt: Text("örn. Postgres tüneli"))
+                Section("Tunnel Info") {
+                    TextField("Name", text: $tunnel.name, prompt: Text("e.g. Postgres tunnel"))
                         .editorFieldStyle()
-                    TextField("Açıklama (İsteğe bağlı)", text: $tunnel.description)
+                    TextField("Description (Optional)", text: $tunnel.description)
                         .editorFieldStyle()
-                    Picker("Tipi", selection: $tunnel.type) {
+                    Picker("Type", selection: $tunnel.type) {
                         ForEach(TunnelType.allCases) { type in
                             Text(type.displayName).tag(type)
                         }
                     }
-                    Toggle("Etkin", isOn: $tunnel.isEnabled)
-                    Toggle("Otomatik Bağlan", isOn: $tunnel.autoConnect)
+                    Toggle("Enabled", isOn: $tunnel.isEnabled)
+                    Toggle("Auto-Connect", isOn: $tunnel.autoConnect)
                         .disabled(!tunnel.isEnabled)
                 }
-                
-                Section("Yerel Bağlantı (Bind)") {
-                    TextField("IP Adresi", text: $tunnel.localBindAddress, prompt: Text("örn. 127.0.0.1"))
+
+                Section("Local Bind") {
+                    TextField("IP Address", text: $tunnel.localBindAddress, prompt: Text("e.g. 127.0.0.1"))
                         .editorFieldStyle()
                         .onChange(of: tunnel.localBindAddress) { _, newValue in
                             showingOpenBindWarning = newValue == "0.0.0.0" || newValue == "::"
                         }
 
                     if showingOpenBindWarning {
-                        Label("Dış dünyaya açık (0.0.0.0) yerel bind güvenli olmayabilir.", systemImage: "exclamationmark.triangle.fill")
+                        Label("Binding to all interfaces (0.0.0.0) may not be secure.", systemImage: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
                             .font(.caption)
                     }
@@ -54,31 +54,31 @@ struct TunnelEditorView: View {
                     TextField("Port", value: Binding(
                         get: { tunnel.localPort },
                         set: { tunnel.localPort = $0 }
-                    ), format: .number, prompt: Text("örn. 5432"))
+                    ), format: .number, prompt: Text("e.g. 5432"))
                         .editorFieldStyle()
                 }
 
                 if tunnel.type != .dynamic {
-                    Section("Uzak Bağlantı") {
-                        TextField("Uzak IP / Host", text: $tunnel.remoteBindAddress, prompt: Text("örn. localhost"))
+                    Section("Remote Bind") {
+                        TextField("Remote IP / Host", text: $tunnel.remoteBindAddress, prompt: Text("e.g. localhost"))
                             .editorFieldStyle()
-                        TextField("Uzak Port", value: Binding(
+                        TextField("Remote Port", value: Binding(
                             get: { tunnel.remotePort },
                             set: { tunnel.remotePort = $0 }
-                        ), format: .number, prompt: Text("örn. 5432"))
+                        ), format: .number, prompt: Text("e.g. 5432"))
                             .editorFieldStyle()
                     }
                 }
-                
-                Section("Hedef Host (Alias)") {
+
+                Section("Target Host (Alias)") {
                     Picker("Host", selection: $tunnel.targetHostAlias) {
-                        Text("Seçiniz...").tag("")
+                        Text("Select…").tag("")
                         ForEach(availableHosts, id: \.self) { host in
                             Text(host).tag(host)
                         }
                     }
                 }
-                
+
                 if let onDelete = onDelete {
                     Section {
                         Button(role: .destructive, action: {
@@ -86,7 +86,7 @@ struct TunnelEditorView: View {
                         }) {
                             HStack {
                                 Spacer()
-                                Text("Tüneli Sil")
+                                Text("Delete Tunnel")
                                 Spacer()
                             }
                         }
@@ -94,25 +94,25 @@ struct TunnelEditorView: View {
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(tunnel.name.isEmpty ? "Yeni Tünel" : "Tünel Düzenle")
+            .navigationTitle(tunnel.name.isEmpty ? "New Tunnel" : "Edit Tunnel")
             .confirmationDialog(
-                "Tüneli silmek istediğinize emin misiniz?",
+                "Are you sure you want to delete this tunnel?",
                 isPresented: $showingDeleteConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Sil", role: .destructive) {
+                Button("Delete", role: .destructive) {
                     onDelete?()
                 }
-                Button("Vazgeç", role: .cancel) {}
+                Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Bu işlem geri alınamaz.")
+                Text("This action cannot be undone.")
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("İptal", action: onCancel)
+                    Button("Cancel", action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Kaydet") {
+                    Button("Save") {
                         onSave(tunnel)
                     }
                     .disabled(tunnel.validationError != nil)

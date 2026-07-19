@@ -30,7 +30,7 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
 
         // 2. ⌘K opens Quick Access (its search field becomes visible).
         app.typeKey("k", modifierFlags: .command)
-        let quickAccessSearchField = app.textFields["Alias, HostName, User veya grup ara"]
+        let quickAccessSearchField = app.textFields["Search alias, HostName, User, or group"]
         XCTAssertTrue(quickAccessSearchField.waitForExistence(timeout: 10), "Hızlı erişim arama alanı açılmalı")
 
         // 3. Esc closes Quick Access again.

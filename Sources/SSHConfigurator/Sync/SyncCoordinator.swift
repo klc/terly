@@ -216,6 +216,6 @@ final class SyncCoordinator: ObservableObject {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM HH:mm"
         formatter.locale = Locale(identifier: "tr_TR")
-        return "Senkronizasyon: \(formatter.string(from: Date()))"
+        return String(localized: "Sync: \(formatter.string(from: Date()))")
     }
 }

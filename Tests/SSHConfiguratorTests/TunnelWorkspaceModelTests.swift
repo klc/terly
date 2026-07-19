@@ -103,7 +103,7 @@ final class TunnelWorkspaceModelTests: XCTestCase {
         model.startTunnel(id: tunnel.id)
 
         XCTAssertTrue(processExecuting.requests.isEmpty)
-        XCTAssertEqual(model.activeStatuses[tunnel.id], .failed("Yerel port 1 ile 65535 arasında olmalı."))
+        XCTAssertEqual(model.activeStatuses[tunnel.id], .failed("Local port must be between 1 and 65535."))
     }
 
     func testStartTunnel_LocalForward() async throws {

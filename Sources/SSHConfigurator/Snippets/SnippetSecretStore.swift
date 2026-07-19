@@ -19,12 +19,12 @@ enum SnippetSecretStoreError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .encodingFailed:
-            return "Gizli değer metne dönüştürülemedi."
+            return String(localized: "The secret value couldn't be converted to text.")
         case .notFound:
-            return "Keychain'de kayıtlı bir değer bulunamadı."
+            return String(localized: "No stored value was found in the Keychain.")
         case let .unexpectedStatus(status):
             let message = SecCopyErrorMessageString(status, nil) as String?
-            return "Keychain hatası (\(status))\(message.map { ": \($0)" } ?? "")."
+            return String(localized: "Keychain error (\(status))\(message.map { ": \($0)" } ?? "").")
         }
     }
 }

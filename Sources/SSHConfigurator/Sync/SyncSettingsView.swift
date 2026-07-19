@@ -14,15 +14,15 @@ struct SyncSettingsView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Remote URL", text: $remoteURLText, prompt: Text("git@github.com:kullanici/dotfiles.git"))
+                TextField("Remote URL", text: $remoteURLText, prompt: Text("git@github.com:username/dotfiles.git"))
                     .textFieldStyle(.roundedBorder)
                     .onSubmit { applyRemoteURL() }
                     .disabled(isBusy)
 
                 HStack {
-                    Button("Uygula") { applyRemoteURL() }
+                    Button("Apply") { applyRemoteURL() }
                         .disabled(isBusy || remoteURLText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    Button("Şimdi Senkronize Et") {
+                    Button("Sync Now") {
                         isBusy = true
                         Task {
                             await coordinator.syncNow()
@@ -35,18 +35,18 @@ struct SyncSettingsView: View {
                     }
                 }
 
-                Toggle("Her commit'ten sonra otomatik push", isOn: Binding(
+                Toggle("Automatically push after every commit", isOn: Binding(
                     get: { coordinator.autoPushEnabled },
                     set: { coordinator.setAutoPushEnabled($0) }
                 ))
                 .disabled(!coordinator.isConfigured)
             } header: {
-                Text("Senkronizasyon")
+                Text("Sync")
             } footer: {
                 (
-                    Text("Repo ")
-                        + Text("private").fontWeight(.semibold)
-                        + Text(" olmalı — buraya yazılan her şey uzak repoya commit edilir ve git geçmişi kalıcıdır, silme geri almaz. Özel anahtarlar hiçbir zaman senkronize edilmez.")
+                    Text("The repo ")
+                        + Text("must be private").fontWeight(.semibold)
+                        + Text(" — everything written here is committed to the remote repo and the git history is permanent; deleting doesn't undo it. Private keys are never synced.")
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -55,17 +55,18 @@ struct SyncSettingsView: View {
             Section {
                 statusRow
                 if let aheadBehind = coordinator.aheadBehind, aheadBehind.ahead > 0 || aheadBehind.behind > 0 {
-                    Label("\(aheadBehind.ahead) commit ileride, \(aheadBehind.behind) commit geride", systemImage: "arrow.up.arrow.down")
+                    // TODO(plural)
+                    Label("\(aheadBehind.ahead) commits ahead, \(aheadBehind.behind) commits behind", systemImage: "arrow.up.arrow.down")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 if let lastSyncedAt = coordinator.lastSyncedAt {
-                    Label("Son senkronizasyon: \(lastSyncedAt.formatted(date: .abbreviated, time: .shortened))", systemImage: "clock")
+                    Label("Last synced: \(lastSyncedAt.formatted(date: .abbreviated, time: .shortened))", systemImage: "clock")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             } header: {
-                Text("Durum")
+                Text("Status")
             }
 
             if case .pendingApply = coordinator.status {
@@ -84,7 +85,7 @@ struct SyncSettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("Atlanan dosyalar")
+                    Text("Skipped Files")
                 }
             }
         }
@@ -104,26 +105,26 @@ struct SyncSettingsView: View {
         switch coordinator.status {
         case .idle:
             if coordinator.isConfigured {
-                Label("Güncel", systemImage: "checkmark.circle")
+                Label("Up to date", systemImage: "checkmark.circle")
                     .foregroundStyle(.green)
             } else {
-                Label("Uzak repo ayarlanmadı", systemImage: "circle.dashed")
+                Label("No remote repo configured", systemImage: "circle.dashed")
                     .foregroundStyle(.secondary)
             }
         case .pendingCommit:
-            Label("Değişiklik bekleniyor, birazdan commit edilecek…", systemImage: "clock.arrow.circlepath")
+            Label("Changes pending, will commit shortly…", systemImage: "clock.arrow.circlepath")
                 .foregroundStyle(.secondary)
         case .syncing:
             HStack {
                 ProgressView().controlSize(.small)
-                Text("Senkronize ediliyor…")
+                Text("Syncing…")
             }
             .foregroundStyle(.secondary)
         case .pendingApply:
-            Label("Uzaktan gelen değişiklikler inceleme bekliyor", systemImage: "tray.and.arrow.down")
+            Label("Incoming changes are waiting for review", systemImage: "tray.and.arrow.down")
                 .foregroundStyle(.blue)
         case .diverged:
-            Label("Yerel ve uzak geçmiş ayrıştı — aşağıdan seçim yap", systemImage: "exclamationmark.triangle.fill")
+            Label("Local and remote history have diverged — choose below", systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
         case let .error(message):
             Label(message, systemImage: "xmark.octagon")
@@ -140,7 +141,7 @@ struct SyncSettingsView: View {
             }
 
             if !coordinator.pendingMissingIdentityFiles.isEmpty {
-                Label("Bu makinede eksik IdentityFile'lar:", systemImage: "key.slash")
+                Label("IdentityFile(s) missing on this machine:", systemImage: "key.slash")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.orange)
                 ForEach(coordinator.pendingMissingIdentityFiles, id: \.self) { path in
@@ -151,10 +152,10 @@ struct SyncSettingsView: View {
             }
 
             HStack {
-                Button("İncele…") { showingDiffPreview = true }
+                Button("Review…") { showingDiffPreview = true }
                 Spacer()
-                Button("Vazgeç") { coordinator.dismissPendingChanges() }
-                Button("Uygula") {
+                Button("Cancel") { coordinator.dismissPendingChanges() }
+                Button("Apply") {
                     isBusy = true
                     Task {
                         await coordinator.applyPendingChanges()
@@ -168,9 +169,9 @@ struct SyncSettingsView: View {
                 }
             }
         } header: {
-            Text("İncelemeni bekleyen değişiklikler")
+            Text("Changes Waiting for Your Review")
         } footer: {
-            Text("Uygulamadan önce mevcut yerel durum otomatik olarak yedeklenir.")
+            Text("The current local state is automatically backed up before applying.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -178,19 +179,19 @@ struct SyncSettingsView: View {
 
     private var divergenceSection: some View {
         Section {
-            Text("Yerel ve uzak repo farklı yönlerde ilerlemiş. Hangisi kalsın?")
+            Text("Local and remote repos have diverged. Which one should be kept?")
                 .font(.caption)
-            Button("Yereli yedekle, uzaktakini al") {
+            Button("Back Up Local, Take Remote") {
                 resolve(.backupLocalAndTakeRemote)
             }
-            Button("Uzaktakini yerelimle değiştir (yeni commit, force yok)", role: .destructive) {
+            Button("Replace Remote with Local (New Commit, No Force)", role: .destructive) {
                 resolve(.overwriteRemoteWithLocal)
             }
-            Button("İptal", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 resolve(.cancel)
             }
         } header: {
-            Text("Çakışma")
+            Text("Conflict")
         }
     }
 
