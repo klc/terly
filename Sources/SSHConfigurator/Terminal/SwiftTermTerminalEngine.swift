@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import MetalKit
 import SwiftUI
 @preconcurrency import SwiftTerm
 
@@ -433,7 +434,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
 }
 
 @MainActor
-private final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
+final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
     var synchronizedPaneIDs: Set<TerminalPane.ID> = []
     var onUserInput: (([UInt8]) -> Void)?
     var onFindCommand: ((TerminalFindCommand) -> Void)?
@@ -531,6 +532,16 @@ private final class SynchronizableLocalProcessTerminalView: LocalProcessTerminal
     override func mouseDown(with event: NSEvent) {
         onMouseDownActivate?()
         super.mouseDown(with: event)
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        let hitView = super.hitTest(point)
+        // SwiftTerm's Metal renderer is an MTKView inserted above the terminal
+        // view. Xcode 16 Release builds deliver clicks to that child, bypassing
+        // TerminalView.mouseDown and our pane-activation callback entirely.
+        // Route only renderer hits back to the terminal; scrollers and other
+        // interactive child views keep their native hit targets.
+        return hitView is MTKView ? self : hitView
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {

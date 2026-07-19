@@ -28,6 +28,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Keep release builds on the same SwiftUI/AppKit generation used during
+      # development. The macos-15 image otherwise defaults to Xcode 16.4.
+      - name: Select Xcode 26.3
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
+      - name: Report toolchain
+        run: xcodebuild -version
+
       - name: Resolve version from tag
         run: |
           VERSION="${GITHUB_REF_NAME#v}"

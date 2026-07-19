@@ -25,6 +25,7 @@
 		23A45AA9D4002D26FC3A2B4B /* StartupFlowBootstrapBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6044D92F8A0835B09BD4CB17 /* StartupFlowBootstrapBuilderTests.swift */; };
 		256B5AD90DE8B613DD1A3995 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F17E24A3F1336017631C99 /* ContentView.swift */; };
 		2AFB37CF763F3390F921C582 /* QuickAccessSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAA9D117582512EE5CF82D6 /* QuickAccessSearch.swift */; };
+		2C3FA56EABF024E26EF9A742 /* PaneMouseActivationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23524E83576EF2A9B9F88545 /* PaneMouseActivationTests.swift */; };
 		2DAAF6C36DF8E71B2CFC885D /* TransferItemRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4531479E8489C2E9048A11E /* TransferItemRunner.swift */; };
 		2DE391E69614DD886C961CB0 /* AutoReconnectManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A984EB504FF497E93B6B7 /* AutoReconnectManagerTests.swift */; };
 		2EBF1784C1647255D7E58884 /* TerminalThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50EB840971B8E5E7E38C856 /* TerminalThemeTests.swift */; };
@@ -229,6 +230,7 @@
 		1992CE6D96799F34D4972C83 /* StartupFlowBootstrapBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupFlowBootstrapBuilder.swift; sourceTree = "<group>"; };
 		1C7C35ADD87A081C9378B37A /* SSHConfigValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigValidator.swift; sourceTree = "<group>"; };
 		23417AAD6CF26007CEB7AC9C /* EmbeddedTerminalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedTerminalEngine.swift; sourceTree = "<group>"; };
+		23524E83576EF2A9B9F88545 /* PaneMouseActivationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneMouseActivationTests.swift; sourceTree = "<group>"; };
 		264DCE0011068848CB95B106 /* RemoteFileBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFileBrowserView.swift; sourceTree = "<group>"; };
 		27C19F8E24EA1C09BAC16452 /* StartupFlowModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupFlowModels.swift; sourceTree = "<group>"; };
 		2AABC552099FD36EE9475D01 /* TerminalTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTheme.swift; sourceTree = "<group>"; };
@@ -525,6 +527,7 @@
 				9B00812DA791EBC953BD25BC /* GitCommandRunnerArgvTests.swift */,
 				16B580874192A7CD06B8A04F /* HostSettingsApplyCoordinatorTests.swift */,
 				A2BCD29EC559BD8E1F4ECCE0 /* KeySetupTests.swift */,
+				23524E83576EF2A9B9F88545 /* PaneMouseActivationTests.swift */,
 				EEC61F9449A631FA6C28D0A7 /* QuickAccessTests.swift */,
 				5899D5BA7A5CCD617EE37F81 /* ReconnectExitClassifierTests.swift */,
 				CD77CC37B15F48F0E6F2F92C /* RunbookTests.swift */,
@@ -869,6 +872,7 @@
 				F1EFC5D0149756BA865281F1 /* GitCommandRunnerArgvTests.swift in Sources */,
 				6B2D967A000C70568D1EFC27 /* HostSettingsApplyCoordinatorTests.swift in Sources */,
 				68F128D6499EDF6352F49E3C /* KeySetupTests.swift in Sources */,
+				2C3FA56EABF024E26EF9A742 /* PaneMouseActivationTests.swift in Sources */,
 				BA68B94D78720EB569EF37A2 /* QuickAccessTests.swift in Sources */,
 				6D47AFAAC76AFB3BAE4A18AD /* ReconnectExitClassifierTests.swift in Sources */,
 				C8681D532C512889D07ACCAF /* RunbookTests.swift in Sources */,
@@ -1177,7 +1181,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Sources/SSHConfigurator/Info.plist;
@@ -1185,7 +1189,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mkilic.Terly;
 				PRODUCT_MODULE_NAME = SSHConfigurator;
 				PRODUCT_NAME = Terly;
@@ -1328,7 +1332,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Sources/SSHConfigurator/Info.plist;
@@ -1336,7 +1340,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mkilic.Terly;
 				PRODUCT_MODULE_NAME = SSHConfigurator;
 				PRODUCT_NAME = Terly;

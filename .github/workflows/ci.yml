@@ -13,6 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Select Xcode 26.3
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
+      - name: Report toolchain
+        run: xcodebuild -version
+
       - name: Build (xcodebuild)
         run: |
           xcodebuild \
@@ -48,6 +54,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Select Xcode 26.3
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
+      - name: Report toolchain
+        run: xcodebuild -version
 
       - name: Enable Developer Mode (required for XCUITest automation)
         run: sudo /usr/sbin/DevToolsSecurity -enable

@@ -5,6 +5,16 @@ This file summarizes Terly's release history. Its format is loosely inspired by
 automatically included in GitHub Release notes and the Sparkle appcast by
 `release.yml` (see `docs/RELEASING.md`).
 
+## 1.1.1
+
+An urgent compatibility fix for pane navigation in release builds.
+
+### Fixed
+- Restored mouse-based pane switching when SwiftTerm's Metal renderer receives
+  the click instead of its parent terminal view.
+- Pinned CI and release jobs to Xcode 26.3 so development, validation, and
+  published artifacts use the same SwiftUI/AppKit toolchain generation.
+
 ## 1.1.0
 
 A usability release that makes the terminal workspace and file transfers faster,

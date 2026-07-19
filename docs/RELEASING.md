@@ -49,8 +49,8 @@ anahtarı ve Sparkle private key hiçbir zaman repoya eklenmemelidir.
 Hazır commit varsayılan branche alındıktan sonra annotated tag oluşturup gönder:
 
 ```sh
-git tag -a v1.1.0 -m 'Terly 1.1.0'
-git push origin v1.1.0
+git tag -a v1.1.1 -m 'Terly 1.1.1'
+git push origin v1.1.1
 ```
 
 `.github/workflows/release.yml` tag'den sürümü, GitHub run number'dan build
