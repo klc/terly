@@ -25,6 +25,72 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         XCTAssertEqual(model.selectedSessionID, firstID)
     }
 
+    /// Returning to the sidebar's Local Terminal item used to append a tab on
+    /// every click, so coming back from another section (Snippets, say) threw
+    /// you into a brand new terminal.
+    @MainActor
+    func testReturningToTheLocalTerminalReusesTheLiveTab() {
+        let model = makeModel()
+
+        XCTAssertTrue(model.openLocalTerminal())
+        let firstID = model.selectedSessionID
+        XCTAssertTrue(model.openLocalTerminal())
+
+        XCTAssertEqual(model.sessions.count, 1)
+        XCTAssertEqual(model.selectedSessionID, firstID)
+    }
+
+    @MainActor
+    func testNewTabButtonOpensASecondLocalTerminalDespiteThatReuse() {
+        let model = makeModel()
+
+        XCTAssertTrue(model.openLocalTerminal())
+        let firstID = try! XCTUnwrap(model.selectedSessionID)
+
+        XCTAssertTrue(model.openNewTabFromActivePane(in: firstID))
+
+        XCTAssertEqual(model.sessions.count, 2)
+        XCTAssertEqual(model.sessions.map(\.alias), ["Yerel Terminal", "Yerel Terminal"])
+        XCTAssertNotEqual(model.selectedSessionID, firstID)
+    }
+
+    @MainActor
+    func testNewTabButtonDuplicatesAnSSHConnectionInsteadOfReusingItsTab() {
+        let model = makeModel()
+
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let firstID = try! XCTUnwrap(model.selectedSessionID)
+
+        XCTAssertTrue(model.openNewTabFromActivePane(in: firstID))
+
+        XCTAssertEqual(model.sessions.count, 2)
+        XCTAssertEqual(model.sessions.map(\.alias), ["prod", "prod"])
+        XCTAssertEqual(model.sessions.map(\.hostID), [1, 1])
+        XCTAssertNotEqual(model.selectedSessionID, firstID)
+
+        // Reopening from the sidebar still selects an existing tab rather than
+        // adding a third — duplicating is the explicit button's job only.
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        XCTAssertEqual(model.sessions.count, 2)
+    }
+
+    /// A split session can hold panes from different hosts, so the new tab
+    /// follows the *active pane*, not the session's own alias.
+    @MainActor
+    func testNewTabFollowsTheActivePaneOfASplitSession() {
+        let model = makeModel()
+
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        model.splitActivePane(in: sessionID, axis: .vertical)
+        let activeAlias = try! XCTUnwrap(model.selectedSession?.activePane?.alias)
+
+        XCTAssertTrue(model.openNewTabFromActivePane(in: sessionID))
+
+        XCTAssertEqual(model.sessions.count, 2)
+        XCTAssertEqual(model.selectedSession?.panes.map(\.alias), [activeAlias])
+    }
+
     @MainActor
     func testOpensConnectionGroupAsSeparateSessionsInOneBatch() {
         let model = makeModel()

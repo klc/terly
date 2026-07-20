@@ -125,6 +125,19 @@ final class TerminalWorkspaceModel: ObservableObject {
     func openLocalTerminal() -> Bool {
         let localAlias = "Yerel Terminal"
 
+        // Returning to the sidebar's Local Terminal item should select the
+        // live local tab, not stack up another one on every click. This is
+        // the same one-live-session-per-alias reuse `openConnections`
+        // already applies to SSH aliases; `openNewTabFromActivePane` is the
+        // explicit path to a second local terminal.
+        if let existing = sessions.first(where: {
+            $0.hostID == -1 && $0.alias == localAlias && !Self.isExited($0.status)
+        }) {
+            selectedSessionID = existing.id
+            errorMessage = nil
+            return true
+        }
+
         do {
             let pane = try launchPlanBuilder.makePane(alias: localAlias)
             let session = TerminalSession(
@@ -135,6 +148,45 @@ final class TerminalWorkspaceModel: ObservableObject {
             sessions.removeAll { $0.hostID == -1 && $0.alias == localAlias && Self.isExited($0.status) }
             sessions.append(session)
             selectedSessionID = session.id
+            errorMessage = nil
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Opens another tab running the active pane's connection.
+    ///
+    /// This is the one opener that deliberately bypasses the
+    /// one-live-session-per-alias reuse in `openConnections` and
+    /// `openLocalTerminal`: duplicating a tab is an explicit request for a
+    /// second live session on the same alias. It keys off the active *pane*
+    /// rather than the session because a split session can hold panes from
+    /// different hosts, so "duplicate the session" has no single meaning.
+    @discardableResult
+    func openNewTabFromActivePane(
+        in sessionID: TerminalSession.ID,
+        startupProfile: StartupFlowProfile? = nil
+    ) -> Bool {
+        guard let session = sessions.first(where: { $0.id == sessionID }),
+              let activePane = session.activePane else {
+            errorMessage = TerminalWorkspaceError.noConnections.localizedDescription
+            return false
+        }
+
+        do {
+            // `makeSession` routes on the alias, so the local terminal needs
+            // no special case here — "Yerel Terminal" produces a shell pane
+            // exactly as it does through `openLocalTerminal`.
+            let newSession = try launchPlanBuilder.makeSession(
+                hostID: session.hostID,
+                alias: activePane.alias,
+                startupProfile: startupProfile,
+                skipStartup: false
+            )
+            sessions.append(newSession)
+            selectedSessionID = newSession.id
             errorMessage = nil
             return true
         } catch {

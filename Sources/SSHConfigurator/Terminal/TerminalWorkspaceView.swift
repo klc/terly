@@ -313,6 +313,15 @@ struct TerminalWorkspaceView: View {
                 )
             )
 
+            Button("New tab", systemImage: "plus.rectangle.on.rectangle") {
+                model.openNewTabFromActivePane(
+                    in: session.id,
+                    startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
+                )
+            }
+            .labelStyle(.iconOnly)
+            .help("Open the active terminal's connection again in a new tab")
+
             Button("Split vertically", systemImage: "rectangle.split.2x1") {
                 model.splitActivePane(
                     in: session.id,

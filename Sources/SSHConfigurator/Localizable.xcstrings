@@ -3984,6 +3984,16 @@
         }
       }
     },
+    "New tab" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni sekme"
+          }
+        }
+      }
+    },
     "New versions are checked for automatically in the background while the app is open." : {
       "localizations" : {
         "tr" : {
@@ -4518,6 +4528,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Senkronizasyon ayarlarını aç"
+          }
+        }
+      }
+    },
+    "Open the active terminal's connection again in a new tab" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin terminalin bağlantısını yeni bir sekmede yeniden aç"
           }
         }
       }
