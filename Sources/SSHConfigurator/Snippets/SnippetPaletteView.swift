@@ -214,7 +214,7 @@ struct SnippetPaletteSupport: ViewModifier {
                     Button("Add Snippet", systemImage: "text.badge.plus") {
                         showingPalette = true
                     }
-                    .keyboardShortcut("s", modifiers: .command)
+                    .keyboardShortcut(.snippetPalette)
                     .disabled(terminalWorkspace.selectedSession?.activePaneID == nil)
                 }
             }

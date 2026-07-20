@@ -22,6 +22,7 @@
 		176647701CF3AA4187CB3E19 /* SSHProcessClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3888A75A39BCFB09BB65F05C /* SSHProcessClientTests.swift */; };
 		2260568DB5A4314EC4121F14 /* RunbookModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A98D3AA064065C446F43D4 /* RunbookModels.swift */; };
 		22D5200B420A49F952159C34 /* TransferQueueEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69ACFD8051580893CCAF2C25 /* TransferQueueEngine.swift */; };
+		230D7D7F0D1D45A12B7DB4C7 /* AppShortcutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EBEBEDBFA6BDFCDC7CB035 /* AppShortcutTests.swift */; };
 		23A45AA9D4002D26FC3A2B4B /* StartupFlowBootstrapBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6044D92F8A0835B09BD4CB17 /* StartupFlowBootstrapBuilderTests.swift */; };
 		256B5AD90DE8B613DD1A3995 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F17E24A3F1336017631C99 /* ContentView.swift */; };
 		2719CFB9A9EEEBE667AFE860 /* TerminalSessionRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44871634DD4F92487FC3912 /* TerminalSessionRecorder.swift */; };
@@ -151,6 +152,7 @@
 		F683EFFD61BC25B566610757 /* SheetHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657861E5BB19632354B40822 /* SheetHeader.swift */; };
 		F7AFDB8BF9E1CBFC7555501D /* UploadPreflight.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BAE8DC10740C0AE33C6943 /* UploadPreflight.swift */; };
 		F821B48CB12C183D92A7770F /* RunbookEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 481EDFB336DFBDFA5DD2C732 /* RunbookEditorView.swift */; };
+		FA02669BB18AF27EBA393534 /* AppShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56E55A9359B5E56E3AA3E58 /* AppShortcut.swift */; };
 		FAEF29C3976A1335E17168B9 /* SCPTransferPlanBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA779FD3CC9CABE217131EA /* SCPTransferPlanBuilderTests.swift */; };
 		FBCA75D14198471D8C40C8DD /* SSHConfigDocumentPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84255DE75C584B2736CA1FB2 /* SSHConfigDocumentPerformanceTests.swift */; };
 		FCCB0E77D30F810406A6538E /* KeySetupEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE954B68B80DEF4A96D2B11 /* KeySetupEngine.swift */; };
@@ -340,8 +342,10 @@
 		D22042E64157754DB6E27E7A /* SSHConfigDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigDocument.swift; sourceTree = "<group>"; };
 		D378DEDB5144FEBE6D868714 /* ConfigViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigViewModel.swift; sourceTree = "<group>"; };
 		D44871634DD4F92487FC3912 /* TerminalSessionRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSessionRecorder.swift; sourceTree = "<group>"; };
+		D56E55A9359B5E56E3AA3E58 /* AppShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcut.swift; sourceTree = "<group>"; };
 		D6799E91AEEE183AA5309764 /* SnippetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetListView.swift; sourceTree = "<group>"; };
 		D6A22ECF805C72700820CB78 /* ReconnectExitClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectExitClassifier.swift; sourceTree = "<group>"; };
+		D9EBEBEDBFA6BDFCDC7CB035 /* AppShortcutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcutTests.swift; sourceTree = "<group>"; };
 		DA7AE025A8B14F13D7F7D912 /* SnippetModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetModels.swift; sourceTree = "<group>"; };
 		E2FB984B84E4AE1D00D33FED /* HostSettingsApplyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostSettingsApplyCoordinator.swift; sourceTree = "<group>"; };
 		E49D2AD99645EA0E7C11BD4B /* AutoReconnectChainIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnectChainIntegrationTests.swift; sourceTree = "<group>"; };
@@ -534,6 +538,7 @@
 		5B973600156922EEB60B317D /* SSHConfiguratorTests */ = {
 			isa = PBXGroup;
 			children = (
+				D9EBEBEDBFA6BDFCDC7CB035 /* AppShortcutTests.swift */,
 				2E496DACF2F8642F2E9873BB /* AskpassHelperScriptTests.swift */,
 				E49D2AD99645EA0E7C11BD4B /* AutoReconnectChainIntegrationTests.swift */,
 				B77A984EB504FF497E93B6B7 /* AutoReconnectManagerTests.swift */,
@@ -664,6 +669,7 @@
 		C82DD3465281F29B45E91EEE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				D56E55A9359B5E56E3AA3E58 /* AppShortcut.swift */,
 				4F9289B94EBCF260C8533544 /* FormFieldStyle.swift */,
 				657861E5BB19632354B40822 /* SheetHeader.swift */,
 				9964612A974D49BD95FFBE6A /* StepStatusStyle.swift */,
@@ -880,6 +886,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				230D7D7F0D1D45A12B7DB4C7 /* AppShortcutTests.swift in Sources */,
 				8A0308361EEE3935E9452E69 /* AskpassHelperScriptTests.swift in Sources */,
 				5E14DF613547601A4D1A9084 /* AutoReconnectChainIntegrationTests.swift in Sources */,
 				2DE391E69614DD886C961CB0 /* AutoReconnectManagerTests.swift in Sources */,
@@ -957,6 +964,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA02669BB18AF27EBA393534 /* AppShortcut.swift in Sources */,
 				DDB25C90A4757984E6070B45 /* AskpassHelperLocator.swift in Sources */,
 				00C71B86CDE13E25817FA102 /* AutoReconnectManager.swift in Sources */,
 				51C72DCA9493745961BB4BA2 /* AutoReconnectSettingsStore.swift in Sources */,

@@ -565,19 +565,27 @@ final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
             return super.performKeyEquivalent(with: event)
         }
 
-        switch (key, flags.contains(.shift)) {
-        case ("f", false):
+        // Compares against the registry instead of bare character literals so
+        // this dispatch can never drift from what AppShortcut.findInTerminal /
+        // .findNext / .findPrevious document in Help.
+        let shift = flags.contains(.shift)
+        func matches(_ shortcut: AppShortcut) -> Bool {
+            String(shortcut.key.character) == key && shortcut.modifiers.contains(.shift) == shift
+        }
+
+        if matches(.findInTerminal) {
             onFindCommand?(.open)
             return true
-        case ("g", false):
+        }
+        if matches(.findNext) {
             onFindCommand?(.next)
             return true
-        case ("g", true):
+        }
+        if matches(.findPrevious) {
             onFindCommand?(.previous)
             return true
-        default:
-            return super.performKeyEquivalent(with: event)
         }
+        return super.performKeyEquivalent(with: event)
     }
 
     // Route the responder-chain find action into our own search bar instead of

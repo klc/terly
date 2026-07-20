@@ -35,7 +35,7 @@ struct HelpCenterView: View {
                             ("server.rack", "Select a connection to open its terminal."),
                             ("plus", "Use + to add a server or connection group."),
                             ("gearshape", "Open connection settings; duplicate and transfer actions are beside it."),
-                            ("magnifyingglass", "Use Quick Access or press ⌘K to find a connection from anywhere."),
+                            ("magnifyingglass", "Use Quick Access or press \(AppShortcut.quickAccess.displayString) to find a connection from anywhere."),
                         ]
                     )
 
@@ -45,9 +45,9 @@ struct HelpCenterView: View {
                         rows: [
                             ("record.circle", "Start session recording and choose a .log file. Press again to stop."),
                             ("arrow.left.arrow.right", "Open file transfer for the active connection."),
-                            ("rectangle.split.2x1", "Split the active terminal vertically (⌘D)."),
-                            ("rectangle.split.1x2", "Split it horizontally (⇧⌘D)."),
-                            ("arrow.up.left.and.arrow.down.right", "Zoom the active pane; use ⇧⌘Return to restore it."),
+                            ("rectangle.split.2x1", "Split the active terminal vertically (\(AppShortcut.splitVertically.displayString))."),
+                            ("rectangle.split.1x2", "Split it horizontally (\(AppShortcut.splitHorizontally.displayString))."),
+                            ("arrow.up.left.and.arrow.down.right", "Zoom the active pane; use \(AppShortcut.zoomPane.displayString) to restore it."),
                             ("rectangle.portrait.and.arrow.right", "Close the selected terminal session."),
                             ("gearshape", "Change the terminal font, theme, cursor, and scroll behavior."),
                         ]
@@ -60,7 +60,7 @@ struct HelpCenterView: View {
                             ("doc.text", "File includes the raw config editor and change preview."),
                             ("gear", "Settings contains General, Terminal, Sync, and Updates."),
                             ("questionmark.circle", "Help opens this guide or restarts the welcome tour."),
-                            ("magnifyingglass", "Find inside the active terminal with ⌘F; continue with ⌘G or ⇧⌘G."),
+                            ("magnifyingglass", "Find inside the active terminal with \(AppShortcut.findInTerminal.displayString); continue with \(AppShortcut.findNext.displayString) or \(AppShortcut.findPrevious.displayString)."),
                         ]
                     )
 

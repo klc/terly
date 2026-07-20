@@ -323,7 +323,7 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Split the active terminal vertically; opens the same connection on the right")
-            .keyboardShortcut("d", modifiers: .command)
+            .keyboardShortcut(.splitVertically)
 
             Button("Split horizontally", systemImage: "rectangle.split.1x2") {
                 model.splitActivePane(
@@ -334,7 +334,7 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Split the active terminal horizontally; opens the same connection below")
-            .keyboardShortcut("d", modifiers: [.command, .shift])
+            .keyboardShortcut(.splitHorizontally)
 
             if session.panes.count > 1 {
                 let isZoomed = session.zoomedPaneID != nil
@@ -350,7 +350,7 @@ struct TerminalWorkspaceView: View {
                 }
                 .labelStyle(.iconOnly)
                 .help("Temporarily expand the active pane to fill the window")
-                .keyboardShortcut(.return, modifiers: [.command, .shift])
+                .keyboardShortcut(.zoomPane)
 
                 Button("Close pane", systemImage: "rectangle.badge.xmark", role: .destructive) {
                     model.closePane(session.activePaneID, in: session.id)
@@ -391,44 +391,41 @@ struct TerminalWorkspaceView: View {
             Button("Select pane to the left") {
                 model.selectPane(direction: .left, in: session.id)
             }
-            .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
+            .keyboardShortcut(.paneLeft)
             .frame(width: 0, height: 0)
 
             Button("Select pane to the right") {
                 model.selectPane(direction: .right, in: session.id)
             }
-            .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
+            .keyboardShortcut(.paneRight)
             .frame(width: 0, height: 0)
 
             Button("Select pane above") {
                 model.selectPane(direction: .up, in: session.id)
             }
-            .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+            .keyboardShortcut(.paneUp)
             .frame(width: 0, height: 0)
 
             Button("Select pane below") {
                 model.selectPane(direction: .down, in: session.id)
             }
-            .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+            .keyboardShortcut(.paneDown)
             .frame(width: 0, height: 0)
         }
         .opacity(0)
     }
 
     /// Faz 5: ⌘1–9 tab selection. Same invisible-button pattern as
-    /// `directionalPaneShortcuts`; `KeyEquivalent` needs a concrete per-index
-    /// literal since there's no String → KeyEquivalent conversion, hence the
-    /// fixed lookup table instead of building the character from `index + 1`.
-    private static let tabSelectionShortcutKeys: [KeyEquivalent] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
+    /// `directionalPaneShortcuts`; the concrete per-index shortcuts live in
+    /// `AppShortcut.tabSelection`.
     private func tabSelectionShortcuts() -> some View {
         Group {
-            ForEach(0..<min(Self.tabSelectionShortcutKeys.count, model.sessions.count), id: \.self) { index in
+            ForEach(0..<min(AppShortcut.tabSelection.count, model.sessions.count), id: \.self) { index in
                 let session = model.sessions[index]
                 Button("Select tab \(index + 1)") {
                     model.selectedSessionID = session.id
                 }
-                .keyboardShortcut(Self.tabSelectionShortcutKeys[index], modifiers: .command)
+                .keyboardShortcut(AppShortcut.tabSelection[index])
                 .frame(width: 0, height: 0)
             }
         }

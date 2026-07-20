@@ -2969,12 +2969,12 @@
         }
       }
     },
-    "Find inside the active terminal with ⌘F; continue with ⌘G or ⇧⌘G." : {
+    "Find inside the active terminal with %@; continue with %@ or %@." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etkin terminalde ⌘F ile ara; ⌘G veya ⇧⌘G ile devam et."
+            "value" : "Etkin terminalde %@ ile ara; %@ veya %@ ile devam et."
           }
         }
       }
@@ -6240,12 +6240,12 @@
         }
       }
     },
-    "Split it horizontally (⇧⌘D)." : {
+    "Split it horizontally (%@)." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yatay olarak böl (⇧⌘D)."
+            "value" : "Yatay olarak böl (%@)."
           }
         }
       }
@@ -6270,12 +6270,12 @@
         }
       }
     },
-    "Split the active terminal vertically (⌘D)." : {
+    "Split the active terminal vertically (%@)." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etkin terminali dikey olarak böl (⌘D)."
+            "value" : "Etkin terminali dikey olarak böl (%@)."
           }
         }
       }
@@ -8017,12 +8017,12 @@
         }
       }
     },
-    "Use Quick Access or press ⌘K to find a connection from anywhere." : {
+    "Use Quick Access or press %@ to find a connection from anywhere." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Her yerden bağlantı bulmak için Hızlı Erişim'i kullan veya ⌘K tuşlarına bas."
+            "value" : "Her yerden bağlantı bulmak için Hızlı Erişim'i kullan veya %@ tuşlarına bas."
           }
         }
       }
@@ -8290,12 +8290,12 @@
         }
       }
     },
-    "Zoom the active pane; use ⇧⌘Return to restore it." : {
+    "Zoom the active pane; use %@ to restore it." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Etkin paneli büyüt; geri yüklemek için ⇧⌘Return kullan."
+            "value" : "Etkin paneli büyüt; geri yüklemek için %@ kullan."
           }
         }
       }

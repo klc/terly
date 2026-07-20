@@ -67,7 +67,7 @@ struct SSHConfiguratorApp: App {
                 Button("Terly Help") {
                     NotificationCenter.default.post(name: .showHelpRequested, object: nil)
                 }
-                .keyboardShortcut("/", modifiers: [.command, .shift])
+                .keyboardShortcut(.help)
 
                 Button("Welcome Tour…") {
                     NotificationCenter.default.post(name: .showOrientationRequested, object: nil)

@@ -79,7 +79,7 @@ struct ContentView: View {
                 Button("Quick access", systemImage: "magnifyingglass") {
                     showingQuickAccess = true
                 }
-                .keyboardShortcut("k", modifiers: .command)
+                .keyboardShortcut(.quickAccess)
                 .disabled(model.document == nil)
                 .help("Quick access (⌘K)")
                 .accessibilityLabel("Quick access")
