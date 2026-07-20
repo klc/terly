@@ -262,6 +262,10 @@ final class TerminalSessionRecorder: ObservableObject {
         try handle.write(contentsOf: Data("\n".utf8))
 
         let paneState = PaneRecordingState(paneID: paneID, fileHandle: handle, fileURL: fileURL, openedAt: openedAt)
+        // The header is already on disk, so it counts toward the cap like any
+        // other written byte — otherwise the cap drifts below the recording's
+        // real footprint by one header per pane.
+        paneState.bytesWritten = headerData.count + 1
         state.panes[paneID] = paneState
         return paneState
     }
@@ -431,14 +435,29 @@ final class TerminalSessionRecorder: ObservableObject {
     // MARK: - Main-actor bookkeeping
 
     private func startFlushTimer(for sessionID: TerminalSession.ID, state: RecordingState) {
-        let timer = DispatchSource.makeTimerSource(queue: writeQueue)
+        flushTimers[sessionID] = Self.makeFlushTimer(queue: writeQueue, recorder: self, state: state)
+    }
+
+    /// Builds the periodic flush timer from a `nonisolated` context on
+    /// purpose. A closure formed inside a `@MainActor` member inherits that
+    /// isolation, and the Swift runtime then asserts it really is running on
+    /// the main actor — but this handler runs on `writeQueue`, so the check
+    /// traps (`dispatch_assert_queue_fail`) the first time the timer fires,
+    /// i.e. one second into any recording. Formed here, the handler carries
+    /// no isolation and calls only `nonisolated`, write-queue-confined work.
+    nonisolated private static func makeFlushTimer(
+        queue: DispatchQueue,
+        recorder: TerminalSessionRecorder,
+        state: RecordingState
+    ) -> DispatchSourceTimer {
+        let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + 1, repeating: 1)
-        timer.setEventHandler { [weak self, weak state] in
-            guard let self, let state, !state.isClosed else { return }
-            self.flushAllPanes(state)
+        timer.setEventHandler { [weak recorder, weak state] in
+            guard let recorder, let state, !state.isClosed else { return }
+            recorder.flushAllPanes(state)
         }
         timer.resume()
-        flushTimers[sessionID] = timer
+        return timer
     }
 
     private func cancelFlushTimer(for sessionID: TerminalSession.ID) {

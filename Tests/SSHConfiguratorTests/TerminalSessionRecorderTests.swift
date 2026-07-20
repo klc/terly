@@ -329,7 +329,103 @@ final class TerminalSessionRecorderTests: XCTestCase {
         }
     }
 
+    /// The periodic flush timer fires on the write queue. If its handler is
+    /// formed in a `@MainActor` context it inherits that isolation and the
+    /// runtime traps the moment it fires — one second into any recording,
+    /// which no short test would ever reach. This test outlives that first
+    /// tick on purpose.
+    @MainActor
+    func testPeriodicFlushTimerFiresWithoutTrappingAndReachesDisk() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let pane = makePane(alias: "prod")
+        let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
+        let recorder = TerminalSessionRecorder()
+
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
+        recorder.append(Array("before-tick\n".utf8), sessionID: session.id, paneID: pane.id, alias: pane.alias)
+
+        // Well past the timer's 1 s period, and far below the 64 KB flush
+        // threshold, so the timer is the only thing that can move these
+        // bytes to disk.
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+        XCTAssertTrue(recorder.isRecording(session.id), "recording should have survived the timer tick")
+
+        let lines = try castLines(at: directory.appendingPathComponent("prod-1.cast"))
+        XCTAssertEqual(lines.count, 2, "the timer tick should have flushed the buffered event")
+        let event = try parseArray(lines[1])
+        XCTAssertEqual(event[2] as? String, "before-tick\n")
+
+        recorder.stop(sessionID: session.id)
+    }
+
     // MARK: - 1.5 Size cap
+
+    /// The cap counts one recording's panes together, not each file on its
+    /// own — neither pane below crosses it alone, only their sum does. Without
+    /// the cross-pane summation a split session would quietly record well past
+    /// the limit.
+    @MainActor
+    func testSizeCapCountsAllPanesOfOneRecordingTogether() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let firstPane = makePane(alias: "prod-api")
+        let secondPane = makePane(alias: "prod-db")
+        let session = TerminalSession(
+            hostID: 1,
+            alias: "prod",
+            layout: .split(
+                id: UUID(),
+                axis: .horizontal,
+                ratio: 0.5,
+                first: .pane(firstPane),
+                second: .pane(secondPane)
+            ),
+            activePaneID: firstPane.id
+        )
+        let recorder = TerminalSessionRecorder()
+        recorder.sizeCapBytes = 400
+
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
+
+        let expectation = expectation(description: "cap-triggered errorMessage")
+        let cancellable = recorder.$errorMessage
+            .dropFirst()
+            .sink { message in
+                if message != nil {
+                    expectation.fulfill()
+                }
+            }
+
+        // 150 bytes each: under the 400-byte cap individually, over it summed
+        // (each also carries its own cast header toward the total).
+        for pane in [firstPane, secondPane] {
+            recorder.append(
+                Array(repeating: UInt8(ascii: "x"), count: 150),
+                sessionID: session.id,
+                paneID: pane.id,
+                alias: pane.alias
+            )
+        }
+
+        await fulfillment(of: [expectation], timeout: 2)
+        cancellable.cancel()
+
+        XCTAssertNotNil(recorder.errorMessage)
+        XCTAssertFalse(recorder.isRecording(session.id))
+
+        // Both panes' files were flushed and closed by the cap-hit step.
+        for name in ["prod-api-1.cast", "prod-db-1.cast"] {
+            let lines = try castLines(at: directory.appendingPathComponent(name))
+            XCTAssertEqual(lines.count, 2, "\(name) should hold a header plus its single event")
+        }
+    }
 
     @MainActor
     func testSizeCapStopsTheRecordingAndSetsErrorMessage() async throws {
