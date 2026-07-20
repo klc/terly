@@ -238,6 +238,7 @@ struct ContentView: View {
             )
         }
         .modifier(RawConfigAccessSupport(model: model))
+        .modifier(HelpPresentationSupport())
         .task {
             model.load()
             transferEngine.historyLibrary.load()
@@ -1623,6 +1624,43 @@ private struct RawConfigAccessSupport: ViewModifier {
                 guard model.document != nil else { return }
                 showingChangePreview = true
             }
+    }
+}
+
+/// Owns the first-launch tour and Help-menu sheets outside `ContentView.body`.
+/// Keeping this presentation state in a modifier also prevents unrelated app
+/// model publishes from rebuilding the help content.
+private struct HelpPresentationSupport: ViewModifier {
+    @AppStorage("hasCompletedOrientationV1") private var hasCompletedOrientation = false
+    @State private var presentation: HelpPresentation?
+    @State private var didOfferOrientation = false
+
+    func body(content: Content) -> some View {
+        content
+            .sheet(item: $presentation) { requestedPresentation in
+                HelpCenterView(
+                    presentation: requestedPresentation,
+                    onCompleteOrientation: completeOrientation
+                )
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .showHelpRequested)) { _ in
+                presentation = .help
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .showOrientationRequested)) { _ in
+                presentation = .orientation
+            }
+            .onAppear {
+                guard !didOfferOrientation else { return }
+                didOfferOrientation = true
+                if !hasCompletedOrientation {
+                    presentation = .orientation
+                }
+            }
+    }
+
+    private func completeOrientation() {
+        hasCompletedOrientation = true
+        presentation = nil
     }
 }
 

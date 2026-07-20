@@ -1,96 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Multiple dropped items would upload to the same destination: %@. Rename or remove the duplicates and try again." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bırakılan birden fazla öğe aynı hedefe yüklenecek: %@. Çakışan öğeleri yeniden adlandırın veya kaldırıp tekrar deneyin."
-          }
-        }
-      }
-    },
-    "Multiple selected items would upload to the same destination: %@. Remove the duplicates and try again." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seçilen birden fazla öğe aynı hedefe yüklenecek: %@. Çakışan öğeleri kaldırıp tekrar deneyin."
-          }
-        }
-      }
-    },
-    "Overwrite and upload" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Üzerine yaz ve yükle"
-          }
-        }
-      }
-    },
-    "Overwrite remote items?" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uzak öğelerin üzerine yazılsın mı?"
-          }
-        }
-      }
-    },
-    "Terminal workspace could not be saved: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminal çalışma alanı kaydedilemedi: %@"
-          }
-        }
-      }
-    },
-    "The remote destination could not be checked: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uzak hedef kontrol edilemedi: %@"
-          }
-        }
-      }
-    },
-    "These items already exist in the remote directory and will be replaced: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bu öğeler uzak dizinde zaten var ve değiştirilecek: %@"
-          }
-        }
-      }
-    },
-    "Upload could not be prepared" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yükleme hazırlanamadı"
-          }
-        }
-      }
-    },
-    "Workspace could not be saved" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Çalışma alanı kaydedilemedi"
-          }
-        }
-      }
-    },
     " — everything written here is committed to the remote repo and the git history is permanent; deleting doesn't undo it. Private keys are never synced." : {
       "localizations" : {
         "tr" : {
@@ -221,7 +131,9 @@
         }
       }
     },
-    "%lld" : {},
+    "%lld" : {
+
+    },
     "%lld commits ahead, %lld commits behind" : {
       "localizations" : {
         "en" : {
@@ -364,7 +276,9 @@
         }
       }
     },
-    "%lld pt" : {},
+    "%lld pt" : {
+
+    },
     "%lld steps" : {
       "localizations" : {
         "en" : {
@@ -479,7 +393,9 @@
         }
       }
     },
-    "%lld." : {},
+    "%lld." : {
+
+    },
     "%lld/%lld succeeded, %lld/%lld failed" : {
       "localizations" : {
         "tr" : {
@@ -550,7 +466,9 @@
         }
       }
     },
-    "/home/xyz" : {},
+    "/home/xyz" : {
+
+    },
     "<hidden for security>" : {
       "localizations" : {
         "tr" : {
@@ -631,6 +549,16 @@
         }
       }
     },
+    "A guide to connections, terminal controls, and keyboard shortcuts." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantılar, terminal kontrolleri ve klavye kısayolları rehberi."
+          }
+        }
+      }
+    },
     "A key already exists at this path. You need to explicitly confirm before overwriting it." : {
       "localizations" : {
         "tr" : {
@@ -667,6 +595,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Devam eden aktarım bitmeden yeni bir aktarım başlatılamaz."
+          }
+        }
+      }
+    },
+    "A quick tour of the menus and terminal controls." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menüler ve terminal kontrolleri için kısa bir tur."
           }
         }
       }
@@ -927,6 +865,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tüm bağlantılar grup adını taşıyan tek sekmede, ayrı bölmelerde açılır."
+          }
+        }
+      }
+    },
+    "All panes in the recorded tab are written to the same file with pane separators." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydedilen sekmedeki tüm paneller, panel ayraçlarıyla aynı dosyaya yazılır."
           }
         }
       }
@@ -1317,6 +1265,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Değişiklik bekleniyor…"
+          }
+        }
+      }
+    },
+    "Change the terminal font, theme, cursor, and scroll behavior." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal yazı tipini, temasını, imlecini ve kaydırma davranışını değiştir."
           }
         }
       }
@@ -1731,6 +1689,16 @@
         }
       }
     },
+    "Close the selected terminal session." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili terminal oturumunu kapat."
+          }
+        }
+      }
+    },
     "Close the tab and all SSH connections" : {
       "localizations" : {
         "tr" : {
@@ -2087,6 +2055,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bağlantılar"
+          }
+        }
+      }
+    },
+    "Connections and sidebar" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantılar ve kenar çubuğu"
           }
         }
       }
@@ -2661,6 +2639,16 @@
         }
       }
     },
+    "Done" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitti"
+          }
+        }
+      }
+    },
     "Download" : {
       "localizations" : {
         "tr" : {
@@ -2921,6 +2909,16 @@
         }
       }
     },
+    "File includes the raw config editor and change preview." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosya menüsü ham config düzenleyicisini ve değişiklik önizlemesini içerir."
+          }
+        }
+      }
+    },
     "File not found." : {
       "localizations" : {
         "tr" : {
@@ -2967,6 +2965,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Include zincirindeki dosyalar Match exec içerebilir; ssh -G bu yerel komutları çalıştırabilir."
+          }
+        }
+      }
+    },
+    "Find inside the active terminal with ⌘F; continue with ⌘G or ⇧⌘G." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin terminalde ⌘F ile ara; ⌘G veya ⇧⌘G ile devam et."
           }
         }
       }
@@ -3071,7 +3079,19 @@
         }
       }
     },
-    "Ghostty · SSH" : {},
+    "Get Started" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başla"
+          }
+        }
+      }
+    },
+    "Ghostty · SSH" : {
+
+    },
     "Global config, line %lld" : {
       "localizations" : {
         "tr" : {
@@ -3200,6 +3220,16 @@
         }
       }
     },
+    "Help opens this guide or restarts the welcome tour." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yardım menüsü bu rehberi açar veya karşılama turunu yeniden başlatır."
+          }
+        }
+      }
+    },
     "History" : {
       "localizations" : {
         "tr" : {
@@ -3270,7 +3300,9 @@
         }
       }
     },
-    "HostName" : {},
+    "HostName" : {
+
+    },
     "Hostname resolved to %lld addresses." : {
       "localizations" : {
         "en" : {
@@ -3319,7 +3351,9 @@
         }
       }
     },
-    "IdentityFile" : {},
+    "IdentityFile" : {
+
+    },
     "IdentityFile updated and saved." : {
       "localizations" : {
         "tr" : {
@@ -3760,6 +3794,16 @@
         }
       }
     },
+    "Menus and shortcuts" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menüler ve kısayollar"
+          }
+        }
+      }
+    },
     "Move down" : {
       "localizations" : {
         "tr" : {
@@ -3796,6 +3840,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yukarı taşı"
+          }
+        }
+      }
+    },
+    "Multiple dropped items would upload to the same destination: %@. Rename or remove the duplicates and try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bırakılan birden fazla öğe aynı hedefe yüklenecek: %@. Çakışan öğeleri yeniden adlandırın veya kaldırıp tekrar deneyin."
+          }
+        }
+      }
+    },
+    "Multiple selected items would upload to the same destination: %@. Remove the duplicates and try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen birden fazla öğe aynı hedefe yüklenecek: %@. Çakışan öğeleri kaldırıp tekrar deneyin."
           }
         }
       }
@@ -4330,6 +4394,16 @@
         }
       }
     },
+    "Only output shown by the terminal while recording is active is saved." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca kayıt etkinken terminalde gösterilen çıktılar kaydedilir."
+          }
+        }
+      }
+    },
     "Open %@ SSH connection" : {
       "localizations" : {
         "tr" : {
@@ -4388,12 +4462,32 @@
         }
       }
     },
+    "Open connection settings; duplicate and transfer actions are beside it." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantı ayarlarını aç; çoğaltma ve aktarım işlemleri hemen yanındadır."
+          }
+        }
+      }
+    },
     "Open connections" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bağlantıları aç"
+          }
+        }
+      }
+    },
+    "Open file transfer for the active connection." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin bağlantı için dosya aktarımını aç."
           }
         }
       }
@@ -4596,6 +4690,26 @@
         }
       }
     },
+    "Overwrite and upload" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üzerine yaz ve yükle"
+          }
+        }
+      }
+    },
+    "Overwrite remote items?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzak öğelerin üzerine yazılsın mı?"
+          }
+        }
+      }
+    },
     "Overwrite the local file?" : {
       "localizations" : {
         "tr" : {
@@ -4756,7 +4870,9 @@
         }
       }
     },
-    "Prod Servers" : {},
+    "Prod Servers" : {
+
+    },
     "Protocol" : {
       "localizations" : {
         "tr" : {
@@ -4787,7 +4903,9 @@
         }
       }
     },
-    "ProxyJump" : {},
+    "ProxyJump" : {
+
+    },
     "ProxyJump chain" : {
       "localizations" : {
         "tr" : {
@@ -4918,6 +5036,46 @@
         }
       }
     },
+    "Record session" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturumu kaydet"
+          }
+        }
+      }
+    },
+    "Record this session's terminal output to a file" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu oturumun terminal çıktısını bir dosyaya kaydet"
+          }
+        }
+      }
+    },
+    "Recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydediliyor"
+          }
+        }
+      }
+    },
+    "Recordings are created with owner-only file permissions (0600). They may contain sensitive data." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlar yalnızca sahibin erişebildiği dosya izinleriyle (0600) oluşturulur. Hassas veriler içerebilir."
+          }
+        }
+      }
+    },
     "Refresh" : {
       "localizations" : {
         "tr" : {
@@ -4978,7 +5136,9 @@
         }
       }
     },
-    "Remote URL" : {},
+    "Remote URL" : {
+
+    },
     "Remote checksum could not be computed." : {
       "localizations" : {
         "tr" : {
@@ -5437,7 +5597,9 @@
         }
       }
     },
-    "SSH Config" : {},
+    "SSH Config" : {
+
+    },
     "SSH agent key unavailable" : {
       "localizations" : {
         "tr" : {
@@ -5544,6 +5706,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Değişiklikleri Kaydet"
+          }
+        }
+      }
+    },
+    "Save Session Recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum Kaydını Kaydet"
           }
         }
       }
@@ -5684,6 +5856,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Karşılaştırmak veya geri yüklemek için bir yedek seç."
+          }
+        }
+      }
+    },
+    "Select a connection to open its terminal." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminalini açmak için bir bağlantı seç."
           }
         }
       }
@@ -5888,6 +6070,56 @@
         }
       }
     },
+    "Session recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum kaydı"
+          }
+        }
+      }
+    },
+    "Session recording could not be started: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum kaydı başlatılamadı: %@"
+          }
+        }
+      }
+    },
+    "Session recording failed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum kaydı başarısız"
+          }
+        }
+      }
+    },
+    "Session recording stopped because the file could not be written: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosyaya yazılamadığı için oturum kaydı durduruldu: %@"
+          }
+        }
+      }
+    },
+    "Settings contains General, Terminal, Sync, and Updates." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar; Genel, Terminal, Senkronizasyon ve Güncellemeler bölümlerini içerir."
+          }
+        }
+      }
+    },
     "Shell command" : {
       "localizations" : {
         "tr" : {
@@ -6008,6 +6240,16 @@
         }
       }
     },
+    "Split it horizontally (⇧⌘D)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yatay olarak böl (⇧⌘D)."
+          }
+        }
+      }
+    },
     "Split panes in one tab" : {
       "localizations" : {
         "tr" : {
@@ -6028,6 +6270,16 @@
         }
       }
     },
+    "Split the active terminal vertically (⌘D)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin terminali dikey olarak böl (⌘D)."
+          }
+        }
+      }
+    },
     "Split the active terminal vertically; opens the same connection on the right" : {
       "localizations" : {
         "tr" : {
@@ -6044,6 +6296,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dikey böl"
+          }
+        }
+      }
+    },
+    "Start Recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydı Başlat"
+          }
+        }
+      }
+    },
+    "Start session recording and choose a .log file. Press again to stop." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum kaydını başlat ve bir .log dosyası seç. Durdurmak için yeniden bas."
           }
         }
       }
@@ -6268,6 +6540,26 @@
         }
       }
     },
+    "Stop recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydı durdur"
+          }
+        }
+      }
+    },
+    "Stop recording and close the log file" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydı durdur ve log dosyasını kapat"
+          }
+        }
+      }
+    },
     "Stop the %@ tunnel" : {
       "localizations" : {
         "tr" : {
@@ -6328,7 +6620,9 @@
         }
       }
     },
-    "SwiftTerm · SSH" : {},
+    "SwiftTerm · SSH" : {
+
+    },
     "Sync" : {
       "localizations" : {
         "tr" : {
@@ -6547,6 +6841,16 @@
         }
       }
     },
+    "Terly Help" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terly Yardım"
+          }
+        }
+      }
+    },
     "Terly — Authentication" : {
       "localizations" : {
         "tr" : {
@@ -6567,13 +6871,32 @@
         }
       }
     },
-    "Terminal" : {},
+    "Terminal" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        }
+      }
+    },
     "Terminal appearance settings" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminal görünüm ayarları"
+          }
+        }
+      }
+    },
+    "Terminal buttons" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal düğmeleri"
           }
         }
       }
@@ -6634,6 +6957,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminal süreci çıkış yaptı (çıkış kodu: %d)."
+          }
+        }
+      }
+    },
+    "Terminal workspace could not be saved: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal çalışma alanı kaydedilemedi: %@"
           }
         }
       }
@@ -7006,6 +7339,16 @@
         }
       }
     },
+    "The remote destination could not be checked: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzak hedef kontrol edilemedi: %@"
+          }
+        }
+      }
+    },
     "The remote file on %@ will be permanently deleted:\n%@" : {
       "localizations" : {
         "tr" : {
@@ -7252,6 +7595,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Agent'ta kullanılabilir bir anahtar yok ve sunucu kimlik doğrulamayı reddetti."
+          }
+        }
+      }
+    },
+    "These items already exist in the remote directory and will be replaced: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu öğeler uzak dizinde zaten var ve değiştirilecek: %@"
           }
         }
       }
@@ -7644,6 +7997,36 @@
         }
       }
     },
+    "Upload could not be prepared" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleme hazırlanamadı"
+          }
+        }
+      }
+    },
+    "Use + to add a server or connection group." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir sunucu veya bağlantı grubu eklemek için + düğmesini kullan."
+          }
+        }
+      }
+    },
+    "Use Quick Access or press ⌘K to find a connection from anywhere." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her yerden bağlantı bulmak için Hızlı Erişim'i kullan veya ⌘K tuşlarına bas."
+          }
+        }
+      }
+    },
     "Use the button below to start the connection checks." : {
       "localizations" : {
         "tr" : {
@@ -7654,7 +8037,9 @@
         }
       }
     },
-    "User" : {},
+    "User" : {
+
+    },
     "UserKnownHostsFile is configured as none." : {
       "localizations" : {
         "tr" : {
@@ -7765,6 +8150,26 @@
         }
       }
     },
+    "Welcome to Terly" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terly'ye Hoş Geldin"
+          }
+        }
+      }
+    },
+    "Welcome Tour…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karşılama Turu…"
+          }
+        }
+      }
+    },
     "Wildcard host blocks require a concrete alias." : {
       "localizations" : {
         "tr" : {
@@ -7815,6 +8220,16 @@
         }
       }
     },
+    "Workspace could not be saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çalışma alanı kaydedilemedi"
+          }
+        }
+      }
+    },
     "Yes" : {
       "localizations" : {
         "tr" : {
@@ -7845,6 +8260,16 @@
         }
       }
     },
+    "You can reopen this tour later from Help → Welcome Tour." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu turu daha sonra Yardım → Karşılama Turu bölümünden yeniden açabilirsin."
+          }
+        }
+      }
+    },
     "You can try again when you're ready." : {
       "localizations" : {
         "tr" : {
@@ -7861,6 +8286,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bölmeyi büyüt"
+          }
+        }
+      }
+    },
+    "Zoom the active pane; use ⇧⌘Return to restore it." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin paneli büyüt; geri yüklemek için ⇧⌘Return kullan."
           }
         }
       }
@@ -8155,7 +8590,9 @@
         }
       }
     },
-    "xyz" : {},
+    "xyz" : {
+
+    },
     "~user" : {
       "localizations" : {
         "tr" : {
@@ -8166,7 +8603,9 @@
         }
       }
     },
-    "· %@" : {},
+    "· %@" : {
+
+    },
     "⌘-click to select for sync" : {
       "localizations" : {
         "tr" : {
@@ -8177,8 +8616,12 @@
         }
       }
     },
-    "⌘K" : {},
-    "⌘S" : {}
+    "⌘K" : {
+
+    },
+    "⌘S" : {
+
+    }
   },
   "version" : "1.0"
 }

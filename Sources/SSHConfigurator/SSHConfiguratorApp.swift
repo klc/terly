@@ -3,6 +3,8 @@ import SwiftUI
 extension Notification.Name {
     static let showRawConfigEditorRequested = Notification.Name("Terly.showRawConfigEditorRequested")
     static let showChangePreviewRequested = Notification.Name("Terly.showChangePreviewRequested")
+    static let showHelpRequested = Notification.Name("Terly.showHelpRequested")
+    static let showOrientationRequested = Notification.Name("Terly.showOrientationRequested")
     /// Posted by any store whose content belongs to the WP10 sync set right
     /// after a successful save — `SyncCoordinator` observes this to debounce
     /// a local commit. One shared instance observes it (see below); a
@@ -59,6 +61,16 @@ struct SSHConfiguratorApp: App {
                 }
                 Button("Change History/Preview…") {
                     NotificationCenter.default.post(name: .showChangePreviewRequested, object: nil)
+                }
+            }
+            CommandGroup(replacing: .help) {
+                Button("Terly Help") {
+                    NotificationCenter.default.post(name: .showHelpRequested, object: nil)
+                }
+                .keyboardShortcut("/", modifiers: [.command, .shift])
+
+                Button("Welcome Tour…") {
+                    NotificationCenter.default.post(name: .showOrientationRequested, object: nil)
                 }
             }
         }

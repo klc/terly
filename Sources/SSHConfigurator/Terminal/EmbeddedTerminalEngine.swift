@@ -25,6 +25,7 @@ protocol EmbeddedTerminalEngine {
         isActive: Bool,
         isVisible: Bool,
         isVisibleInLayout: Bool,
+        onOutput: @escaping @MainActor @Sendable ([UInt8]) -> Void,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
         onActivate: @escaping @MainActor @Sendable () -> Void,

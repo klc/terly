@@ -17,6 +17,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
         isActive: Bool,
         isVisible: Bool,
         isVisibleInLayout: Bool,
+        onOutput: @escaping @MainActor @Sendable ([UInt8]) -> Void,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
         onActivate: @escaping @MainActor @Sendable () -> Void,
@@ -34,6 +35,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
                 searchRouter: searchRouter,
                 focusCoordinator: focusCoordinator,
                 markerPrefix: pane.startupExecution?.markerPrefix,
+                onOutput: onOutput,
                 onStartupEvent: onStartupEvent,
                 onFindCommand: onFindCommand,
                 onActivate: onActivate,
@@ -251,6 +253,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
     let searchRouter: TerminalSearchRouter
     let focusCoordinator: TerminalFocusCoordinator
     let markerPrefix: String?
+    let onOutput: @MainActor @Sendable ([UInt8]) -> Void
     let onStartupEvent: @MainActor @Sendable (StartupFlowMarkerEvent) -> Void
     let onFindCommand: @MainActor @Sendable (TerminalFindCommand) -> Void
     let onActivate: @MainActor @Sendable () -> Void
@@ -285,6 +288,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
                 to: terminal.synchronizedPaneIDs
             )
         }
+        terminal.onOutput = onOutput
         if let markerPrefix {
             terminal.configureStartupMarkers(prefix: markerPrefix) { event in
                 Task { @MainActor in
@@ -356,6 +360,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
             terminal.onMouseDownActivate = {
                 onActivate()
             }
+            terminal.onOutput = onOutput
             let font = settings.resolvedFont
             if terminal.font != font {
                 terminal.font = font
@@ -437,6 +442,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
 final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
     var synchronizedPaneIDs: Set<TerminalPane.ID> = []
     var onUserInput: (([UInt8]) -> Void)?
+    var onOutput: (@MainActor @Sendable ([UInt8]) -> Void)?
     var onFindCommand: ((TerminalFindCommand) -> Void)?
     var onMouseDownActivate: (() -> Void)?
 
@@ -509,6 +515,7 @@ final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
 
     override func dataReceived(slice: ArraySlice<UInt8>) {
         guard var parser = startupMarkerParser else {
+            onOutput?(Array(slice))
             super.dataReceived(slice: slice)
             return
         }
@@ -516,6 +523,7 @@ final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
         let result = parser.process(slice)
         startupMarkerParser = parser
         if !result.visibleBytes.isEmpty {
+            onOutput?(result.visibleBytes)
             super.dataReceived(slice: result.visibleBytes[...])
         }
         for event in result.events {
@@ -603,6 +611,7 @@ final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
         let visible = parser.finalize()
         startupMarkerParser = parser
         if !visible.isEmpty {
+            onOutput?(visible)
             super.dataReceived(slice: visible[...])
         }
     }

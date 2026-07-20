@@ -70,6 +70,7 @@ struct TerminalWorkspaceView: View {
     let isVisible: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
+    @StateObject private var recorder = TerminalSessionRecorder()
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
     @State private var searchTerm = ""
@@ -118,6 +119,25 @@ struct TerminalWorkspaceView: View {
             }
         }
         .background(tabSelectionShortcuts())
+        .onChange(of: model.sessions.map(\.id)) { _, sessionIDs in
+            recorder.stopIfSessionClosed(remainingSessionIDs: Set(sessionIDs))
+        }
+        .onDisappear {
+            recorder.stop()
+        }
+        .alert(
+            "Session recording failed",
+            isPresented: Binding(
+                get: { recorder.errorMessage != nil },
+                set: { if !$0 { recorder.dismissError() } }
+            )
+        ) {
+            Button("OK", role: .cancel) {
+                recorder.dismissError()
+            }
+        } message: {
+            Text(recorder.errorMessage ?? "")
+        }
     }
 
     private var terminalBackground: Color {
@@ -135,6 +155,11 @@ struct TerminalWorkspaceView: View {
                                 .frame(width: 7, height: 7)
                             Text(session.displayTitle)
                                 .lineLimit(1)
+                            if recorder.isRecording(session.id) {
+                                Image(systemName: "record.circle.fill")
+                                    .foregroundStyle(.red)
+                                    .accessibilityLabel("Recording")
+                            }
                             if session.panes.count > 1 {
                                 Text("\(session.panes.count)")
                                     .font(.caption2.monospacedDigit())
@@ -229,6 +254,12 @@ struct TerminalWorkspaceView: View {
                 .font(.caption.monospaced())
                 .foregroundStyle(.secondary)
 
+            if recorder.isRecording(session.id) {
+                Text("Recording")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.red)
+            }
+
             if session.activePane?.startupExecution != nil {
                 Button("Run startup flow again", systemImage: "arrow.clockwise.circle") {
                     runStartupAgain(in: session)
@@ -255,6 +286,24 @@ struct TerminalWorkspaceView: View {
                 .disabled(!SSHLaunchPlanBuilder.isConcreteAlias(transferAlias))
                 .help("Open file transfer for the active pane's connection")
             }
+
+            Button(
+                recorder.isRecording(session.id)
+                    ? String(localized: "Stop recording")
+                    : String(localized: "Record session"),
+                systemImage: recorder.isRecording(session.id) ? "record.circle.fill" : "record.circle"
+            ) {
+                toggleRecording(session)
+            }
+            .labelStyle(.iconOnly)
+            .foregroundStyle(recorder.isRecording(session.id) ? Color.red : Color.primary)
+            .help(
+                Text(
+                    recorder.isRecording(session.id)
+                        ? String(localized: "Stop recording and close the log file")
+                        : String(localized: "Record this session's terminal output to a file")
+                )
+            )
 
             Button("Split vertically", systemImage: "rectangle.split.2x1") {
                 model.splitActivePane(
@@ -301,7 +350,7 @@ struct TerminalWorkspaceView: View {
                 .help("Close the active terminal pane")
             }
 
-            Button("Close connection", systemImage: "stop.circle", role: .destructive) {
+            Button("Close connection", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                 model.closeTab(session.id)
             }
             .labelStyle(.iconOnly)
@@ -586,6 +635,14 @@ struct TerminalWorkspaceView: View {
                     isActive: isActive && searchPaneID != pane.id,
                     isVisible: isVisible && model.selectedSessionID == session.id,
                     isVisibleInLayout: session.zoomedPaneID == nil || session.zoomedPaneID == pane.id,
+                    onOutput: { bytes in
+                        recorder.append(
+                            bytes,
+                            sessionID: session.id,
+                            paneID: pane.id,
+                            alias: pane.alias
+                        )
+                    },
                     onStartupEvent: { event in
                         model.startupEvent(event, sessionID: session.id, paneID: pane.id)
                     },
@@ -665,6 +722,22 @@ struct TerminalWorkspaceView: View {
                 selectPane(pane.id, in: session.id)
             }
         )
+    }
+
+    private func toggleRecording(_ session: TerminalSession) {
+        if recorder.isRecording(session.id) {
+            recorder.stop()
+            return
+        }
+
+        let panel = NSSavePanel()
+        panel.title = String(localized: "Save Session Recording")
+        panel.prompt = String(localized: "Start Recording")
+        panel.nameFieldStringValue = TerminalSessionRecorder.suggestedFilename(for: session.displayTitle)
+        panel.allowedContentTypes = [UTType(filenameExtension: "log") ?? .plainText]
+        panel.canCreateDirectories = true
+        guard panel.runModal() == .OK, let fileURL = panel.url else { return }
+        recorder.start(session: session, fileURL: fileURL)
     }
 
     private func selectPane(_ paneID: TerminalPane.ID, in sessionID: TerminalSession.ID) {
