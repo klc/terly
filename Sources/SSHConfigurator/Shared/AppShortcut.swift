@@ -58,6 +58,9 @@ extension AppShortcut {
     /// Terly Help (Help menu, replacing the system Help item).
     static let help = AppShortcut(key: "/", modifiers: [.command, .shift])
 
+    /// Open the active pane's connection again in a new tab.
+    static let newTab = AppShortcut(key: "t", modifiers: .command)
+
     /// Split the active terminal pane vertically.
     static let splitVertically = AppShortcut(key: "d", modifiers: .command)
 
@@ -89,7 +92,7 @@ extension AppShortcut {
     /// Every registry entry, for collision checks and enumeration.
     static let all: [AppShortcut] = [
         quickAccess, snippetPalette, help,
-        splitVertically, splitHorizontally, zoomPane,
+        newTab, splitVertically, splitHorizontally, zoomPane,
         paneLeft, paneRight, paneUp, paneDown,
         findInTerminal, findNext, findPrevious,
     ] + tabSelection

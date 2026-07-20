@@ -321,6 +321,7 @@ struct TerminalWorkspaceView: View {
             }
             .labelStyle(.iconOnly)
             .help("Open the active terminal's connection again in a new tab")
+            .keyboardShortcut(.newTab)
 
             Button("Split vertically", systemImage: "rectangle.split.2x1") {
                 model.splitActivePane(

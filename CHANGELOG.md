@@ -23,8 +23,14 @@ the changes below are moved under a real version number at tag time.
 - A Help Center (**Help → Terly Help**, ⇧⌘/) covering connections, terminal
   controls, menus, and keyboard shortcuts, plus a welcome tour shown on first
   launch and re-openable from the Help menu.
+- A new tab button beside the split controls in the session header (⌘T) that
+  opens the active pane's connection again in its own tab.
 
 ### Fixed
+- Selecting **Local Terminal** in the sidebar returns to the terminal you left
+  instead of stacking up another tab on every click, so coming back from
+  another section no longer drops you into a fresh shell. Use the new tab
+  button when a second local terminal is what you want.
 - Recording no longer dies silently when the configuration is reloaded: the
   recorder used to be owned by a view that gets torn down in that case, so every
   byte after the reload was lost.

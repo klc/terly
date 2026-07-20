@@ -36,6 +36,7 @@ struct HelpCenterView: View {
                             ("plus", "Use + to add a server or connection group."),
                             ("gearshape", "Open connection settings; duplicate and transfer actions are beside it."),
                             ("magnifyingglass", "Use Quick Access or press \(AppShortcut.quickAccess.displayString) to find a connection from anywhere."),
+                            ("terminal", "Local Terminal returns to its open tab; use the new tab button for a second one."),
                         ]
                     )
 
@@ -45,6 +46,7 @@ struct HelpCenterView: View {
                         rows: [
                             ("record.circle", "Start session recording and choose a folder to save it to. Press again to stop and reveal it in Finder."),
                             ("arrow.left.arrow.right", "Open file transfer for the active connection."),
+                            ("plus.rectangle.on.rectangle", "Open the active terminal's connection again in a new tab (\(AppShortcut.newTab.displayString))."),
                             ("rectangle.split.2x1", "Split the active terminal vertically (\(AppShortcut.splitVertically.displayString))."),
                             ("rectangle.split.1x2", "Split it horizontally (\(AppShortcut.splitHorizontally.displayString))."),
                             ("arrow.up.left.and.arrow.down.right", "Zoom the active pane; use \(AppShortcut.zoomPane.displayString) to restore it."),

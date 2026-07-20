@@ -11,6 +11,9 @@
         }
       }
     },
+    "· %@" : {
+
+    },
     "\"%@\" (%@) will be permanently deleted. This action cannot be undone." : {
       "localizations" : {
         "tr" : {
@@ -31,22 +34,65 @@
         }
       }
     },
-    "$ echo \"Hello, World!\"" : {
+    "(couldn't read public key)" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "$ echo \"Merhaba Dünya!\""
+            "value" : "(public key okunamadı)"
           }
         }
       }
     },
-    "%@ You must explicitly approve this before diagnostics can start." : {
+    "(empty / none)" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ Tanılama başlamadan önce bunu açıkça onaylamalısın."
+            "value" : "(boş / yok)"
+          }
+        }
+      }
+    },
+    "(empty config)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(boş config)"
+          }
+        }
+      }
+    },
+    "(unnamed)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(isimsiz)"
+          }
+        }
+      }
+    },
+    "[Step %lld] %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Adım %lld] %@"
+          }
+        }
+      }
+    },
+    "/home/xyz" : {
+
+    },
+    "%@ → %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ → %2$@"
           }
         }
       }
@@ -91,12 +137,12 @@
         }
       }
     },
-    "%@ → %@" : {
+    "%@ You must explicitly approve this before diagnostics can start." : {
       "localizations" : {
-        "en" : {
+        "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ → %2$@"
+            "state" : "translated",
+            "value" : "%@ Tanılama başlamadan önce bunu açıkça onaylamalısın."
           }
         }
       }
@@ -383,16 +429,6 @@
         }
       }
     },
-    "%lld%%" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%%%lld"
-          }
-        }
-      }
-    },
     "%lld." : {
 
     },
@@ -402,6 +438,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld/%lld başarılı, %lld/%lld başarısız"
+          }
+        }
+      }
+    },
+    "%lld%%" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%%%lld"
           }
         }
       }
@@ -425,49 +471,6 @@
           }
         }
       }
-    },
-    "(couldn't read public key)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(public key okunamadı)"
-          }
-        }
-      }
-    },
-    "(empty / none)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(boş / yok)"
-          }
-        }
-      }
-    },
-    "(empty config)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(boş config)"
-          }
-        }
-      }
-    },
-    "(unnamed)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(isimsiz)"
-          }
-        }
-      }
-    },
-    "/home/xyz" : {
-
     },
     "<hidden for security>" : {
       "localizations" : {
@@ -515,6 +518,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "<redakte>"
+          }
+        }
+      }
+    },
+    "~user" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~kullanıcı"
+          }
+        }
+      }
+    },
+    "⌘-click to select for sync" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⌘-tıkla ile senkron seç"
+          }
+        }
+      }
+    },
+    "⌘K" : {
+
+    },
+    "⌘S" : {
+
+    },
+    "$ echo \"Hello, World!\"" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "$ echo \"Merhaba Dünya!\""
           }
         }
       }
@@ -669,36 +708,6 @@
         }
       }
     },
-    "Add Runbook" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Runbook Ekle"
-          }
-        }
-      }
-    },
-    "Add Snippet" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snippet Ekle"
-          }
-        }
-      }
-    },
-    "Add Tunnel" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tünel Ekle"
-          }
-        }
-      }
-    },
     "Add at least one connection to the group." : {
       "localizations" : {
         "tr" : {
@@ -759,22 +768,32 @@
         }
       }
     },
+    "Add Runbook" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runbook Ekle"
+          }
+        }
+      }
+    },
+    "Add Snippet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippet Ekle"
+          }
+        }
+      }
+    },
     "Add step" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adım ekle"
-          }
-        }
-      }
-    },
-    "Add to SSH agent" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH agent'a ekleme"
           }
         }
       }
@@ -795,6 +814,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kuyruğa Ekle"
+          }
+        }
+      }
+    },
+    "Add to SSH agent" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH agent'a ekleme"
+          }
+        }
+      }
+    },
+    "Add Tunnel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tünel Ekle"
           }
         }
       }
@@ -909,22 +948,22 @@
         }
       }
     },
-    "Apply Changes" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Değişiklikleri Uygula"
-          }
-        }
-      }
-    },
     "Apply and save" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uygula ve kaydet"
+          }
+        }
+      }
+    },
+    "Apply Changes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değişiklikleri Uygula"
           }
         }
       }
@@ -1229,22 +1268,22 @@
         }
       }
     },
-    "Change History/Preview…" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Değişiklik Geçmişi/Önizleme…"
-          }
-        }
-      }
-    },
     "Change directory" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dizine geç"
+          }
+        }
+      }
+    },
+    "Change History/Preview…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değişiklik Geçmişi/Önizleme…"
           }
         }
       }
@@ -1279,16 +1318,6 @@
         }
       }
     },
-    "Changes Waiting for Your Review" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İncelemeni bekleyen değişiklikler"
-          }
-        }
-      }
-    },
     "Changes pending, will commit shortly…" : {
       "localizations" : {
         "tr" : {
@@ -1305,6 +1334,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uygulanacak değişiklikler"
+          }
+        }
+      }
+    },
+    "Changes Waiting for Your Review" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İncelemeni bekleyen değişiklikler"
           }
         }
       }
@@ -1369,26 +1408,6 @@
         }
       }
     },
-    "Check the HostName spelling, the DNS/VPN connection, and the ProxyJump setting." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HostName yazımını, DNS/VPN bağlantısını ve ProxyJump ayarını kontrol et."
-          }
-        }
-      }
-    },
-    "Check the User, IdentityFile, and SSH agent keys." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User, IdentityFile ve SSH agent anahtarlarını kontrol et."
-          }
-        }
-      }
-    },
     "Check the agent status with ssh-add; don't give the app your private key." : {
       "localizations" : {
         "tr" : {
@@ -1409,12 +1428,32 @@
         }
       }
     },
+    "Check the HostName spelling, the DNS/VPN connection, and the ProxyJump setting." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HostName yazımını, DNS/VPN bağlantısını ve ProxyJump ayarını kontrol et."
+          }
+        }
+      }
+    },
     "Check the remote file/folder permissions and ownership." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uzak dosya/klasör izinlerini ve sahipliğini kontrol et."
+          }
+        }
+      }
+    },
+    "Check the User, IdentityFile, and SSH agent keys." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User, IdentityFile ve SSH agent anahtarlarını kontrol et."
           }
         }
       }
@@ -1629,16 +1668,6 @@
         }
       }
     },
-    "Close Pane" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bölmeyi Kapat"
-          }
-        }
-      }
-    },
     "Close connection" : {
       "localizations" : {
         "tr" : {
@@ -1655,6 +1684,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bölmeyi kapat"
+          }
+        }
+      }
+    },
+    "Close Pane" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölmeyi Kapat"
           }
         }
       }
@@ -1899,22 +1938,22 @@
         }
       }
     },
-    "Connection Diagnostics and Trust Center" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bağlantı Tanılama ve Güven Merkezi"
-          }
-        }
-      }
-    },
     "Connection alias" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bağlantı alias'ı"
+          }
+        }
+      }
+    },
+    "Connection Diagnostics and Trust Center" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantı Tanılama ve Güven Merkezi"
           }
         }
       }
@@ -2129,22 +2168,22 @@
         }
       }
     },
-    "Copy to Server" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sunucuya Kopyala"
-          }
-        }
-      }
-    },
     "Copy to server" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sunucuya kopyalama"
+          }
+        }
+      }
+    },
+    "Copy to Server" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucuya Kopyala"
           }
         }
       }
@@ -2239,16 +2278,6 @@
         }
       }
     },
-    "Create Group" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grubu Oluştur"
-          }
-        }
-      }
-    },
     "Create a new folder at this location" : {
       "localizations" : {
         "tr" : {
@@ -2265,6 +2294,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bağlantı grubu oluştur"
+          }
+        }
+      }
+    },
+    "Create Group" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grubu Oluştur"
           }
         }
       }
@@ -2339,36 +2378,6 @@
         }
       }
     },
-    "DNS / target address" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DNS / hedef adres"
-          }
-        }
-      }
-    },
-    "DNS resolution" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DNS çözümleme"
-          }
-        }
-      }
-    },
-    "DNS resolution failed" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DNS çözümlemesi başarısız"
-          }
-        }
-      }
-    },
     "Dangerous" : {
       "localizations" : {
         "tr" : {
@@ -2429,36 +2438,6 @@
         }
       }
     },
-    "Delete Runbook" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Runbook'u Sil"
-          }
-        }
-      }
-    },
-    "Delete Snippet" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snippet'i Sil"
-          }
-        }
-      }
-    },
-    "Delete Tunnel" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tüneli Sil"
-          }
-        }
-      }
-    },
     "Delete parameter" : {
       "localizations" : {
         "tr" : {
@@ -2485,6 +2464,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kısmi dosyayı sil…"
+          }
+        }
+      }
+    },
+    "Delete Runbook" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runbook'u Sil"
+          }
+        }
+      }
+    },
+    "Delete Snippet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippet'i Sil"
           }
         }
       }
@@ -2519,6 +2518,16 @@
         }
       }
     },
+    "Delete Tunnel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüneli Sil"
+          }
+        }
+      }
+    },
     "Delete…" : {
       "localizations" : {
         "tr" : {
@@ -2529,22 +2538,22 @@
         }
       }
     },
-    "Description (Optional)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Açıklama (İsteğe bağlı)"
-          }
-        }
-      }
-    },
     "Description (optional)" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Açıklama (isteğe bağlı)"
+          }
+        }
+      }
+    },
+    "Description (Optional)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıklama (İsteğe bağlı)"
           }
         }
       }
@@ -2605,6 +2614,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İşlem"
+          }
+        }
+      }
+    },
+    "DNS / target address" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DNS / hedef adres"
+          }
+        }
+      }
+    },
+    "DNS resolution" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DNS çözümleme"
+          }
+        }
+      }
+    },
+    "DNS resolution failed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DNS çözümlemesi başarısız"
           }
         }
       }
@@ -2679,6 +2718,176 @@
         }
       }
     },
+    "e.g. /var/www" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. /var/www"
+          }
+        }
+      }
+    },
+    "e.g. ~/.ssh/config.d/*" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. ~/.ssh/config.d/*"
+          }
+        }
+      }
+    },
+    "e.g. ~/.ssh/id_ed25519" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. ~/.ssh/id_ed25519"
+          }
+        }
+      }
+    },
+    "e.g. 22" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. 22"
+          }
+        }
+      }
+    },
+    "e.g. 127.0.0.1" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. 127.0.0.1"
+          }
+        }
+      }
+    },
+    "e.g. 192.168.1.10" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. 192.168.1.10"
+          }
+        }
+      }
+    },
+    "e.g. 5432" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. 5432"
+          }
+        }
+      }
+    },
+    "e.g. apt-get install -y {{package}}" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. apt-get install -y {{package}}"
+          }
+        }
+      }
+    },
+    "e.g. bastion" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. bastion"
+          }
+        }
+      }
+    },
+    "e.g. localhost" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. localhost"
+          }
+        }
+      }
+    },
+    "e.g. mustafa@macbook" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. mustafa@macbook"
+          }
+        }
+      }
+    },
+    "e.g. Postgres tunnel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. Postgres tüneli"
+          }
+        }
+      }
+    },
+    "e.g. release" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Örn. release"
+          }
+        }
+      }
+    },
+    "e.g. root" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. root"
+          }
+        }
+      }
+    },
+    "e.g. tmux attach || tmux new" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. tmux attach || tmux new"
+          }
+        }
+      }
+    },
+    "e.g. version" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. version"
+          }
+        }
+      }
+    },
+    "e.g. web-prod" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "örn. web-prod"
+          }
+        }
+      }
+    },
     "Each connection opens in its own terminal tab." : {
       "localizations" : {
         "tr" : {
@@ -2709,36 +2918,6 @@
         }
       }
     },
-    "Edit Runbook" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Runbook Düzenle"
-          }
-        }
-      }
-    },
-    "Edit Snippet" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snippet Düzenle"
-          }
-        }
-      }
-    },
-    "Edit Tunnel" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tünel Düzenle"
-          }
-        }
-      }
-    },
     "Edit connection group" : {
       "localizations" : {
         "tr" : {
@@ -2759,12 +2938,32 @@
         }
       }
     },
+    "Edit Runbook" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runbook Düzenle"
+          }
+        }
+      }
+    },
     "Edit snippet" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Snippet'i düzenle"
+          }
+        }
+      }
+    },
+    "Edit Snippet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippet Düzenle"
           }
         }
       }
@@ -2805,6 +3004,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tüneli düzenle"
+          }
+        }
+      }
+    },
+    "Edit Tunnel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tünel Düzenle"
           }
         }
       }
@@ -3092,6 +3301,26 @@
     "Ghostty · SSH" : {
 
     },
+    "git %@ failed (exit code %d)%@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "git %@ başarısız oldu (çıkış kodu %d)%@"
+          }
+        }
+      }
+    },
+    "git@github.com:username/dotfiles.git" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "git@github.com:kullanici/dotfiles.git"
+          }
+        }
+      }
+    },
     "Global config, line %lld" : {
       "localizations" : {
         "tr" : {
@@ -3331,16 +3560,6 @@
         }
       }
     },
-    "IP Address" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "IP Adresi"
-          }
-        }
-      }
-    },
     "Identity" : {
       "localizations" : {
         "tr" : {
@@ -3494,6 +3713,16 @@
         }
       }
     },
+    "IP Address" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IP Adresi"
+          }
+        }
+      }
+    },
     "Issue found" : {
       "localizations" : {
         "tr" : {
@@ -3510,26 +3739,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Anahtar"
-          }
-        }
-      }
-    },
-    "Key Setup" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anahtar Kurulumu"
-          }
-        }
-      }
-    },
-    "Key Setup — %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anahtar Kurulumu — %@"
           }
         }
       }
@@ -3554,6 +3763,26 @@
         }
       }
     },
+    "Key Setup" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Kurulumu"
+          }
+        }
+      }
+    },
+    "Key Setup — %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Kurulumu — %@"
+          }
+        }
+      }
+    },
     "Key setup…" : {
       "localizations" : {
         "tr" : {
@@ -3570,6 +3799,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keychain hatası (%d)%@."
+          }
+        }
+      }
+    },
+    "known_hosts entry and fingerprint found." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "known_hosts kaydı ve fingerprint bulundu."
           }
         }
       }
@@ -3614,26 +3853,6 @@
         }
       }
     },
-    "Local Bind" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yerel Bağlantı (Bind)"
-          }
-        }
-      }
-    },
-    "Local Terminal" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yerel Terminal"
-          }
-        }
-      }
-    },
     "Local and remote history have diverged — choose below" : {
       "localizations" : {
         "tr" : {
@@ -3660,6 +3879,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yerel ve uzak repo farklı yönlerde ilerlemiş. Hangisi kalsın?"
+          }
+        }
+      }
+    },
+    "Local Bind" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerel Bağlantı (Bind)"
           }
         }
       }
@@ -3710,6 +3939,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yerel kaynak dosya artık mevcut değil: %@"
+          }
+        }
+      }
+    },
+    "Local Terminal returns to its open tab; use the new tab button for a second one." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerel Terminal açık sekmesine döner; ikinci bir tane için yeni sekme butonunu kullan."
+          }
+        }
+      }
+    },
+    "Local Terminal" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerel Terminal"
           }
         }
       }
@@ -3864,6 +4113,16 @@
         }
       }
     },
+    "must be private" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "private"
+          }
+        }
+      }
+    },
     "Name" : {
       "localizations" : {
         "tr" : {
@@ -3900,46 +4159,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yeni Klasör"
-          }
-        }
-      }
-    },
-    "New Runbook" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yeni Runbook"
-          }
-        }
-      }
-    },
-    "New Snippet" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yeni Snippet"
-          }
-        }
-      }
-    },
-    "New Transfer" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yeni Aktarım"
-          }
-        }
-      }
-    },
-    "New Tunnel" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yeni Tünel"
           }
         }
       }
@@ -3984,12 +4203,52 @@
         }
       }
     },
+    "New Runbook" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Runbook"
+          }
+        }
+      }
+    },
+    "New Snippet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Snippet"
+          }
+        }
+      }
+    },
     "New tab" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yeni sekme"
+          }
+        }
+      }
+    },
+    "New Transfer" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Aktarım"
+          }
+        }
+      }
+    },
+    "New Tunnel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Tünel"
           }
         }
       }
@@ -4034,76 +4293,6 @@
         }
       }
     },
-    "No Changes" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Değişiklik yok"
-          }
-        }
-      }
-    },
-    "No Runbooks Found" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Runbook Bulunamadı"
-          }
-        }
-      }
-    },
-    "No SSH connection found to open." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Açılacak bir SSH bağlantısı bulunamadı."
-          }
-        }
-      }
-    },
-    "No SSH tunnel has been created yet." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Henüz bir SSH tüneli oluşturulmamış."
-          }
-        }
-      }
-    },
-    "No Snippets" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snippet Yok"
-          }
-        }
-      }
-    },
-    "No Snippets Found" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Snippet Bulunamadı"
-          }
-        }
-      }
-    },
-    "No Tunnels Found" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tünel Bulunamadı"
-          }
-        }
-      }
-    },
     "No automatic startup flow" : {
       "localizations" : {
         "tr" : {
@@ -4134,12 +4323,12 @@
         }
       }
     },
-    "No concrete SSH alias found to add to the group." : {
+    "No Changes" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gruba eklenebilecek somut bir SSH alias'ı bulunamadı."
+            "value" : "Değişiklik yok"
           }
         }
       }
@@ -4150,6 +4339,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Config içinde somut bir host bulunamadı."
+          }
+        }
+      }
+    },
+    "No concrete SSH alias found to add to the group." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gruba eklenebilecek somut bir SSH alias'ı bulunamadı."
           }
         }
       }
@@ -4284,12 +4483,62 @@
         }
       }
     },
+    "No Runbooks Found" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runbook Bulunamadı"
+          }
+        }
+      }
+    },
     "No save location selected" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kayıt yeri seçilmedi"
+          }
+        }
+      }
+    },
+    "No Snippets" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippet Yok"
+          }
+        }
+      }
+    },
+    "No Snippets Found" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snippet Bulunamadı"
+          }
+        }
+      }
+    },
+    "No SSH connection found to open." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açılacak bir SSH bağlantısı bulunamadı."
+          }
+        }
+      }
+    },
+    "No SSH tunnel has been created yet." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz bir SSH tüneli oluşturulmamış."
           }
         }
       }
@@ -4340,6 +4589,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kuyrukta aktarım yok"
+          }
+        }
+      }
+    },
+    "No Tunnels Found" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tünel Bulunamadı"
           }
         }
       }
@@ -4452,16 +4711,6 @@
         }
       }
     },
-    "Open Key Setup Wizard" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anahtar Kurulumu Sihirbazını Aç"
-          }
-        }
-      }
-    },
     "Open all SSH connections in the group" : {
       "localizations" : {
         "tr" : {
@@ -4512,6 +4761,16 @@
         }
       }
     },
+    "Open Key Setup Wizard" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Kurulumu Sihirbazını Aç"
+          }
+        }
+      }
+    },
     "Open settings" : {
       "localizations" : {
         "tr" : {
@@ -4532,12 +4791,32 @@
         }
       }
     },
+    "Open the active terminal's connection again in a new tab (%@)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin terminalin bağlantısını yeni bir sekmede yeniden aç (%@)."
+          }
+        }
+      }
+    },
     "Open the active terminal's connection again in a new tab" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Etkin terminalin bağlantısını yeni bir sekmede yeniden aç"
+          }
+        }
+      }
+    },
+    "Opening the group starts all selected connections together." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grubu açtığında seçili bağlantıların tümü birlikte başlar."
           }
         }
       }
@@ -4616,16 +4895,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OpenSSH doğrulaması başarılı: %@"
-          }
-        }
-      }
-    },
-    "Opening the group starts all selected connections together." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grubu açtığında seçili bağlantıların tümü birlikte başlar."
           }
         }
       }
@@ -5026,22 +5295,22 @@
         }
       }
     },
-    "Raw Config Editor…" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ham Config Editörü…"
-          }
-        }
-      }
-    },
     "Raw config change saved." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ham config değişikliği kaydedildi."
+          }
+        }
+      }
+    },
+    "Raw Config Editor…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ham Config Editörü…"
           }
         }
       }
@@ -5146,29 +5415,6 @@
         }
       }
     },
-    "Remote IP / Host" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uzak IP / Host"
-          }
-        }
-      }
-    },
-    "Remote Port" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uzak Port"
-          }
-        }
-      }
-    },
-    "Remote URL" : {
-
-    },
     "Remote checksum could not be computed." : {
       "localizations" : {
         "tr" : {
@@ -5239,6 +5485,26 @@
         }
       }
     },
+    "Remote IP / Host" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzak IP / Host"
+          }
+        }
+      }
+    },
+    "Remote Port" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzak Port"
+          }
+        }
+      }
+    },
     "Remote port must be between 1 and 65535." : {
       "localizations" : {
         "tr" : {
@@ -5248,6 +5514,9 @@
           }
         }
       }
+    },
+    "Remote URL" : {
+
     },
     "Remote: %@" : {
       "localizations" : {
@@ -5329,6 +5598,16 @@
         }
       }
     },
+    "Resolved settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çözümlenmiş ayarlar"
+          }
+        }
+      }
+    },
     "Resolved SSH settings" : {
       "localizations" : {
         "tr" : {
@@ -5345,16 +5624,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Çözümlenmiş SSH ayarları (%lld)"
-          }
-        }
-      }
-    },
-    "Resolved settings" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Çözümlenmiş ayarlar"
           }
         }
       }
@@ -5507,16 +5776,6 @@
         }
       }
     },
-    "Run Runbook" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Runbook Çalıştır"
-          }
-        }
-      }
-    },
     "Run again" : {
       "localizations" : {
         "tr" : {
@@ -5543,6 +5802,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Komut çalıştır"
+          }
+        }
+      }
+    },
+    "Run Runbook" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runbook Çalıştır"
           }
         }
       }
@@ -5613,109 +5882,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "sudo -iu <kullanıcı> kullanılır. Bu adım ilk sırada ve yalnızca bir kez bulunabilir."
-          }
-        }
-      }
-    },
-    "SFTP must be enabled on the server (sftp-server subsystem)." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SFTP sunucuda etkin olmalıdır (sftp-server alt sistemi)."
-          }
-        }
-      }
-    },
-    "SSH Config" : {
-
-    },
-    "SSH agent key unavailable" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH agent anahtarı kullanılamıyor"
-          }
-        }
-      }
-    },
-    "SSH connection is open" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH bağlantısı açık"
-          }
-        }
-      }
-    },
-    "SSH connection settings" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH bağlantı ayarları"
-          }
-        }
-      }
-    },
-    "SSH connections and the config file are unchanged; only this group is deleted." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH bağlantıları ve config dosyası değişmez; yalnızca bu grup silinir."
-          }
-        }
-      }
-    },
-    "SSH operation failed" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH işlemi başarısız"
-          }
-        }
-      }
-    },
-    "SSH process closed before the startup flow finished (exit: %d)." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH süreci başlangıç akışı tamamlanmadan kapandı (çıkış: %d)."
-          }
-        }
-      }
-    },
-    "SSH process closed before the startup flow finished." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH süreci başlangıç akışı tamamlanmadan kapandı."
-          }
-        }
-      }
-    },
-    "SSH tool couldn't be launched" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH aracı başlatılamadı"
-          }
-        }
-      }
-    },
-    "SSH tool failed to launch: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH aracı başlatılamadı: %@"
           }
         }
       }
@@ -6030,22 +6196,22 @@
         }
       }
     },
-    "Selected backup" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seçili yedek"
-          }
-        }
-      }
-    },
     "Select…" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seçiniz..."
+          }
+        }
+      }
+    },
+    "Selected backup" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili yedek"
           }
         }
       }
@@ -6130,6 +6296,16 @@
         }
       }
     },
+    "Session recording stopped because it reached the size limit." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum kaydı boyut sınırına ulaştığı için durduruldu."
+          }
+        }
+      }
+    },
     "Session recording stopped because the file could not be written: %@" : {
       "localizations" : {
         "tr" : {
@@ -6146,6 +6322,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayarlar; Genel, Terminal, Senkronizasyon ve Güncellemeler bölümlerini içerir."
+          }
+        }
+      }
+    },
+    "SFTP must be enabled on the server (sftp-server subsystem)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFTP sunucuda etkin olmalıdır (sftp-server alt sistemi)."
+          }
+        }
+      }
+    },
+    "shasum or sha256sum was not found on the server." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucuda shasum veya sha256sum bulunamadı."
           }
         }
       }
@@ -6330,6 +6526,159 @@
         }
       }
     },
+    "ssh -- %@ '%@'" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ssh -- %1$@ '%2$@'"
+          }
+        }
+      }
+    },
+    "ssh -G can run the local command inside Match exec. Make sure you want to continue." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ssh -G, Match exec içindeki yerel komutu çalıştırabilir. Devam etmek istediğinden emin ol."
+          }
+        }
+      }
+    },
+    "SSH agent key unavailable" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH agent anahtarı kullanılamıyor"
+          }
+        }
+      }
+    },
+    "SSH Config" : {
+
+    },
+    "SSH connection is open" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH bağlantısı açık"
+          }
+        }
+      }
+    },
+    "SSH connection settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH bağlantı ayarları"
+          }
+        }
+      }
+    },
+    "SSH connections and the config file are unchanged; only this group is deleted." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH bağlantıları ve config dosyası değişmez; yalnızca bu grup silinir."
+          }
+        }
+      }
+    },
+    "SSH operation failed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH işlemi başarısız"
+          }
+        }
+      }
+    },
+    "SSH process closed before the startup flow finished (exit: %d)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH süreci başlangıç akışı tamamlanmadan kapandı (çıkış: %d)."
+          }
+        }
+      }
+    },
+    "SSH process closed before the startup flow finished." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH süreci başlangıç akışı tamamlanmadan kapandı."
+          }
+        }
+      }
+    },
+    "SSH tool couldn't be launched" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH aracı başlatılamadı"
+          }
+        }
+      }
+    },
+    "SSH tool failed to launch: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH aracı başlatılamadı: %@"
+          }
+        }
+      }
+    },
+    "ssh-add is running." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ssh-add çalışıyor."
+          }
+        }
+      }
+    },
+    "ssh-add returned exit code %d." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ssh-add çıkış kodu %d döndürdü."
+          }
+        }
+      }
+    },
+    "ssh-keygen is running. A separate dialog opens if a passphrase is requested." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ssh-keygen çalışıyor. Passphrase istenirse ayrı bir diyalog açılır."
+          }
+        }
+      }
+    },
+    "ssh-keygen returned exit code %d." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ssh-keygen çıkış kodu %d döndürdü."
+          }
+        }
+      }
+    },
     "Start Recording" : {
       "localizations" : {
         "tr" : {
@@ -6500,16 +6849,6 @@
         }
       }
     },
-    "Step %lld/%lld" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adım %lld/%lld"
-          }
-        }
-      }
-    },
     "Step %lld: changing the user can only be the first step in the flow." : {
       "localizations" : {
         "tr" : {
@@ -6556,6 +6895,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld. adımdaki kullanıcı adı sudo için güvenli bir kullanıcı adı değil."
+          }
+        }
+      }
+    },
+    "Step %lld/%lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adım %lld/%lld"
           }
         }
       }
@@ -6663,22 +7012,22 @@
         }
       }
     },
-    "Sync Now" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Şimdi Senkronize Et"
-          }
-        }
-      }
-    },
     "Sync error" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Senkronizasyon hatası"
+          }
+        }
+      }
+    },
+    "Sync Now" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi Senkronize Et"
           }
         }
       }
@@ -6729,16 +7078,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sistem (SF Mono)"
-          }
-        }
-      }
-    },
-    "TCP %@:%lld accepts connections." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "TCP %@:%lld bağlantı kabul ediyor."
           }
         }
       }
@@ -6851,32 +7190,22 @@
         }
       }
     },
+    "TCP %@:%lld accepts connections." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TCP %@:%lld bağlantı kabul ediyor."
+          }
+        }
+      }
+    },
     "Temporarily expand the active pane to fill the window" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktif bölmeyi geçici olarak pencereyi kaplayacak şekilde büyüt"
-          }
-        }
-      }
-    },
-    "Terly Diagnostic Report" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terly Tanılama Raporu"
-          }
-        }
-      }
-    },
-    "Terly Help" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terly Yardım"
           }
         }
       }
@@ -6897,6 +7226,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terly — Sunucu Kimliği Onayı"
+          }
+        }
+      }
+    },
+    "Terly Diagnostic Report" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terly Tanılama Raporu"
+          }
+        }
+      }
+    },
+    "Terly Help" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terly Yardım"
           }
         }
       }
@@ -7017,16 +7366,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ssh -o BatchMode=yes ile test ediliyor."
-          }
-        }
-      }
-    },
-    "The SCP transfer could not complete." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SCP aktarımı tamamlanamadı."
           }
         }
       }
@@ -7445,6 +7784,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaydedilmiş host key ile sunucunun sunduğu anahtar uyuşmuyor."
+          }
+        }
+      }
+    },
+    "The SCP transfer could not complete." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SCP aktarımı tamamlanamadı."
           }
         }
       }
@@ -8270,6 +8619,9 @@
         }
       }
     },
+    "xyz" : {
+
+    },
     "Yes" : {
       "localizations" : {
         "tr" : {
@@ -8339,328 +8691,6 @@
           }
         }
       }
-    },
-    "[Step %lld] %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "[Adım %lld] %@"
-          }
-        }
-      }
-    },
-    "e.g. /var/www" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. /var/www"
-          }
-        }
-      }
-    },
-    "e.g. 127.0.0.1" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. 127.0.0.1"
-          }
-        }
-      }
-    },
-    "e.g. 192.168.1.10" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. 192.168.1.10"
-          }
-        }
-      }
-    },
-    "e.g. 22" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. 22"
-          }
-        }
-      }
-    },
-    "e.g. 5432" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. 5432"
-          }
-        }
-      }
-    },
-    "e.g. Postgres tunnel" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. Postgres tüneli"
-          }
-        }
-      }
-    },
-    "e.g. apt-get install -y {{package}}" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. apt-get install -y {{package}}"
-          }
-        }
-      }
-    },
-    "e.g. bastion" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. bastion"
-          }
-        }
-      }
-    },
-    "e.g. localhost" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. localhost"
-          }
-        }
-      }
-    },
-    "e.g. mustafa@macbook" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. mustafa@macbook"
-          }
-        }
-      }
-    },
-    "e.g. release" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Örn. release"
-          }
-        }
-      }
-    },
-    "e.g. root" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. root"
-          }
-        }
-      }
-    },
-    "e.g. tmux attach || tmux new" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. tmux attach || tmux new"
-          }
-        }
-      }
-    },
-    "e.g. version" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. version"
-          }
-        }
-      }
-    },
-    "e.g. web-prod" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. web-prod"
-          }
-        }
-      }
-    },
-    "e.g. ~/.ssh/config.d/*" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. ~/.ssh/config.d/*"
-          }
-        }
-      }
-    },
-    "e.g. ~/.ssh/id_ed25519" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "örn. ~/.ssh/id_ed25519"
-          }
-        }
-      }
-    },
-    "git %@ failed (exit code %d)%@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "git %@ başarısız oldu (çıkış kodu %d)%@"
-          }
-        }
-      }
-    },
-    "git@github.com:username/dotfiles.git" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "git@github.com:kullanici/dotfiles.git"
-          }
-        }
-      }
-    },
-    "known_hosts entry and fingerprint found." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "known_hosts kaydı ve fingerprint bulundu."
-          }
-        }
-      }
-    },
-    "must be private" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "private"
-          }
-        }
-      }
-    },
-    "shasum or sha256sum was not found on the server." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sunucuda shasum veya sha256sum bulunamadı."
-          }
-        }
-      }
-    },
-    "ssh -- %@ '%@'" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "ssh -- %1$@ '%2$@'"
-          }
-        }
-      }
-    },
-    "ssh -G can run the local command inside Match exec. Make sure you want to continue." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ssh -G, Match exec içindeki yerel komutu çalıştırabilir. Devam etmek istediğinden emin ol."
-          }
-        }
-      }
-    },
-    "ssh-add is running." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ssh-add çalışıyor."
-          }
-        }
-      }
-    },
-    "ssh-add returned exit code %d." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ssh-add çıkış kodu %d döndürdü."
-          }
-        }
-      }
-    },
-    "ssh-keygen is running. A separate dialog opens if a passphrase is requested." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ssh-keygen çalışıyor. Passphrase istenirse ayrı bir diyalog açılır."
-          }
-        }
-      }
-    },
-    "ssh-keygen returned exit code %d." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ssh-keygen çıkış kodu %d döndürdü."
-          }
-        }
-      }
-    },
-    "xyz" : {
-
-    },
-    "~user" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~kullanıcı"
-          }
-        }
-      }
-    },
-    "· %@" : {
-
-    },
-    "⌘-click to select for sync" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⌘-tıkla ile senkron seç"
-          }
-        }
-      }
-    },
-    "⌘K" : {
-
-    },
-    "⌘S" : {
-
     }
   },
   "version" : "1.0"
