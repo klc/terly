@@ -17,7 +17,7 @@ final class SwiftTermTerminalEngine: ObservableObject, EmbeddedTerminalEngine {
         isActive: Bool,
         isVisible: Bool,
         isVisibleInLayout: Bool,
-        onOutput: @escaping @MainActor @Sendable ([UInt8]) -> Void,
+        onOutput: (@MainActor @Sendable ([UInt8]) -> Void)?,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
         onActivate: @escaping @MainActor @Sendable () -> Void,
@@ -253,7 +253,7 @@ private struct SwiftTermTerminalSurface: NSViewRepresentable {
     let searchRouter: TerminalSearchRouter
     let focusCoordinator: TerminalFocusCoordinator
     let markerPrefix: String?
-    let onOutput: @MainActor @Sendable ([UInt8]) -> Void
+    let onOutput: (@MainActor @Sendable ([UInt8]) -> Void)?
     let onStartupEvent: @MainActor @Sendable (StartupFlowMarkerEvent) -> Void
     let onFindCommand: @MainActor @Sendable (TerminalFindCommand) -> Void
     let onActivate: @MainActor @Sendable () -> Void

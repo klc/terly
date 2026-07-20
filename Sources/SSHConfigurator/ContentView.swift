@@ -5,6 +5,12 @@ struct ContentView: View {
     @StateObject private var model = ConfigViewModel()
     @StateObject private var terminalWorkspace = TerminalWorkspaceModel()
     @StateObject private var terminalEngine = SwiftTermTerminalEngine()
+    // Owned here, above `ContentDetailView`'s `if let document` guard, so a
+    // config reload/error that tears down that subtree never deinits an
+    // in-progress recording and silently drops the rest of the session's
+    // output. See `TerminalWorkspaceView`'s `recorder` property for the
+    // other half of this fix.
+    @StateObject private var terminalRecorder = TerminalSessionRecorder()
     @StateObject private var transferWorkspace = SCPTransferWorkspaceModel()
     @StateObject private var transferEngine = TransferQueueEngine()
     @StateObject private var tunnelWorkspace = TunnelWorkspaceModel(launchPlanBuilder: SSHLaunchPlanBuilder(baseEnvironment: SSHProcessEnvironment.interactive()))
@@ -57,6 +63,7 @@ struct ContentView: View {
                 model: model,
                 terminalWorkspace: terminalWorkspace,
                 terminalEngine: terminalEngine,
+                terminalRecorder: terminalRecorder,
                 startupFlows: startupFlows,
                 tunnelWorkspace: tunnelWorkspace,
                 snippets: snippets,
@@ -928,6 +935,7 @@ private struct ContentDetailView: View {
     @ObservedObject var model: ConfigViewModel
     @ObservedObject var terminalWorkspace: TerminalWorkspaceModel
     @ObservedObject var terminalEngine: SwiftTermTerminalEngine
+    @ObservedObject var terminalRecorder: TerminalSessionRecorder
     @ObservedObject var startupFlows: StartupFlowLibrary
     @ObservedObject var tunnelWorkspace: TunnelWorkspaceModel
     @ObservedObject var snippets: SnippetLibrary
@@ -944,6 +952,7 @@ private struct ContentDetailView: View {
                     TerminalWorkspaceView(
                         model: terminalWorkspace,
                         startupLibrary: startupFlows,
+                        recorder: terminalRecorder,
                         engine: terminalEngine,
                         isActive: terminalIsVisible && !isHostSettingsSheetPresented,
                         isVisible: terminalIsVisible,

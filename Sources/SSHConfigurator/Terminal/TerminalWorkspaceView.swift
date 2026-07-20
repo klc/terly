@@ -65,12 +65,17 @@ private struct DividerCursorArea: NSViewRepresentable {
 struct TerminalWorkspaceView: View {
     @ObservedObject var model: TerminalWorkspaceModel
     @ObservedObject var startupLibrary: StartupFlowLibrary
+    // Owned by `ContentView`, above the `if let document` guard that
+    // destroys this view's subtree on config reload/error — recorder used to
+    // be a `@StateObject` here, so a reload mid-recording silently deinited
+    // it and lost every subsequent byte. Threaded down as `@ObservedObject`
+    // so this view no longer controls its lifetime.
+    @ObservedObject var recorder: TerminalSessionRecorder
     let engine: any EmbeddedTerminalEngine
     let isActive: Bool
     let isVisible: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
-    @StateObject private var recorder = TerminalSessionRecorder()
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
     @State private var searchTerm = ""
@@ -122,9 +127,13 @@ struct TerminalWorkspaceView: View {
         .onChange(of: model.sessions.map(\.id)) { _, sessionIDs in
             recorder.stopIfSessionClosed(remainingSessionIDs: Set(sessionIDs))
         }
-        .onDisappear {
-            recorder.stop()
-        }
+        // No `.onDisappear { recorder.stop() }` here: the recorder now
+        // outlives this view (owned by `ContentView`), and this view stays
+        // in the hierarchy at `.opacity(0)` when hidden rather than being
+        // torn down — an onDisappear-driven stop would kill a healthy
+        // recording the moment the terminal tab isn't the visible one.
+        // `stopIfSessionClosed` above plus the explicit user stop in
+        // `toggleRecording` are the correct lifecycle hooks.
         .alert(
             "Session recording failed",
             isPresented: Binding(
@@ -557,6 +566,19 @@ struct TerminalWorkspaceView: View {
         let isDragTarget = paneDrag?.target == pane.id
         let isFileDropTarget = fileDropTargetPaneID == pane.id
         let canUploadDroppedFiles = session.hostID != -1 && SSHLaunchPlanBuilder.isConcreteAlias(pane.alias)
+        // Hoisted out of the `engine.makeSurface(...)` call (with an explicit
+        // type, built via if/else rather than a ternary — a ternary here
+        // defeated the closure-literal's attribute inference) rather than
+        // inlined there, which made the surrounding view-builder expression
+        // too complex for the type checker to solve in reasonable time.
+        let recordingOutputHandler: (@MainActor @Sendable ([UInt8]) -> Void)?
+        if recorder.isRecording(session.id) {
+            recordingOutputHandler = { bytes in
+                recorder.append(bytes, sessionID: session.id, paneID: pane.id, alias: pane.alias)
+            }
+        } else {
+            recordingOutputHandler = nil
+        }
 
         return VStack(spacing: 0) {
             HStack(spacing: 7) {
@@ -635,14 +657,13 @@ struct TerminalWorkspaceView: View {
                     isActive: isActive && searchPaneID != pane.id,
                     isVisible: isVisible && model.selectedSessionID == session.id,
                     isVisibleInLayout: session.zoomedPaneID == nil || session.zoomedPaneID == pane.id,
-                    onOutput: { bytes in
-                        recorder.append(
-                            bytes,
-                            sessionID: session.id,
-                            paneID: pane.id,
-                            alias: pane.alias
-                        )
-                    },
+                    // Only non-nil when this session is actually being
+                    // recorded: `onOutput` is optional at every layer down to
+                    // the SwiftTerm surface, and `onOutput?(Array(slice))`
+                    // there short-circuits before evaluating its argument
+                    // when nil — so a pane in a session nobody is recording
+                    // pays zero per-chunk `Array` copy cost.
+                    onOutput: recordingOutputHandler,
                     onStartupEvent: { event in
                         model.startupEvent(event, sessionID: session.id, paneID: pane.id)
                     },
@@ -726,7 +747,7 @@ struct TerminalWorkspaceView: View {
 
     private func toggleRecording(_ session: TerminalSession) {
         if recorder.isRecording(session.id) {
-            recorder.stop()
+            recorder.stop(sessionID: session.id)
             return
         }
 

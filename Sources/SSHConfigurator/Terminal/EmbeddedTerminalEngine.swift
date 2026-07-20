@@ -25,7 +25,11 @@ protocol EmbeddedTerminalEngine {
         isActive: Bool,
         isVisible: Bool,
         isVisibleInLayout: Bool,
-        onOutput: @escaping @MainActor @Sendable ([UInt8]) -> Void,
+        // Optional: only pass a real closure when the pane is actually being
+        // recorded. `onOutput?(Array(slice))` at the call site short-circuits
+        // before evaluating its argument when this is `nil`, so an unused
+        // pane pays zero per-chunk copy cost while recording is off.
+        onOutput: (@MainActor @Sendable ([UInt8]) -> Void)?,
         onStartupEvent: @escaping @MainActor @Sendable (StartupFlowMarkerEvent) -> Void,
         onFindCommand: @escaping @MainActor @Sendable (TerminalFindCommand) -> Void,
         onActivate: @escaping @MainActor @Sendable () -> Void,
