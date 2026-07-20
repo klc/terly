@@ -760,7 +760,8 @@ struct TerminalWorkspaceView: View {
         panel.nameFieldStringValue = TerminalSessionRecorder.suggestedFolderName(for: session.displayTitle)
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let folderURL = panel.url else { return }
-        try? FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
+        // No `createDirectory` here: `start` creates it with 0700 in one step.
+        // Creating it first would briefly leave the folder at the default 0755.
         recorder.start(session: session, folderURL: folderURL)
     }
 

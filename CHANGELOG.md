@@ -5,6 +5,38 @@ This file summarizes Terly's release history. Its format is loosely inspired by
 automatically included in GitHub Release notes and the Sparkle appcast by
 `release.yml` (see `docs/RELEASING.md`).
 
+## Unreleased
+
+Work in progress on the next release. `release.yml` only extracts a section
+whose heading exactly matches the tag's version, so this heading is inert until
+the changes below are moved under a real version number at tag time.
+
+### Added
+- Record a terminal session from the session header. Each recording is a folder
+  containing one [asciinema](https://docs.asciinema.org/) cast v2 file per pane,
+  named after the pane's alias, playable with `asciinema play`. The folder is
+  created with owner-only permissions (`0700`), each cast file with `0600`, and
+  the save panel warns that recordings capture everything the terminal displays.
+  Stopping a recording reveals its folder in Finder.
+- Several recordings can run at once — one per terminal tab — and each carries a
+  100 MB cap that stops it cleanly rather than filling the disk.
+- A Help Center (**Help → Terly Help**, ⇧⌘/) covering connections, terminal
+  controls, menus, and keyboard shortcuts, plus a welcome tour shown on first
+  launch and re-openable from the Help menu.
+
+### Fixed
+- Recording no longer dies silently when the configuration is reloaded: the
+  recorder used to be owned by a view that gets torn down in that case, so every
+  byte after the reload was lost.
+- Recording writes now happen off the main thread on a serial queue with a
+  buffer, instead of a blocking disk write in the terminal output hot path.
+- Panes in a session nobody is recording no longer allocate a copy of every
+  output chunk just to have it discarded.
+
+### Changed
+- Keyboard shortcuts now come from a single registry that both the bindings and
+  the Help guide read from, so documented shortcuts cannot drift from real ones.
+
 ## 1.1.1
 
 An urgent compatibility fix for pane navigation in release builds.
