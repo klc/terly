@@ -52,6 +52,7 @@ A native SwiftUI SSH workspace for macOS: `~/.ssh/config` management, embedded t
 - The Key Setup Wizard does not use `ssh-copy-id`; when copying to the server, it only reads the `.pub` file and feeds it to `ssh` via stdin. The private key itself is never opened or read in any code path. Overwriting is only possible with explicit user consent.
 - Git synchronization **does not store** its own git credentials: the system git (`/usr/bin/git`) is called with an argv array (no shell parsing), and authentication is fully delegated to the user's own SSH keys/credential helper. With `GIT_TERMINAL_PROMPT=0`, headless processes will not hang on password prompts and will return with a clear error instead. Private keys, `known_hosts`, transfer history, workspace layouts, and secret snippet values are never included in the sync set — snippet `isSecret` values are already never written to JSON (kept in Keychain), so the sync layer does not need to redact them. Non-fast-forward pulls never merge automatically; remote changes are first compared to local files (diff preview), and are only applied after explicit approval, backing up the current local state beforehand. There is no line-based automatic merging on conflicts (diverged history) — the user chooses one of three options: (a) back up local and pull remote, (b) replace remote with local — which does not use `git push --force` but rather creates a new merge commit, (c) cancel. Regardless of the choice, the local state is backed up before applying.
 - **Bootstrap Paradox**: To use sync on a new machine, you must first have remote access (e.g., GitHub) — meaning an SSH key (added to agent) or HTTPS credential helper must already be set up. This cannot be solved by synchronization itself: generate/add a key using the **Key Setup Wizard** (see above), register the public key on GitHub, and then link the remote URL under the Sync tab.
+- Session recording (see In-App Terminal) captures everything the terminal displays while active, which may include sensitive data from command output. Each recording lives in its own folder created with `0700` permissions, and every per-pane `.cast` file inside it is written with `0600` permissions.
 
 ## In-App Terminal
 
@@ -62,6 +63,10 @@ Font, font size, and color themes (System, Solarized Dark/Light, Dracula, Nord, 
 Connections without startup flows or those skipped once open directly via `/usr/bin/ssh -- <alias>`. If an automated flow is active, the app sends a single remote bootstrap command using `-tt` instead of typing steps with delays into the PTY. Closing a terminal tab terminates the associated SSH process; connections do not persist in the background when the app is closed.
 
 The working copy must be saved before opening a connection; SSH always uses the `~/.ssh/config` file on disk.
+
+### Session Recording
+
+The record button in the terminal toolbar starts a recording for the active tab; a save panel lets you pick (and create) the destination folder. Each pane is recorded lazily — its file is only opened once output actually arrives for it — as its own [asciinema cast v2](https://docs.asciinema.org/manual/asciicast/v2/) file named `<alias>-<n>.cast` (the index disambiguates panes sharing an alias, e.g. after a split), all inside one folder per recording (`Terly-<session-title>-<yyyy-MM-dd-HHmmss>/`). Recordings can be replayed with `asciinema play <file>.cast`. Stopping a recording from the toolbar reveals the folder in Finder; the automatic stop that happens when a recording hits the size cap or when its session closes does not. See the Security section for the permissions and sensitive-data warning.
 
 ### Auto-Reconnect
 

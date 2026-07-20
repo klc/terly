@@ -43,7 +43,7 @@ struct HelpCenterView: View {
                         title: "Terminal buttons",
                         systemImage: "terminal",
                         rows: [
-                            ("record.circle", "Start session recording and choose a .log file. Press again to stop."),
+                            ("record.circle", "Start session recording and choose a folder to save it to. Press again to stop and reveal it in Finder."),
                             ("arrow.left.arrow.right", "Open file transfer for the active connection."),
                             ("rectangle.split.2x1", "Split the active terminal vertically (\(AppShortcut.splitVertically.displayString))."),
                             ("rectangle.split.1x2", "Split it horizontally (\(AppShortcut.splitHorizontally.displayString))."),
@@ -70,8 +70,9 @@ struct HelpCenterView: View {
                             systemImage: "lock.doc",
                             rows: [
                                 ("eye", "Only output shown by the terminal while recording is active is saved."),
-                                ("rectangle.split.3x1", "All panes in the recorded tab are written to the same file with pane separators."),
-                                ("lock", "Recordings are created with owner-only file permissions (0600). They may contain sensitive data."),
+                                ("folder", "Each recording is saved as a folder with one asciinema .cast file per pane, named after the pane's alias."),
+                                ("play.rectangle", "Play a .cast file back with asciinema play <file>."),
+                                ("lock", "The recording folder is created with owner-only permissions (0700) and each .cast file with 0600. They may contain sensitive data."),
                             ]
                         )
                     }

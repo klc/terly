@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// Normalized (0–1) geometry for one split boundary, produced by
 /// `TerminalWorkspaceView.dividerGeometry(for:in:)` so dividers can be
@@ -309,8 +308,8 @@ struct TerminalWorkspaceView: View {
             .help(
                 Text(
                     recorder.isRecording(session.id)
-                        ? String(localized: "Stop recording and close the log file")
-                        : String(localized: "Record this session's terminal output to a file")
+                        ? String(localized: "Stop recording and reveal the recording folder in Finder")
+                        : String(localized: "Record this session's terminal output to a folder")
                 )
             )
 
@@ -744,18 +743,25 @@ struct TerminalWorkspaceView: View {
 
     private func toggleRecording(_ session: TerminalSession) {
         if recorder.isRecording(session.id) {
+            // Read the folder URL before stopping — `stop` clears the
+            // recording state, so `fileURL(for:)` would return nil after.
+            let folderURL = recorder.fileURL(for: session.id)
             recorder.stop(sessionID: session.id)
+            if let folderURL {
+                NSWorkspace.shared.activateFileViewerSelecting([folderURL])
+            }
             return
         }
 
         let panel = NSSavePanel()
         panel.title = String(localized: "Save Session Recording")
         panel.prompt = String(localized: "Start Recording")
-        panel.nameFieldStringValue = TerminalSessionRecorder.suggestedFilename(for: session.displayTitle)
-        panel.allowedContentTypes = [UTType(filenameExtension: "log") ?? .plainText]
+        panel.message = String(localized: "Recordings capture everything the terminal displays, including command output that may contain sensitive data. They are saved with owner-only permissions.")
+        panel.nameFieldStringValue = TerminalSessionRecorder.suggestedFolderName(for: session.displayTitle)
         panel.canCreateDirectories = true
-        guard panel.runModal() == .OK, let fileURL = panel.url else { return }
-        recorder.start(session: session, fileURL: fileURL)
+        guard panel.runModal() == .OK, let folderURL = panel.url else { return }
+        try? FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
+        recorder.start(session: session, folderURL: folderURL)
     }
 
     private func selectPane(_ paneID: TerminalPane.ID, in sessionID: TerminalSession.ID) {

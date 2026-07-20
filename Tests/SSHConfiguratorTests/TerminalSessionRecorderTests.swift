@@ -5,7 +5,7 @@ import XCTest
 
 final class TerminalSessionRecorderTests: XCTestCase {
     @MainActor
-    func testRecordsVisibleOutputFromAllPanesAndUsesOwnerOnlyPermissions() throws {
+    func testRecordsEachPaneAsItsOwnCastFileWithOwnerOnlyPermissions() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -26,10 +26,9 @@ final class TerminalSessionRecorderTests: XCTestCase {
             ),
             activePaneID: firstPane.id
         )
-        let fileURL = directory.appendingPathComponent("session.log")
         let recorder = TerminalSessionRecorder()
 
-        XCTAssertTrue(recorder.start(session: session, fileURL: fileURL))
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
         recorder.append(
             Array("api ready\n".utf8),
             sessionID: session.id,
@@ -44,16 +43,108 @@ final class TerminalSessionRecorderTests: XCTestCase {
         )
         recorder.stop(sessionID: session.id)
 
-        let output = try String(contentsOf: fileURL, encoding: .utf8)
-        XCTAssertTrue(output.contains("Session: Production"))
-        XCTAssertTrue(output.contains("--- prod-api"))
-        XCTAssertTrue(output.contains("api ready"))
-        XCTAssertTrue(output.contains("--- prod-db"))
-        XCTAssertTrue(output.contains("db ready"))
-        XCTAssertTrue(output.contains("Recording ended:"))
+        let apiFile = directory.appendingPathComponent("prod-api-1.cast")
+        let dbFile = directory.appendingPathComponent("prod-db-1.cast")
 
-        let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
-        XCTAssertEqual((attributes[.posixPermissions] as? NSNumber)?.intValue, 0o600)
+        let apiEvent = try lastEvent(in: apiFile)
+        XCTAssertEqual(apiEvent[2] as? String, "api ready\n")
+        let dbEvent = try lastEvent(in: dbFile)
+        XCTAssertEqual(dbEvent[2] as? String, "db ready\n")
+
+        // Each pane's file contains only its own output.
+        XCTAssertFalse(try String(contentsOf: apiFile, encoding: .utf8).contains("db ready"))
+        XCTAssertFalse(try String(contentsOf: dbFile, encoding: .utf8).contains("api ready"))
+
+        let folderAttributes = try FileManager.default.attributesOfItem(atPath: directory.path)
+        XCTAssertEqual((folderAttributes[.posixPermissions] as? NSNumber)?.intValue, 0o700)
+
+        for fileURL in [apiFile, dbFile] {
+            let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+            XCTAssertEqual((attributes[.posixPermissions] as? NSNumber)?.intValue, 0o600)
+        }
+    }
+
+    @MainActor
+    func testCastHeaderIsFirstLineValidJSONWithVersion2AndExpectedTitle() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let pane = makePane(alias: "prod-api")
+        let session = TerminalSession(hostID: 1, alias: "Production", layout: .pane(pane), activePaneID: pane.id)
+        let recorder = TerminalSessionRecorder()
+
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
+        recorder.append(Array("hi\n".utf8), sessionID: session.id, paneID: pane.id, alias: pane.alias)
+        recorder.stop(sessionID: session.id)
+
+        let lines = try castLines(at: directory.appendingPathComponent("prod-api-1.cast"))
+        XCTAssertEqual(lines.count, 2, "expected a header line and exactly one event line")
+
+        let header = try parseObject(lines[0])
+        XCTAssertEqual(header["version"] as? Int, 2)
+        XCTAssertEqual(header["width"] as? Int, 80)
+        XCTAssertEqual(header["height"] as? Int, 24)
+        XCTAssertNotNil(header["timestamp"] as? Int)
+        XCTAssertEqual(header["title"] as? String, "Production — prod-api")
+    }
+
+    @MainActor
+    func testEventsRoundTripExactBytesFedInThroughJSONSerialization() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let pane = makePane(alias: "prod")
+        let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
+        let recorder = TerminalSessionRecorder()
+
+        // ESC bytes, control characters, quotes, and backslashes — exactly
+        // the content that would corrupt a hand-rolled JSON escaper.
+        let raw = "\u{1B}[31mHello \"World\"\\end\u{1B}[0m\ttab\n"
+
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
+        recorder.append(Array(raw.utf8), sessionID: session.id, paneID: pane.id, alias: pane.alias)
+        recorder.stop(sessionID: session.id)
+
+        let event = try lastEvent(in: directory.appendingPathComponent("prod-1.cast"))
+        XCTAssertEqual(event[1] as? String, "o")
+        XCTAssertEqual(event[2] as? String, raw)
+        XCTAssertNotNil(event[0] as? Double)
+    }
+
+    @MainActor
+    func testMultiByteUTF8CharacterSplitAcrossTwoAppendsArrivesIntact() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let pane = makePane(alias: "prod")
+        let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
+        let recorder = TerminalSessionRecorder()
+
+        // "ğ" (U+011F) is a 2-byte UTF-8 sequence: 0xC4 0x9F. Split it across
+        // two `append` calls, exactly as a PTY chunk boundary would.
+        let character = "ğ"
+        let bytes = Array(character.utf8)
+        XCTAssertEqual(bytes.count, 2)
+
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
+        recorder.append([bytes[0]], sessionID: session.id, paneID: pane.id, alias: pane.alias)
+        recorder.append([bytes[1]], sessionID: session.id, paneID: pane.id, alias: pane.alias)
+        recorder.stop(sessionID: session.id)
+
+        let fileURL = directory.appendingPathComponent("prod-1.cast")
+        let lines = try castLines(at: fileURL)
+        // Header + exactly one event: the first (incomplete) chunk must not
+        // have produced a garbled event on its own.
+        XCTAssertEqual(lines.count, 2)
+
+        let event = try parseArray(lines[1])
+        XCTAssertEqual(event[2] as? String, character)
     }
 
     @MainActor
@@ -65,10 +156,9 @@ final class TerminalSessionRecorderTests: XCTestCase {
 
         let pane = makePane(alias: "prod")
         let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
-        let fileURL = directory.appendingPathComponent("session.log")
         let recorder = TerminalSessionRecorder()
 
-        XCTAssertTrue(recorder.start(session: session, fileURL: fileURL))
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
         recorder.append(
             Array("must not appear".utf8),
             sessionID: UUID(),
@@ -77,8 +167,11 @@ final class TerminalSessionRecorderTests: XCTestCase {
         )
         recorder.stop(sessionID: session.id)
 
-        let output = try String(contentsOf: fileURL, encoding: .utf8)
-        XCTAssertFalse(output.contains("must not appear"))
+        // The mismatched session ID means `append` never resolved a
+        // recording to write into, so no pane file was ever opened.
+        let castFiles = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+            .filter { $0.hasSuffix(".cast") }
+        XCTAssertTrue(castFiles.isEmpty)
     }
 
     @MainActor
@@ -92,7 +185,7 @@ final class TerminalSessionRecorderTests: XCTestCase {
         let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
         let recorder = TerminalSessionRecorder()
 
-        XCTAssertTrue(recorder.start(session: session, fileURL: directory.appendingPathComponent("session.log")))
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
         recorder.stopIfSessionClosed(remainingSessionIDs: [])
 
         XCTAssertFalse(recorder.isRecording(session.id))
@@ -100,13 +193,14 @@ final class TerminalSessionRecorderTests: XCTestCase {
     }
 
     @MainActor
-    func testOverwritingAnExistingLogTruncatesItAndRestrictsPermissions() throws {
+    func testOverwritingAnExistingCastFileTruncatesItAndRestrictsPermissions() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let fileURL = directory.appendingPathComponent("session.log")
+        // A stale file at the exact path the pane's file will be opened at.
+        let fileURL = directory.appendingPathComponent("prod-1.cast")
         try Data("old sensitive output".utf8).write(to: fileURL)
         try FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: fileURL.path)
 
@@ -114,31 +208,36 @@ final class TerminalSessionRecorderTests: XCTestCase {
         let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
         let recorder = TerminalSessionRecorder()
 
-        XCTAssertTrue(recorder.start(session: session, fileURL: fileURL))
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
+        recorder.append(Array("fresh output\n".utf8), sessionID: session.id, paneID: pane.id, alias: pane.alias)
         recorder.stop(sessionID: session.id)
 
         let output = try String(contentsOf: fileURL, encoding: .utf8)
         XCTAssertFalse(output.contains("old sensitive output"))
-        XCTAssertTrue(output.contains("Terly session recording"))
+
+        let lines = try castLines(at: fileURL)
+        let header = try parseObject(lines[0])
+        XCTAssertEqual(header["version"] as? Int, 2)
+
         let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
         XCTAssertEqual((attributes[.posixPermissions] as? NSNumber)?.intValue, 0o600)
     }
 
     @MainActor
-    func testSuggestedFilenameRemovesUnsafeCharacters() {
+    func testSuggestedFolderNameRemovesUnsafeCharacters() {
         let date = Date(timeIntervalSince1970: 0)
-        let filename = TerminalSessionRecorder.suggestedFilename(for: " Prod / DB ", date: date)
+        let name = TerminalSessionRecorder.suggestedFolderName(for: " Prod / DB ", date: date)
 
-        XCTAssertTrue(filename.hasPrefix("Terly-Prod-DB-"))
-        XCTAssertTrue(filename.hasSuffix(".log"))
-        XCTAssertFalse(filename.contains("/"))
-        XCTAssertFalse(filename.contains(" "))
+        XCTAssertTrue(name.hasPrefix("Terly-Prod-DB-"))
+        XCTAssertFalse(name.hasSuffix(".log"))
+        XCTAssertFalse(name.contains("/"))
+        XCTAssertFalse(name.contains(" "))
     }
 
     // MARK: - 1.4 Multiple concurrent recordings
 
     @MainActor
-    func testTwoSessionsRecordingConcurrentlyEachFileGetsOnlyItsOwnBytes() throws {
+    func testTwoSessionsRecordingConcurrentlyEachFolderGetsOnlyItsOwnFiles() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -148,18 +247,19 @@ final class TerminalSessionRecorderTests: XCTestCase {
         let paneB = makePane(alias: "beta")
         let sessionA = TerminalSession(hostID: 1, alias: "A", layout: .pane(paneA), activePaneID: paneA.id)
         let sessionB = TerminalSession(hostID: 2, alias: "B", layout: .pane(paneB), activePaneID: paneB.id)
-        let fileA = directory.appendingPathComponent("a.log")
-        let fileB = directory.appendingPathComponent("b.log")
+        // Folders don't exist yet — `start` must create them.
+        let folderA = directory.appendingPathComponent("recording-a", isDirectory: true)
+        let folderB = directory.appendingPathComponent("recording-b", isDirectory: true)
         let recorder = TerminalSessionRecorder()
 
-        XCTAssertTrue(recorder.start(session: sessionA, fileURL: fileA))
-        XCTAssertTrue(recorder.start(session: sessionB, fileURL: fileB))
+        XCTAssertTrue(recorder.start(session: sessionA, folderURL: folderA))
+        XCTAssertTrue(recorder.start(session: sessionB, folderURL: folderB))
         XCTAssertTrue(recorder.isRecording(sessionA.id))
         XCTAssertTrue(recorder.isRecording(sessionB.id))
 
         // Interleaved appends across both sessions — starting the second
         // recording must not stop the first (the old single-`activeSessionID`
-        // bug), and each session's bytes must land only in its own file.
+        // bug), and each session's bytes must land only in its own folder.
         recorder.append(Array("alpha-1\n".utf8), sessionID: sessionA.id, paneID: paneA.id, alias: paneA.alias)
         recorder.append(Array("beta-1\n".utf8), sessionID: sessionB.id, paneID: paneB.id, alias: paneB.alias)
         recorder.append(Array("alpha-2\n".utf8), sessionID: sessionA.id, paneID: paneA.id, alias: paneA.alias)
@@ -171,8 +271,13 @@ final class TerminalSessionRecorderTests: XCTestCase {
         XCTAssertFalse(recorder.isRecording(sessionA.id))
         XCTAssertFalse(recorder.isRecording(sessionB.id))
 
-        let outputA = try String(contentsOf: fileA, encoding: .utf8)
-        let outputB = try String(contentsOf: fileB, encoding: .utf8)
+        let filesA = try FileManager.default.contentsOfDirectory(atPath: folderA.path)
+        let filesB = try FileManager.default.contentsOfDirectory(atPath: folderB.path)
+        XCTAssertEqual(filesA, ["alpha-1.cast"])
+        XCTAssertEqual(filesB, ["beta-1.cast"])
+
+        let outputA = try String(contentsOf: folderA.appendingPathComponent("alpha-1.cast"), encoding: .utf8)
+        let outputB = try String(contentsOf: folderB.appendingPathComponent("beta-1.cast"), encoding: .utf8)
 
         XCTAssertTrue(outputA.contains("alpha-1"))
         XCTAssertTrue(outputA.contains("alpha-2"))
@@ -183,10 +288,10 @@ final class TerminalSessionRecorderTests: XCTestCase {
         XCTAssertFalse(outputB.contains("alpha"))
     }
 
-    // MARK: - 1.1 Ordering trap: buffer must flush before the footer
+    // MARK: - 1.1 Ordering trap: buffer must flush before close, synchronously
 
     @MainActor
-    func testStopFlushesAllBufferedBytesInOrderBeforeTheFooterSynchronously() throws {
+    func testStopFlushesAllBufferedEventsInOrderSynchronously() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -194,10 +299,9 @@ final class TerminalSessionRecorderTests: XCTestCase {
 
         let pane = makePane(alias: "prod")
         let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
-        let fileURL = directory.appendingPathComponent("session.log")
         let recorder = TerminalSessionRecorder()
 
-        XCTAssertTrue(recorder.start(session: session, fileURL: fileURL))
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
 
         // Many small chunks, well under the 64 KB flush threshold both
         // individually and cumulatively, so none of this has reached disk
@@ -216,24 +320,12 @@ final class TerminalSessionRecorderTests: XCTestCase {
 
         // No wait/poll here: `stop()` is synchronous, so the file must
         // already be complete and readable the instant this call returns.
-        let output = try String(contentsOf: fileURL, encoding: .utf8)
+        let lines = try castLines(at: directory.appendingPathComponent("prod-1.cast"))
+        XCTAssertEqual(lines.count, lineCount + 1, "header + one event per append")
 
-        guard let footerRange = output.range(of: "Recording ended:") else {
-            XCTFail("footer missing")
-            return
-        }
-
-        var previousUpperBound = output.startIndex
         for index in 0..<lineCount {
-            guard let lineRange = output.range(of: "line-\(index)\n") else {
-                XCTFail("line-\(index) missing from recording")
-                continue
-            }
-            // In order relative to the previous line...
-            XCTAssertTrue(lineRange.lowerBound >= previousUpperBound, "line-\(index) out of order")
-            // ...and entirely before the footer.
-            XCTAssertTrue(lineRange.upperBound <= footerRange.lowerBound, "line-\(index) appears after the footer")
-            previousUpperBound = lineRange.upperBound
+            let event = try parseArray(lines[index + 1])
+            XCTAssertEqual(event[2] as? String, "line-\(index)\n", "line-\(index) missing or out of order")
         }
     }
 
@@ -248,11 +340,10 @@ final class TerminalSessionRecorderTests: XCTestCase {
 
         let pane = makePane(alias: "prod")
         let session = TerminalSession(hostID: 1, alias: "prod", layout: .pane(pane), activePaneID: pane.id)
-        let fileURL = directory.appendingPathComponent("session.log")
         let recorder = TerminalSessionRecorder()
         recorder.sizeCapBytes = 64 // well under the 64 KB flush threshold
 
-        XCTAssertTrue(recorder.start(session: session, fileURL: fileURL))
+        XCTAssertTrue(recorder.start(session: session, folderURL: directory))
 
         let expectation = expectation(description: "cap-triggered errorMessage")
         let cancellable = recorder.$errorMessage
@@ -274,13 +365,16 @@ final class TerminalSessionRecorderTests: XCTestCase {
         cancellable.cancel()
 
         XCTAssertNotNil(recorder.errorMessage)
+        XCTAssertTrue(recorder.errorMessage?.contains("size limit") ?? false)
         XCTAssertFalse(recorder.isRecording(session.id))
 
-        // The file itself was flushed, footer-written, and closed on the
-        // write queue as part of the very same cap-hit step that preceded
-        // the errorMessage hop, so it's already complete by now.
-        let output = try String(contentsOf: fileURL, encoding: .utf8)
-        XCTAssertTrue(output.contains("size limit"))
+        // The pane file was flushed and closed on the write queue as part of
+        // the very same cap-hit step that preceded the errorMessage hop, so
+        // it's already complete (and structurally valid) by now.
+        let lines = try castLines(at: directory.appendingPathComponent("prod-1.cast"))
+        XCTAssertEqual(lines.count, 2)
+        let event = try parseArray(lines[1])
+        XCTAssertEqual((event[2] as? String)?.count, 200)
     }
 
     private func makePane(alias: String) -> TerminalPane {
@@ -293,5 +387,31 @@ final class TerminalSessionRecorderTests: XCTestCase {
                 currentDirectoryURL: nil
             )
         )
+    }
+
+    // MARK: - Cast v2 test helpers
+
+    private func castLines(at fileURL: URL) throws -> [String] {
+        let content = try String(contentsOf: fileURL, encoding: .utf8)
+        return content
+            .split(separator: "\n", omittingEmptySubsequences: true)
+            .map(String.init)
+    }
+
+    private func parseObject(_ line: String) throws -> [String: Any] {
+        let object = try JSONSerialization.jsonObject(with: Data(line.utf8), options: [])
+        return try XCTUnwrap(object as? [String: Any])
+    }
+
+    private func parseArray(_ line: String) throws -> [Any] {
+        let object = try JSONSerialization.jsonObject(with: Data(line.utf8), options: [])
+        return try XCTUnwrap(object as? [Any])
+    }
+
+    /// Reads the last event line of a `.cast` file (the header is line 1).
+    private func lastEvent(in fileURL: URL) throws -> [Any] {
+        let lines = try castLines(at: fileURL)
+        let lastLine = try XCTUnwrap(lines.last)
+        return try parseArray(lastLine)
     }
 }

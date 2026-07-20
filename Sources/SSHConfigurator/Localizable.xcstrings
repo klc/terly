@@ -869,16 +869,6 @@
         }
       }
     },
-    "All panes in the recorded tab are written to the same file with pane separators." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaydedilen sekmedeki tüm paneller, panel ayraçlarıyla aynı dosyaya yazılır."
-          }
-        }
-      }
-    },
     "All startup flows run as a single SSH bootstrap command." : {
       "localizations" : {
         "tr" : {
@@ -2705,6 +2695,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Her ağ adımı timeout ile sınırlıdır. İptal, çalışan alt süreci sonlandırır."
+          }
+        }
+      }
+    },
+    "Each recording is saved as a folder with one asciinema .cast file per pane, named after the pane's alias." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her kayıt, her panel için ayrı bir asciinema .cast dosyası içeren bir klasör olarak kaydedilir; dosya adları panelin alias'ından türetilir."
           }
         }
       }
@@ -4800,6 +4800,16 @@
         }
       }
     },
+    "Play a .cast file back with asciinema play <file>." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir .cast dosyasını asciinema play <dosya> ile oynat."
+          }
+        }
+      }
+    },
     "Port" : {
       "localizations" : {
         "tr" : {
@@ -5046,12 +5056,12 @@
         }
       }
     },
-    "Record this session's terminal output to a file" : {
+    "Record this session's terminal output to a folder" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu oturumun terminal çıktısını bir dosyaya kaydet"
+            "value" : "Bu oturumun terminal çıktısını bir klasöre kaydet"
           }
         }
       }
@@ -5066,12 +5076,12 @@
         }
       }
     },
-    "Recordings are created with owner-only file permissions (0600). They may contain sensitive data." : {
+    "Recordings capture everything the terminal displays, including command output that may contain sensitive data. They are saved with owner-only permissions." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kayıtlar yalnızca sahibin erişebildiği dosya izinleriyle (0600) oluşturulur. Hassas veriler içerebilir."
+            "value" : "Kayıtlar, terminalde görüntülenen her şeyi (hassas veri içerebilecek komut çıktıları dahil) kaydeder. Yalnızca sahibin erişebildiği izinlerle kaydedilir."
           }
         }
       }
@@ -6310,12 +6320,12 @@
         }
       }
     },
-    "Start session recording and choose a .log file. Press again to stop." : {
+    "Start session recording and choose a folder to save it to. Press again to stop and reveal it in Finder." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oturum kaydını başlat ve bir .log dosyası seç. Durdurmak için yeniden bas."
+            "value" : "Oturum kaydını başlat ve kaydedileceği klasörü seç. Durdurmak için yeniden bas; klasör Finder'da açılır."
           }
         }
       }
@@ -6550,12 +6560,12 @@
         }
       }
     },
-    "Stop recording and close the log file" : {
+    "Stop recording and reveal the recording folder in Finder" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaydı durdur ve log dosyasını kapat"
+            "value" : "Kaydı durdur ve kayıt klasörünü Finder'da göster"
           }
         }
       }
@@ -7335,6 +7345,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Public key dosyası (.pub) bulunamadı veya okunamadı."
+          }
+        }
+      }
+    },
+    "The recording folder is created with owner-only permissions (0700) and each .cast file with 0600. They may contain sensitive data." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt klasörü yalnızca sahibin erişebildiği izinlerle (0700), her .cast dosyası ise 0600 ile oluşturulur. Hassas veriler içerebilir."
           }
         }
       }
