@@ -226,6 +226,29 @@ final class StartupFlowBootstrapBuilderTests: XCTestCase {
         XCTAssertTrue(result.output.contains("|completed"), result.output)
     }
 
+    func testExitingTargetUserShellFallsBackToOriginalUserShell() throws {
+        let fixture = try makeCommandFixture(
+            idOutput: "original-user",
+            sudoScript: """
+            printf 'TARGET_USER_SHELL_EXITED\\n'
+            exit 0
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: fixture) }
+        let profile = StartupFlowProfile(
+            alias: "prod",
+            steps: [.changeUser("target-user"), .runCommand("echo INSIDE_TARGET")]
+        )
+        let execution = try StartupFlowBootstrapBuilder().build(profile: profile)
+
+        let result = try runShell(execution.command, prependingToPath: fixture.path)
+
+        XCTAssertEqual(result.status, 0)
+        XCTAssertTrue(result.output.contains("TARGET_USER_SHELL_EXITED"), result.output)
+        // Verify that after sudo exits, the script falls back to executing original user interactive shell
+        XCTAssertTrue(execution.command.contains("; exec \"${SHELL:-/bin/sh}\" -l"), execution.command)
+    }
+
     private func assertValidShell(_ command: String) throws {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")

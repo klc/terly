@@ -60,7 +60,8 @@ struct StartupFlowBootstrapBuilder: Sendable {
                 "startup_user=$(id -un 2>/dev/null || true)",
                 "if [ \"$startup_user\" = \(quotedUser) ]; then /bin/sh -lc \(quotedInner); else sudo -iu \(quotedUser) -- /bin/sh -lc \(quotedInner); fi",
                 "startup_code=$?",
-                "if [ \"$startup_code\" -ne 0 ]; then \(failure); exec \"${SHELL:-/bin/sh}\" -l; fi",
+                "if [ \"$startup_code\" -ne 0 ]; then \(failure); fi",
+                "exec \"${SHELL:-/bin/sh}\" -l",
             ].joined(separator: "; ")
         } else {
             script = innerScript
