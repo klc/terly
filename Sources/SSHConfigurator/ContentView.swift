@@ -179,12 +179,14 @@ struct ContentView: View {
                     model.connectionGroups.first { $0.id == groupID }
                 },
                 connections: model.availableConnections,
-                onSave: { name, aliases, openMode in
+                onSave: { name, aliases, openMode, startupProfile, overrideHostStartupFlows in
                     model.saveConnectionGroup(
                         id: selection.groupID,
                         name: name,
                         aliases: aliases,
-                        openMode: openMode
+                        openMode: openMode,
+                        startupProfile: startupProfile,
+                        overrideHostStartupFlows: overrideHostStartupFlows
                     )
                 },
                 onDelete: selection.groupID.flatMap { groupID in
@@ -461,17 +463,20 @@ struct ContentView: View {
 
     private func requestStartupLaunch(for destination: StartupLaunchRequest.Destination) {
         let connections: [SSHConnectionTarget]
+        let profiles: [String: StartupFlowProfile]
         switch destination {
         case let .connections(targets):
             connections = targets
-        case let .group(_, targets):
+            profiles = startupProfiles(for: connections)
+        case let .group(group, targets):
             connections = targets
+            profiles = startupProfiles(for: group, connections: targets)
         }
 
         let items = connections.map {
             StartupFlowLaunchPreviewItem(
                 target: $0,
-                profile: startupFlows.profile(for: $0.alias)
+                profile: profiles[$0.alias]
             )
         }
         guard items.contains(where: { item in
@@ -495,7 +500,7 @@ struct ContentView: View {
     ) {
         let previousSelection = model.selectedItem
         let didOpen: Bool
-        let profiles = startupProfiles(for: connections)
+        let profiles = startupProfiles(for: group, connections: connections)
         switch group.openMode {
         case .separateTabs:
             didOpen = terminalWorkspace.openConnections(
@@ -547,6 +552,41 @@ struct ContentView: View {
         Dictionary(uniqueKeysWithValues: connections.compactMap { connection in
             startupFlows.profile(for: connection.alias).map { (connection.alias, $0) }
         })
+    }
+
+    private func startupProfiles(
+        for group: SSHConnectionGroup,
+        connections: [SSHConnectionTarget]
+    ) -> [String: StartupFlowProfile] {
+        guard let groupProfile = group.startupProfile, !groupProfile.steps.isEmpty else {
+            return startupProfiles(for: connections)
+        }
+
+        var result: [String: StartupFlowProfile] = [:]
+        for connection in connections {
+            let hostProfile = startupFlows.profile(for: connection.alias)
+            if group.overrideHostStartupFlows || hostProfile == nil {
+                var profile = groupProfile
+                profile.alias = connection.alias
+                result[connection.alias] = profile
+            } else if let hostProfile {
+                var combinedSteps = groupProfile.steps
+                let groupHasUserChange = groupProfile.steps.contains { $0.kind == .changeUser }
+                let hostSteps = hostProfile.steps.filter { step in
+                    !(groupHasUserChange && step.kind == .changeUser)
+                }
+                combinedSteps.append(contentsOf: hostSteps)
+
+                let combinedProfile = StartupFlowProfile(
+                    id: groupProfile.id,
+                    alias: connection.alias,
+                    automaticallyRun: groupProfile.automaticallyRun || hostProfile.automaticallyRun,
+                    steps: combinedSteps
+                )
+                result[connection.alias] = combinedProfile
+            }
+        }
+        return result
     }
 
     private func applyHostSettings(
@@ -1278,19 +1318,21 @@ private struct HostGroupDisclosure: View {
 private struct ConnectionGroupEditorSheet: View {
     let group: SSHConnectionGroup?
     let connections: [SSHConnectionTarget]
-    let onSave: (String, [String], SSHConnectionGroupOpenMode) -> Bool
+    let onSave: (String, [String], SSHConnectionGroupOpenMode, StartupFlowProfile?, Bool) -> Bool
     let onDelete: (() -> Bool)?
 
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
     @State private var selectedAliases: Set<String>
     @State private var openMode: SSHConnectionGroupOpenMode
+    @State private var startupProfile: StartupFlowProfile?
+    @State private var overrideHostStartupFlows: Bool
     @State private var showingDeleteConfirmation = false
 
     init(
         group: SSHConnectionGroup?,
         connections: [SSHConnectionTarget],
-        onSave: @escaping (String, [String], SSHConnectionGroupOpenMode) -> Bool,
+        onSave: @escaping (String, [String], SSHConnectionGroupOpenMode, StartupFlowProfile?, Bool) -> Bool,
         onDelete: (() -> Bool)?
     ) {
         self.group = group
@@ -1300,6 +1342,8 @@ private struct ConnectionGroupEditorSheet: View {
         _name = State(initialValue: group?.name ?? "")
         _selectedAliases = State(initialValue: Set(group?.aliases ?? []))
         _openMode = State(initialValue: group?.openMode ?? .separateTabs)
+        _startupProfile = State(initialValue: group?.startupProfile)
+        _overrideHostStartupFlows = State(initialValue: group?.overrideHostStartupFlows ?? true)
     }
 
     private var availableAliases: Set<String> {
@@ -1350,6 +1394,29 @@ private struct ConnectionGroupEditorSheet: View {
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                }
+
+                Section("Group Startup Flow") {
+                    Toggle("Enable group startup flow", isOn: Binding(
+                        get: { startupProfile != nil },
+                        set: { isEnabled in
+                            if isEnabled {
+                                let profileAlias = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Group" : name
+                                startupProfile = StartupFlowProfile(alias: profileAlias, automaticallyRun: true)
+                            } else {
+                                startupProfile = nil
+                            }
+                        }
+                    ))
+
+                    if startupProfile != nil {
+                        Toggle("Override host startup flows", isOn: $overrideHostStartupFlows)
+                            .help("When enabled, only the group startup flow runs. When disabled, the group startup flow runs first, followed by each host's individual startup flow.")
+                    }
+                }
+
+                if startupProfile != nil {
+                    StartupFlowOptionalEditorView(profile: $startupProfile)
                 }
 
                 Section("Connections") {
@@ -1408,7 +1475,7 @@ private struct ConnectionGroupEditorSheet: View {
                     let aliases = connections
                         .map(\.alias)
                         .filter(selectedAliases.contains)
-                    if onSave(name, aliases, openMode) {
+                    if onSave(name, aliases, openMode, startupProfile, overrideHostStartupFlows) {
                         dismiss()
                     }
                 }

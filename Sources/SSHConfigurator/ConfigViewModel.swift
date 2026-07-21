@@ -300,14 +300,18 @@ final class ConfigViewModel: ObservableObject {
         id: UUID?,
         name: String,
         aliases: [String],
-        openMode: SSHConnectionGroupOpenMode
+        openMode: SSHConnectionGroupOpenMode,
+        startupProfile: StartupFlowProfile? = nil,
+        overrideHostStartupFlows: Bool = true
     ) -> Bool {
         do {
             let group = try SSHConnectionGroup.validated(
                 id: id ?? UUID(),
                 name: name,
                 aliases: aliases,
-                openMode: openMode
+                openMode: openMode,
+                startupProfile: startupProfile,
+                overrideHostStartupFlows: overrideHostStartupFlows
             )
             var updatedGroups = connectionGroups
             if let index = updatedGroups.firstIndex(where: { $0.id == group.id }) {

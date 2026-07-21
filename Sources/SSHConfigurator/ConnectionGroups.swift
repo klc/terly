@@ -19,24 +19,32 @@ struct SSHConnectionGroup: Codable, Equatable, Identifiable, Sendable {
     let name: String
     let aliases: [String]
     let openMode: SSHConnectionGroupOpenMode
+    let startupProfile: StartupFlowProfile?
+    let overrideHostStartupFlows: Bool
 
     init(
         id: UUID = UUID(),
         name: String,
         aliases: [String],
-        openMode: SSHConnectionGroupOpenMode = .separateTabs
+        openMode: SSHConnectionGroupOpenMode = .separateTabs,
+        startupProfile: StartupFlowProfile? = nil,
+        overrideHostStartupFlows: Bool = true
     ) {
         self.id = id
         self.name = name
         self.aliases = aliases
         self.openMode = openMode
+        self.startupProfile = startupProfile
+        self.overrideHostStartupFlows = overrideHostStartupFlows
     }
 
     static func validated(
         id: UUID = UUID(),
         name: String,
         aliases: [String],
-        openMode: SSHConnectionGroupOpenMode = .separateTabs
+        openMode: SSHConnectionGroupOpenMode = .separateTabs,
+        startupProfile: StartupFlowProfile? = nil,
+        overrideHostStartupFlows: Bool = true
     ) throws -> SSHConnectionGroup {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty else {
@@ -61,7 +69,9 @@ struct SSHConnectionGroup: Codable, Equatable, Identifiable, Sendable {
             id: id,
             name: normalizedName,
             aliases: normalizedAliases,
-            openMode: openMode
+            openMode: openMode,
+            startupProfile: startupProfile,
+            overrideHostStartupFlows: overrideHostStartupFlows
         )
     }
 
@@ -70,6 +80,8 @@ struct SSHConnectionGroup: Codable, Equatable, Identifiable, Sendable {
         case name
         case aliases
         case openMode
+        case startupProfile
+        case overrideHostStartupFlows
     }
 
     init(from decoder: Decoder) throws {
@@ -81,6 +93,14 @@ struct SSHConnectionGroup: Codable, Equatable, Identifiable, Sendable {
             SSHConnectionGroupOpenMode.self,
             forKey: .openMode
         ) ?? .separateTabs
+        startupProfile = try container.decodeIfPresent(
+            StartupFlowProfile.self,
+            forKey: .startupProfile
+        )
+        overrideHostStartupFlows = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .overrideHostStartupFlows
+        ) ?? true
     }
 }
 

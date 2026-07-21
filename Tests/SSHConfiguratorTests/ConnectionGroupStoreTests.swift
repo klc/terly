@@ -80,4 +80,50 @@ final class ConnectionGroupStoreTests: XCTestCase {
             XCTAssertEqual(error as? SSHConnectionGroupError, .emptyConnections)
         }
     }
+
+    func testSavesAndLoadsConnectionGroupWithStartupProfileAndOverrideSetting() throws {
+        let store = ConnectionGroupStore(fileURL: root.appendingPathComponent("groups.json"))
+        let startupProfile = StartupFlowProfile(
+            alias: "Prod Servers",
+            automaticallyRun: true,
+            steps: [.changeDirectory("/var/log"), .runCommand("ls -la")]
+        )
+        let groups = [
+            try SSHConnectionGroup.validated(
+                id: UUID(uuidString: "4A102E53-51F0-4C12-B09C-8DF1EC2A7DB9")!,
+                name: "Prod Servers",
+                aliases: ["prod-api", "prod-worker"],
+                openMode: .splitPanes,
+                startupProfile: startupProfile,
+                overrideHostStartupFlows: false
+            ),
+        ]
+
+        try store.save(groups)
+        let loaded = try store.load()
+
+        XCTAssertEqual(loaded.count, 1)
+        XCTAssertEqual(loaded.first?.startupProfile, startupProfile)
+        XCTAssertEqual(loaded.first?.overrideHostStartupFlows, false)
+    }
+
+    func testLegacyGroupWithoutStartupProfileDefaultsToNilProfileAndTrueOverride() throws {
+        let storeURL = root.appendingPathComponent("groups.json")
+        let store = ConnectionGroupStore(fileURL: storeURL)
+        let legacyJSON = """
+        [
+          {
+            "id": "4A102E53-51F0-4C12-B09C-8DF1EC2A7DB9",
+            "name": "Legacy Group",
+            "aliases": ["legacy-host"]
+          }
+        ]
+        """
+        try Data(legacyJSON.utf8).write(to: storeURL)
+
+        let group = try XCTUnwrap(store.load().first)
+
+        XCTAssertNil(group.startupProfile)
+        XCTAssertTrue(group.overrideHostStartupFlows)
+    }
 }
