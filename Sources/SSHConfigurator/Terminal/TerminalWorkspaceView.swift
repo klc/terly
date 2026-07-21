@@ -651,6 +651,10 @@ struct TerminalWorkspaceView: View {
                     ? Color.orange.opacity(0.20)
                     : isActive ? Color.accentColor.opacity(0.18) : Color.black.opacity(0.22)
             )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selectPane(pane.id, in: session.id)
+            }
 
             Divider()
 
@@ -743,12 +747,6 @@ struct TerminalWorkspaceView: View {
                 fileDropTargetPaneID = nil
             }
         }
-        .contentShape(Rectangle())
-        .simultaneousGesture(
-            TapGesture().onEnded {
-                selectPane(pane.id, in: session.id)
-            }
-        )
     }
 
     private func toggleRecording(_ session: TerminalSession) {
