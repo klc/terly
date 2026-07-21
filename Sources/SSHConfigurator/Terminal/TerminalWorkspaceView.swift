@@ -278,7 +278,7 @@ struct TerminalWorkspaceView: View {
             }
 
             if session.synchronizedPaneIDs.count > 1 {
-                Button("Turn off sync", systemImage: "link.badge.minus") {
+                Button("Turn off sync", systemImage: "link.slash") {
                     model.clearPaneSynchronization(in: session.id)
                 }
                 .labelStyle(.iconOnly)
