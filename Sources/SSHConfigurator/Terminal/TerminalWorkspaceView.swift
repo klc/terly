@@ -268,111 +268,117 @@ struct TerminalWorkspaceView: View {
                     .foregroundStyle(.red)
             }
 
-            if session.activePane?.startupExecution != nil {
-                Button("Run startup flow again", systemImage: "arrow.clockwise.circle") {
-                    runStartupAgain(in: session)
+            // Group 1: Actions (Startup, Sync, File Transfer, Session Recording)
+            ControlGroup {
+                if session.activePane?.startupExecution != nil {
+                    Button("Run startup flow again", systemImage: "arrow.clockwise.circle") {
+                        runStartupAgain(in: session)
+                    }
+                    .disabled(session.activePane?.status != .running || session.isStartupRunning)
+                    .help("Manually re-run the startup flow in the active terminal")
                 }
-                .labelStyle(.iconOnly)
-                .disabled(session.activePane?.status != .running || session.isStartupRunning)
-                .help("Manually re-run the startup flow in the active terminal")
-            }
 
-            if session.synchronizedPaneIDs.count > 1 {
-                Button("Turn off sync", systemImage: "xmark.circle") {
-                    model.clearPaneSynchronization(in: session.id)
+                if session.synchronizedPaneIDs.count > 1 {
+                    Button("Turn off sync", systemImage: "xmark.circle") {
+                        model.clearPaneSynchronization(in: session.id)
+                    }
+                    .help("Clear synchronized terminal selection")
                 }
-                .labelStyle(.iconOnly)
-                .help("Clear synchronized terminal selection")
-            }
 
-            if session.hostID != -1 {
-                let transferAlias = session.activePane?.alias ?? session.alias
-                Button("Transfer files", systemImage: "arrow.left.arrow.right") {
-                    onRequestTransfer(transferAlias)
+                if session.hostID != -1 {
+                    let transferAlias = session.activePane?.alias ?? session.alias
+                    Button("Transfer files", systemImage: "arrow.left.arrow.right") {
+                        onRequestTransfer(transferAlias)
+                    }
+                    .disabled(!SSHLaunchPlanBuilder.isConcreteAlias(transferAlias))
+                    .help("Open file transfer for the active pane's connection")
                 }
-                .labelStyle(.iconOnly)
-                .disabled(!SSHLaunchPlanBuilder.isConcreteAlias(transferAlias))
-                .help("Open file transfer for the active pane's connection")
-            }
 
-            Button(
-                recorder.isRecording(session.id)
-                    ? String(localized: "Stop recording")
-                    : String(localized: "Record session"),
-                systemImage: recorder.isRecording(session.id) ? "record.circle.fill" : "record.circle"
-            ) {
-                toggleRecording(session)
-            }
-            .labelStyle(.iconOnly)
-            .foregroundStyle(recorder.isRecording(session.id) ? Color.red : Color.primary)
-            .help(
-                Text(
-                    recorder.isRecording(session.id)
-                        ? String(localized: "Stop recording and reveal the recording folder in Finder")
-                        : String(localized: "Record this session's terminal output to a folder")
-                )
-            )
-
-            Button("New tab", systemImage: "plus.rectangle.on.rectangle") {
-                model.openNewTabFromActivePane(
-                    in: session.id,
-                    startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
-                )
-            }
-            .labelStyle(.iconOnly)
-            .help("Open the active terminal's connection again in a new tab")
-            .keyboardShortcut(.newTab)
-
-            Button("Split vertically", systemImage: "rectangle.split.2x1") {
-                model.splitActivePane(
-                    in: session.id,
-                    axis: .vertical,
-                    startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
-                )
-            }
-            .labelStyle(.iconOnly)
-            .help("Split the active terminal vertically; opens the same connection on the right")
-            .keyboardShortcut(.splitVertically)
-
-            Button("Split horizontally", systemImage: "rectangle.split.1x2") {
-                model.splitActivePane(
-                    in: session.id,
-                    axis: .horizontal,
-                    startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
-                )
-            }
-            .labelStyle(.iconOnly)
-            .help("Split the active terminal horizontally; opens the same connection below")
-            .keyboardShortcut(.splitHorizontally)
-
-            if session.panes.count > 1 {
-                let isZoomed = session.zoomedPaneID != nil
                 Button(
-                    // Ternary of two literals resolves to the `StringProtocol`
-                    // `Button` overload instead of `LocalizedStringKey`, which
-                    // would silently skip the catalog — `String(localized:)`
-                    // forces the lookup explicitly on both branches.
-                    isZoomed ? String(localized: "Restore panes") : String(localized: "Zoom pane"),
-                    systemImage: isZoomed ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
+                    recorder.isRecording(session.id)
+                        ? String(localized: "Stop recording")
+                        : String(localized: "Record session"),
+                    systemImage: recorder.isRecording(session.id) ? "record.circle.fill" : "record.circle"
                 ) {
-                    model.toggleZoom(in: session.id)
+                    toggleRecording(session)
                 }
-                .labelStyle(.iconOnly)
-                .help("Temporarily expand the active pane to fill the window")
-                .keyboardShortcut(.zoomPane)
-
-                Button("Close pane", systemImage: "rectangle.badge.xmark", role: .destructive) {
-                    model.closePane(session.activePaneID, in: session.id)
-                }
-                .labelStyle(.iconOnly)
-                .help("Close the active terminal pane")
-            }
-
-            Button("Close connection", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
-                model.closeTab(session.id)
+                .foregroundStyle(recorder.isRecording(session.id) ? Color.red : Color.primary)
+                .help(
+                    Text(
+                        recorder.isRecording(session.id)
+                            ? String(localized: "Stop recording and reveal the recording folder in Finder")
+                            : String(localized: "Record this session's terminal output to a folder")
+                    )
+                )
             }
             .labelStyle(.iconOnly)
-            .help("Close the terminal tab and all SSH processes")
+
+            // Group 2: Tab & Split Layout Controls (New Tab, Split Vertical, Split Horizontal, Zoom/Restore Pane)
+            ControlGroup {
+                Button("New tab", systemImage: "plus.rectangle.on.rectangle") {
+                    model.openNewTabFromActivePane(
+                        in: session.id,
+                        startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
+                    )
+                }
+                .help("Open the active terminal's connection again in a new tab")
+                .keyboardShortcut(.newTab)
+
+                Button("Split vertically", systemImage: "rectangle.split.2x1") {
+                    model.splitActivePane(
+                        in: session.id,
+                        axis: .vertical,
+                        startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
+                    )
+                }
+                .help("Split the active terminal vertically; opens the same connection on the right")
+                .keyboardShortcut(.splitVertically)
+
+                Button("Split horizontally", systemImage: "rectangle.split.1x2") {
+                    model.splitActivePane(
+                        in: session.id,
+                        axis: .horizontal,
+                        startupProfile: startupLibrary.profile(for: session.activePane?.alias ?? "")
+                    )
+                }
+                .help("Split the active terminal horizontally; opens the same connection below")
+                .keyboardShortcut(.splitHorizontally)
+
+                if session.panes.count > 1 {
+                    let isZoomed = session.zoomedPaneID != nil
+                    Button(
+                        isZoomed ? String(localized: "Restore panes") : String(localized: "Zoom pane"),
+                        systemImage: isZoomed ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
+                    ) {
+                        model.toggleZoom(in: session.id)
+                    }
+                    .help(
+                        Text(
+                            isZoomed
+                                ? String(localized: "Restore all terminal panes layout")
+                                : String(localized: "Temporarily expand the active pane to fill the window")
+                        )
+                    )
+                    .keyboardShortcut(.zoomPane)
+                }
+            }
+            .labelStyle(.iconOnly)
+
+            // Group 3: Close Controls (Close Pane, Close Connection)
+            ControlGroup {
+                if session.panes.count > 1 {
+                    Button("Close pane", systemImage: "rectangle.badge.xmark", role: .destructive) {
+                        model.closePane(session.activePaneID, in: session.id)
+                    }
+                    .help("Close the active terminal pane")
+                }
+
+                Button("Close connection", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                    model.closeTab(session.id)
+                }
+                .help("Close the terminal tab and all SSH processes")
+            }
+            .labelStyle(.iconOnly)
 
             Button {
                 showingSettingsPopover = true

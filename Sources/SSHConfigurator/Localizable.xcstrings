@@ -3028,6 +3028,9 @@
         }
       }
     },
+    "Enable group startup flow" : {
+
+    },
     "Enabled" : {
       "localizations" : {
         "tr" : {
@@ -3428,6 +3431,9 @@
           }
         }
       }
+    },
+    "Group Startup Flow" : {
+
     },
     "Group startup flows" : {
       "localizations" : {
@@ -3943,22 +3949,22 @@
         }
       }
     },
-    "Local Terminal returns to its open tab; use the new tab button for a second one." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yerel Terminal açık sekmesine döner; ikinci bir tane için yeni sekme butonunu kullan."
-          }
-        }
-      }
-    },
     "Local Terminal" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yerel Terminal"
+          }
+        }
+      }
+    },
+    "Local Terminal returns to its open tab; use the new tab button for a second one." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerel Terminal açık sekmesine döner; ikinci bir tane için yeni sekme butonunu kullan."
           }
         }
       }
@@ -4791,22 +4797,22 @@
         }
       }
     },
-    "Open the active terminal's connection again in a new tab (%@)." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Etkin terminalin bağlantısını yeni bir sekmede yeniden aç (%@)."
-          }
-        }
-      }
-    },
     "Open the active terminal's connection again in a new tab" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Etkin terminalin bağlantısını yeni bir sekmede yeniden aç"
+          }
+        }
+      }
+    },
+    "Open the active terminal's connection again in a new tab (%@)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin terminalin bağlantısını yeni bir sekmede yeniden aç (%@)."
           }
         }
       }
@@ -4958,6 +4964,9 @@
           }
         }
       }
+    },
+    "Override host startup flows" : {
+
     },
     "Overwrite" : {
       "localizations" : {
@@ -5634,6 +5643,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geri Yükle"
+          }
+        }
+      }
+    },
+    "Restore all terminal panes layout" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm terminal bölmelerinin yerleşimini geri yükle"
           }
         }
       }
@@ -8558,6 +8577,9 @@
           }
         }
       }
+    },
+    "When enabled, only the group startup flow runs. When disabled, the group startup flow runs first, followed by each host's individual startup flow." : {
+
     },
     "Wildcard host blocks require a concrete alias." : {
       "localizations" : {
