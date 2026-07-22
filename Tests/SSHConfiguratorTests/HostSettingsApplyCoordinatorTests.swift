@@ -150,8 +150,7 @@ final class HostSettingsApplyCoordinatorTests: XCTestCase {
 
     private func catalog(alias: String) -> QuickAccessCatalog {
         QuickAccessCatalog(
-            hosts: [.init(hostID: 1, alias: alias, hostName: nil, user: nil)],
-            groups: []
+            hosts: [.init(hostID: 1, alias: alias, hostName: nil, user: nil)]
         )
     }
 

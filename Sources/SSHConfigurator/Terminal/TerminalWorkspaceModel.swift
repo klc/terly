@@ -287,59 +287,6 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
 
-    @discardableResult
-    func openConnectionGroupInSplitSession(
-        groupID: UUID,
-        title: String,
-        targets: [SSHConnectionTarget],
-        hasUnsavedChanges: Bool,
-        startupProfiles: [String: StartupFlowProfile] = [:],
-        skipAllStartups: Bool = false
-    ) -> Bool {
-        var seenTargets: Set<SSHConnectionTarget> = []
-        let uniqueTargets = targets.filter { seenTargets.insert($0).inserted }
-        guard !uniqueTargets.isEmpty else {
-            errorMessage = TerminalWorkspaceError.noConnections.localizedDescription
-            return false
-        }
-
-        let aliases = uniqueTargets.map(\.alias)
-        let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        let sessionTitle = normalizedTitle.isEmpty ? aliases[0] : normalizedTitle
-        if let existingSession = sessions.first(where: {
-            $0.groupID == groupID &&
-                $0.alias == sessionTitle &&
-                $0.panes.map(\.alias) == aliases &&
-                $0.panes.allSatisfy { !Self.isExited($0.status) }
-        }) {
-            selectedSessionID = existingSession.id
-            errorMessage = nil
-            return true
-        }
-
-        guard !hasUnsavedChanges else {
-            errorMessage = TerminalWorkspaceError.unsavedChanges.localizedDescription
-            return false
-        }
-
-        do {
-            let newSession = try launchPlanBuilder.makeGroupedSession(
-                groupID: groupID,
-                title: title,
-                targets: uniqueTargets,
-                startupProfiles: startupProfiles,
-                skipAllStartups: skipAllStartups
-            )
-            sessions.removeAll { $0.groupID == groupID }
-            sessions.append(newSession)
-            selectedSessionID = newSession.id
-            errorMessage = nil
-            return true
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
-        }
-    }
 
     /// Phase B: opens a saved workspace snapshot, appending its sessions to
     /// whatever is already open — never closes, reuses, or reorders existing
@@ -433,7 +380,6 @@ final class TerminalWorkspaceModel: ObservableObject {
             var session = TerminalSession(
                 hostID: savedSession.hostID,
                 alias: savedSession.alias,
-                groupID: nil,
                 layout: layout,
                 activePaneID: activePaneID,
                 customTitle: savedSession.customTitle
@@ -781,7 +727,6 @@ final class TerminalWorkspaceModel: ObservableObject {
                 hostID: session.hostID,
                 alias: session.alias,
                 customTitle: session.customTitle,
-                groupID: session.groupID,
                 layout: session.layout.persisted,
                 activePaneID: session.activePaneID,
                 synchronizedPaneIDs: Array(session.synchronizedPaneIDs)
@@ -836,7 +781,6 @@ final class TerminalWorkspaceModel: ObservableObject {
                         id: persistedSession.id,
                         hostID: persistedSession.hostID,
                         alias: persistedSession.alias,
-                        groupID: persistedSession.groupID,
                         layout: restoredLayout,
                         activePaneID: persistedSession.activePaneID,
                         customTitle: persistedSession.customTitle

@@ -44,7 +44,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
             id: UUID(),
             hostID: 10,
             alias: "prod-session",
-            groupID: UUID(),
             layout: splitLayout,
             activePaneID: pane.id,
             synchronizedPaneIDs: [pane.id]
@@ -164,12 +163,10 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
         
         let paneID = UUID()
         let sessionID = UUID()
-        let groupID = UUID()
         let persistedSession = PersistedSession(
             id: sessionID,
             hostID: 5,
             alias: "stage",
-            groupID: groupID,
             layout: .pane(PersistedPane(id: paneID, alias: "stage")),
             activePaneID: paneID,
             synchronizedPaneIDs: [paneID]
@@ -198,7 +195,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
         let restoredSession = model.sessions[0]
         XCTAssertEqual(restoredSession.alias, "stage")
         XCTAssertEqual(restoredSession.hostID, 5)
-        XCTAssertEqual(restoredSession.groupID, groupID)
         XCTAssertEqual(restoredSession.activePaneID, paneID)
         XCTAssertEqual(restoredSession.synchronizedPaneIDs, [paneID])
         XCTAssertEqual(restoredSession.panes.count, 1)
@@ -216,7 +212,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
             id: sessionID1,
             hostID: 5,
             alias: "stage",
-            groupID: nil,
             layout: .pane(PersistedPane(id: paneID1, alias: "stage")),
             activePaneID: paneID1,
             synchronizedPaneIDs: [paneID1]
@@ -228,7 +223,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
             id: sessionID2,
             hostID: 6,
             alias: "invalid-host",
-            groupID: nil,
             layout: .pane(PersistedPane(id: paneID2, alias: "invalid-host")),
             activePaneID: paneID2,
             synchronizedPaneIDs: [paneID2]
@@ -240,7 +234,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
             id: sessionID3,
             hostID: -1,
             alias: "Yerel Terminal",
-            groupID: nil,
             layout: .pane(PersistedPane(id: paneID3, alias: "Yerel Terminal")),
             activePaneID: paneID3,
             synchronizedPaneIDs: [paneID3]
@@ -368,7 +361,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
             id: sessionID,
             hostID: 5,
             alias: "stage",
-            groupID: nil,
             layout: .pane(PersistedPane(id: paneID, alias: "stage", startupOverride: .command("htop"))),
             activePaneID: paneID,
             synchronizedPaneIDs: []
@@ -403,7 +395,6 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
             id: sessionID,
             hostID: 5,
             alias: "stage",
-            groupID: nil,
             layout: .pane(PersistedPane(id: paneID, alias: "stage", startupOverride: .command("htop"))),
             activePaneID: paneID,
             synchronizedPaneIDs: []

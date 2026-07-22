@@ -5,8 +5,9 @@ import Foundation
 /// override-wins-over-alias-profile resolution (see
 /// `PaneStartupOverride.effectiveProfile`) without constructing any panes.
 ///
-/// Deliberately narrower than the connection-group preview: it emits one item
-/// per pane whose effective profile will actually auto-run at least one step
+/// Deliberately narrower than the plain-connections preview built in
+/// `ContentView.requestStartupLaunch`: it emits one item per pane whose
+/// effective profile will actually auto-run at least one step
 /// — not one item per pane in the workspace. `.suppressed` panes, panes whose
 /// resolved profile is `nil` or has no steps, and local-terminal panes (which
 /// never run a startup profile regardless of any override — see `makePane`)

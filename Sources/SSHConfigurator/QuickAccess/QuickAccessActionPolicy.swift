@@ -9,7 +9,6 @@ enum QuickAccessAction: String, CaseIterable, Equatable, Sendable {
 
 enum QuickAccessRouteTarget: Equatable, Sendable {
     case host(hostID: Int, alias: String)
-    case group(id: UUID)
 }
 
 struct QuickAccessRoute: Equatable, Sendable {
@@ -23,7 +22,9 @@ enum QuickAccessActionPolicy {
         case .host:
             return [.connect, .settings, .transfer, .diagnostics]
         case .group:
-            return [.connect, .settings]
+            // Decode-compat only: no catalog/entry-building path produces a
+            // `.group`-kind entry anymore (connection groups were removed).
+            return []
         }
     }
 
@@ -37,8 +38,7 @@ enum QuickAccessActionPolicy {
             guard let hostID = entry.hostID, let alias = entry.alias else { return nil }
             return QuickAccessRoute(action: action, target: .host(hostID: hostID, alias: alias))
         case .group:
-            guard let groupID = entry.groupID else { return nil }
-            return QuickAccessRoute(action: action, target: .group(id: groupID))
+            return nil
         }
     }
 }

@@ -64,22 +64,18 @@ final class ConfigViewModel: ObservableObject {
     @Published private(set) var backups: [SSHConfigBackup] = []
     @Published private(set) var previewedBackup: SSHConfigBackup?
     @Published private(set) var previewedBackupSource: String?
-    @Published private(set) var connectionGroups: [SSHConnectionGroup] = []
     @Published var selectedItem: ConfigNavigationItem?
 
     let configURL: URL
     private let store: SSHConfigFileStore
-    private let connectionGroupStore: ConnectionGroupStore
     private let validator = SSHConfigValidator()
 
     init(
         configURL: URL = SSHConfigFileStore.defaultConfigURL,
-        store: SSHConfigFileStore = SSHConfigFileStore(),
-        connectionGroupStore: ConnectionGroupStore = ConnectionGroupStore()
+        store: SSHConfigFileStore = SSHConfigFileStore()
     ) {
         self.configURL = configURL
         self.store = store
-        self.connectionGroupStore = connectionGroupStore
     }
 
     var hosts: [SSHHostBlock] { document?.hostBlocks ?? [] }
@@ -117,25 +113,17 @@ final class ConfigViewModel: ObservableObject {
         do {
             let loadedSnapshot = try store.snapshot(at: configURL)
             let loadedDocument = SSHConfigDocument(source: loadedSnapshot.source)
-            var connectionGroupLoadError: Error?
-            do {
-                connectionGroups = try connectionGroupStore.load()
-            } catch {
-                connectionGroups = []
-                connectionGroupLoadError = error
-            }
             snapshot = loadedSnapshot
             document = loadedDocument
             selectedItem = loadedDocument.hostBlocks.first.map { .host($0.id) } ?? .global
             refreshBackups()
             statusMessage = loadedSnapshot.exists ? String(localized: "Config loaded.") : String(localized: "Config file not found yet; you can create a new one.")
-            errorMessage = connectionGroupLoadError?.localizedDescription
+            errorMessage = nil
         } catch {
             document = nil
             snapshot = nil
             selectedItem = nil
             backups = []
-            connectionGroups = []
             previewedBackup = nil
             previewedBackupSource = nil
             errorMessage = error.localizedDescription
@@ -293,73 +281,6 @@ final class ConfigViewModel: ObservableObject {
         self.document = document.removingDirective(atLine: include.line)
         selectedItem = .includes
         persistWorkingCopy(successMessage: String(localized: "Include line removed and saved."))
-    }
-
-    @discardableResult
-    func saveConnectionGroup(
-        id: UUID?,
-        name: String,
-        aliases: [String],
-        openMode: SSHConnectionGroupOpenMode,
-        startupProfile: StartupFlowProfile? = nil,
-        overrideHostStartupFlows: Bool = true
-    ) -> Bool {
-        do {
-            let group = try SSHConnectionGroup.validated(
-                id: id ?? UUID(),
-                name: name,
-                aliases: aliases,
-                openMode: openMode,
-                startupProfile: startupProfile,
-                overrideHostStartupFlows: overrideHostStartupFlows
-            )
-            var updatedGroups = connectionGroups
-            if let index = updatedGroups.firstIndex(where: { $0.id == group.id }) {
-                updatedGroups[index] = group
-            } else {
-                updatedGroups.append(group)
-            }
-
-            try connectionGroupStore.save(updatedGroups)
-            connectionGroups = updatedGroups
-            statusMessage = id == nil ? String(localized: "Connection group created.") : String(localized: "Connection group updated.")
-            errorMessage = nil
-            return true
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
-        }
-    }
-
-    @discardableResult
-    func deleteConnectionGroup(_ group: SSHConnectionGroup) -> Bool {
-        do {
-            let updatedGroups = connectionGroups.filter { $0.id != group.id }
-            try connectionGroupStore.save(updatedGroups)
-            connectionGroups = updatedGroups
-            statusMessage = String(localized: "Connection group deleted.")
-            errorMessage = nil
-            return true
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
-        }
-    }
-
-    func connections(in group: SSHConnectionGroup) -> [SSHConnectionTarget]? {
-        let connectionsByAlias = Dictionary(
-            uniqueKeysWithValues: availableConnections.map { ($0.alias, $0) }
-        )
-        let missingAliases = group.aliases.filter { connectionsByAlias[$0] == nil }
-        guard missingAliases.isEmpty else {
-            errorMessage = SSHConnectionGroupError
-                .missingConnections(missingAliases)
-                .localizedDescription
-            return nil
-        }
-
-        errorMessage = nil
-        return group.aliases.compactMap { connectionsByAlias[$0] }
     }
 
     func refreshBackups() {

@@ -332,8 +332,7 @@ final class ConfigViewModelIdentityFileTests: XCTestCase {
 
         let model = ConfigViewModel(
             configURL: configURL,
-            store: SSHConfigFileStore(backupDirectory: directory.appendingPathComponent("backups")),
-            connectionGroupStore: ConnectionGroupStore(fileURL: directory.appendingPathComponent("groups.json"))
+            store: SSHConfigFileStore(backupDirectory: directory.appendingPathComponent("backups"))
         )
         model.load()
 

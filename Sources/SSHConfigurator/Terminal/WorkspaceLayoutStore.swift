@@ -101,7 +101,6 @@ struct PersistedSession: Codable, Equatable {
     let hostID: Int
     let alias: String
     let customTitle: String?
-    let groupID: UUID?
     let layout: PersistedPaneLayout
     let activePaneID: UUID
     let synchronizedPaneIDs: [UUID]
@@ -111,7 +110,6 @@ struct PersistedSession: Codable, Equatable {
         hostID: Int,
         alias: String,
         customTitle: String? = nil,
-        groupID: UUID?,
         layout: PersistedPaneLayout,
         activePaneID: UUID,
         synchronizedPaneIDs: [UUID]
@@ -120,14 +118,17 @@ struct PersistedSession: Codable, Equatable {
         self.hostID = hostID
         self.alias = alias
         self.customTitle = customTitle
-        self.groupID = groupID
         self.layout = layout
         self.activePaneID = activePaneID
         self.synchronizedPaneIDs = synchronizedPaneIDs
     }
 
+    // The removed connection-group session field is deliberately absent from
+    // `CodingKeys`: a pre-Phase-D workspace-layout.json may still carry that
+    // key per session, and `JSONDecoder` silently ignores unrecognized keys,
+    // so old files keep decoding without a migration step.
     private enum CodingKeys: String, CodingKey {
-        case id, hostID, alias, customTitle, groupID, layout, activePaneID, synchronizedPaneIDs
+        case id, hostID, alias, customTitle, layout, activePaneID, synchronizedPaneIDs
     }
 
     init(from decoder: Decoder) throws {
@@ -136,7 +137,6 @@ struct PersistedSession: Codable, Equatable {
         hostID = try container.decode(Int.self, forKey: .hostID)
         alias = try container.decode(String.self, forKey: .alias)
         customTitle = try container.decodeIfPresent(String.self, forKey: .customTitle)
-        groupID = try container.decodeIfPresent(UUID.self, forKey: .groupID)
         layout = try container.decode(PersistedPaneLayout.self, forKey: .layout)
         activePaneID = try container.decode(UUID.self, forKey: .activePaneID)
         synchronizedPaneIDs = try container.decodeIfPresent([UUID].self, forKey: .synchronizedPaneIDs) ?? []

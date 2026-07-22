@@ -142,9 +142,8 @@ struct SavedWorkspace: Codable, Equatable, Identifiable, Sendable {
     /// Pure mapping of the live `sessions` into a named snapshot. Captures
     /// every pane — including exited ones, which simply reopen fresh — along
     /// with each pane's `startupOverride` and each session's `customTitle`.
-    /// Deliberately drops `hostID`'s companion `groupID` (grouped-session
-    /// membership isn't captured) and `zoomedPaneID` (never persisted
-    /// anywhere, session-local UI state only).
+    /// Deliberately drops `zoomedPaneID` (never persisted anywhere,
+    /// session-local UI state only).
     static func capture(
         name: String,
         from sessions: [TerminalSession],

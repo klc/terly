@@ -3,7 +3,6 @@ import SwiftUI
 struct RunbookListView: View {
     @ObservedObject var library: RunbookLibrary
     let availableConnections: [SSHConnectionTarget]
-    let connectionGroups: [SSHConnectionGroup]
 
     @State private var editingRunbook: Runbook?
     @State private var runningRunbook: Runbook?
@@ -82,7 +81,6 @@ struct RunbookListView: View {
             RunbookRunSheet(
                 runbook: runbook,
                 availableConnections: availableConnections,
-                connectionGroups: connectionGroups,
                 onClose: { runningRunbook = nil }
             )
         }

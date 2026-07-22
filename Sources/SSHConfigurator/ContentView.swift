@@ -23,7 +23,6 @@ struct ContentView: View {
     @State private var showingDeleteConfirmation = false
     @State private var collapsedHostGroupIDs: Set<String> = []
     @State private var editingHostSelection: HostSettingsSelection?
-    @State private var connectionGroupEditorSelection: ConnectionGroupEditorSelection?
     @State private var workspaceEditorSelection: WorkspaceEditorSelection?
     @State private var skippedWorkspaceAliasesMessage: String?
     @State private var transferSelection: SCPTransferSelection?
@@ -47,14 +46,11 @@ struct ContentView: View {
             savedWorkspaces: savedWorkspaces,
             expansionBinding: expansionBinding,
             onConnectHost: connect,
-            onConnectGroup: connect,
             onDuplicateHost: model.duplicateHost,
             onDiagnoseHost: { showDiagnostics(for: $0) },
             onTransferHost: { showTransfer(for: $0) },
             onKeySetupHost: { showKeySetup(for: $0) },
             onShowHostSettings: { showSettings(for: $0) },
-            onShowGroupSettings: { showSettings(for: $0) },
-            onNewConnectionGroup: showNewConnectionGroupEditor,
             onNewHost: {
                 model.addHost()
                 if let host = model.selectedHost {
@@ -240,29 +236,6 @@ struct ContentView: View {
             .sheet(item: $editingHostSelection, onDismiss: discardUnsavedWorkingCopy) { selection in
                 hostSettingsSheet(for: selection)
             }
-            .sheet(item: $connectionGroupEditorSelection) { selection in
-                ConnectionGroupEditorSheet(
-                    group: selection.groupID.flatMap { groupID in
-                        model.connectionGroups.first { $0.id == groupID }
-                    },
-                    connections: model.availableConnections,
-                    onSave: { name, aliases, openMode, startupProfile, overrideHostStartupFlows in
-                        model.saveConnectionGroup(
-                            id: selection.groupID,
-                            name: name,
-                            aliases: aliases,
-                            openMode: openMode,
-                            startupProfile: startupProfile,
-                            overrideHostStartupFlows: overrideHostStartupFlows
-                        )
-                    },
-                    onDelete: selection.groupID.flatMap { groupID in
-                        model.connectionGroups.first { $0.id == groupID }
-                    }.map { group in
-                        { model.deleteConnectionGroup(group) }
-                    }
-                )
-            }
             .sheet(item: $workspaceEditorSelection) { selection in
                 WorkspaceEditSheet(
                     workspace: selection.seed,
@@ -408,9 +381,7 @@ struct ContentView: View {
                 startupProfiles[target.alias] = profile
             }
         }
-        let hostAliases: [String] = model.availableConnections.map(\.alias)
-        let groupNames: [String] = model.connectionGroups.map(\.name)
-        let validAliases = Set(hostAliases + groupNames)
+        let validAliases = Set(model.availableConnections.map(\.alias))
         terminalWorkspace.restoreWorkspace(startupProfiles: startupProfiles, validAliases: validAliases)
 
         if terminalWorkspace.sessions.isEmpty {
@@ -552,11 +523,6 @@ struct ContentView: View {
         }
     }
 
-    private func connect(_ group: SSHConnectionGroup) {
-        guard let connections = model.connections(in: group) else { return }
-        requestStartupLaunch(for: .group(group, connections))
-    }
-
     private func connect(_ workspace: SavedWorkspace) {
         requestStartupLaunch(for: .savedWorkspace(workspace))
     }
@@ -564,7 +530,7 @@ struct ContentView: View {
     private func requestStartupLaunch(for destination: StartupLaunchRequest.Destination) {
         // Saved workspaces build pane-level (not connection-level) preview
         // items — one per pane whose effective profile will actually
-        // auto-run — which is a different shape than the connections/group
+        // auto-run — which is a different shape than the connections
         // items built below, so it's handled as its own early branch.
         if case let .savedWorkspace(workspace) = destination {
             let aliasProfiles = workspaceStartupProfiles(for: workspace)
@@ -589,9 +555,6 @@ struct ContentView: View {
         case let .connections(targets):
             connections = targets
             profiles = startupProfiles(for: connections)
-        case let .group(group, targets):
-            connections = targets
-            profiles = startupProfiles(for: group, connections: targets)
         case .savedWorkspace:
             return // handled above
         }
@@ -616,43 +579,6 @@ struct ContentView: View {
         startupLaunchRequest = StartupLaunchRequest(destination: destination, items: items)
     }
 
-    private func open(
-        group: SSHConnectionGroup,
-        connections: [SSHConnectionTarget],
-        skipAllStartups: Bool
-    ) {
-        let previousSelection = model.selectedItem
-        let didOpen: Bool
-        let profiles = startupProfiles(for: group, connections: connections)
-        switch group.openMode {
-        case .separateTabs:
-            didOpen = terminalWorkspace.openConnections(
-                connections,
-                hasUnsavedChanges: model.hasChanges,
-                startupProfiles: profiles,
-                skipAllStartups: skipAllStartups
-            )
-        case .splitPanes:
-            didOpen = terminalWorkspace.openConnectionGroupInSplitSession(
-                groupID: group.id,
-                title: group.name,
-                targets: connections,
-                hasUnsavedChanges: model.hasChanges,
-                startupProfiles: profiles,
-                skipAllStartups: skipAllStartups
-            )
-        }
-        if didOpen, let lastConnection = connections.last {
-            _ = quickAccess.markUsed(
-                hostAliases: connections.map(\.alias),
-                groupID: group.id
-            )
-            model.selectedItem = .host(lastConnection.hostID)
-        } else {
-            model.selectedItem = previousSelection
-        }
-    }
-
     private func executeStartupLaunch(
         _ request: StartupLaunchRequest,
         skipAllStartups: Bool
@@ -660,21 +586,14 @@ struct ContentView: View {
         switch request.destination {
         case let .connections(connections):
             openConnections(connections, skipAllStartups: skipAllStartups)
-        case let .group(group, connections):
-            open(
-                group: group,
-                connections: connections,
-                skipAllStartups: skipAllStartups
-            )
         case let .savedWorkspace(workspace):
             open(savedWorkspace: workspace, skipAllStartups: skipAllStartups)
         }
     }
 
     /// Opens a saved workspace, appending its sessions to whatever's already
-    /// open. `validAliases` deliberately excludes connection-group names —
-    /// `SavedWorkspace.capture` never records a group membership, so a saved
-    /// pane's alias is always either a concrete host alias or the
+    /// open. `validAliases` is built from `model.availableConnections`, so a
+    /// saved pane's alias is always either a concrete host alias or the
     /// local-terminal alias (which `openSavedWorkspace` always treats as
     /// valid regardless of this set).
     private func open(savedWorkspace workspace: SavedWorkspace, skipAllStartups: Bool) {
@@ -738,41 +657,6 @@ struct ContentView: View {
         Dictionary(uniqueKeysWithValues: connections.compactMap { connection in
             startupFlows.profile(for: connection.alias).map { (connection.alias, $0) }
         })
-    }
-
-    private func startupProfiles(
-        for group: SSHConnectionGroup,
-        connections: [SSHConnectionTarget]
-    ) -> [String: StartupFlowProfile] {
-        guard let groupProfile = group.startupProfile, !groupProfile.steps.isEmpty else {
-            return startupProfiles(for: connections)
-        }
-
-        var result: [String: StartupFlowProfile] = [:]
-        for connection in connections {
-            let hostProfile = startupFlows.profile(for: connection.alias)
-            if group.overrideHostStartupFlows || hostProfile == nil {
-                var profile = groupProfile
-                profile.alias = connection.alias
-                result[connection.alias] = profile
-            } else if let hostProfile {
-                var combinedSteps = groupProfile.steps
-                let groupHasUserChange = groupProfile.steps.contains { $0.kind == .changeUser }
-                let hostSteps = hostProfile.steps.filter { step in
-                    !(groupHasUserChange && step.kind == .changeUser)
-                }
-                combinedSteps.append(contentsOf: hostSteps)
-
-                let combinedProfile = StartupFlowProfile(
-                    id: groupProfile.id,
-                    alias: connection.alias,
-                    automaticallyRun: groupProfile.automaticallyRun || hostProfile.automaticallyRun,
-                    steps: combinedSteps
-                )
-                result[connection.alias] = combinedProfile
-            }
-        }
-        return result
     }
 
     private func applyHostSettings(
@@ -850,7 +734,7 @@ struct ContentView: View {
     }
 
     private var quickAccessCatalog: QuickAccessCatalog {
-        QuickAccessCatalog(document: model.document, groups: model.connectionGroups)
+        QuickAccessCatalog(document: model.document)
     }
 
     private var quickAccessEntries: [QuickAccessEntry] {
@@ -873,18 +757,6 @@ struct ContentView: View {
             case .diagnostics:
                 showDiagnostics(for: host)
             }
-        case let .group(groupID):
-            guard let group = model.connectionGroups.first(where: { $0.id == groupID }) else {
-                return
-            }
-            switch route.action {
-            case .connect:
-                connect(group)
-            case .settings:
-                showSettings(for: group)
-            case .transfer, .diagnostics:
-                break
-            }
         }
     }
 
@@ -904,20 +776,6 @@ struct ContentView: View {
     private func discardUnsavedWorkingCopy() {
         guard model.hasChanges else { return }
         model.restoreSnapshot()
-    }
-
-    private func showSettings(for group: SSHConnectionGroup) {
-        connectionGroupEditorSelection = ConnectionGroupEditorSelection(
-            id: group.id,
-            groupID: group.id
-        )
-    }
-
-    private func showNewConnectionGroupEditor() {
-        connectionGroupEditorSelection = ConnectionGroupEditorSelection(
-            id: UUID(),
-            groupID: nil
-        )
     }
 
     private var canSaveCurrentScreenAsWorkspace: Bool {
@@ -965,14 +823,11 @@ private struct ContentSidebarView: View {
     @ObservedObject var savedWorkspaces: SavedWorkspaceLibrary
     let expansionBinding: (SSHConfigHostGroup) -> Binding<Bool>
     let onConnectHost: (SSHHostBlock) -> Void
-    let onConnectGroup: (SSHConnectionGroup) -> Void
     let onDuplicateHost: (SSHHostBlock) -> Void
     let onDiagnoseHost: (SSHHostBlock) -> Void
     let onTransferHost: (SSHHostBlock) -> Void
     let onKeySetupHost: (SSHHostBlock) -> Void
     let onShowHostSettings: (SSHHostBlock) -> Void
-    let onShowGroupSettings: (SSHConnectionGroup) -> Void
-    let onNewConnectionGroup: () -> Void
     let onNewHost: () -> Void
     let onDeleteHost: (SSHHostBlock) -> Void
     let onOpenLocalTerminal: () -> Void
@@ -1099,44 +954,6 @@ private struct ContentSidebarView: View {
                     .help("Save the current tabs and panes as a workspace")
                     .accessibilityLabel("Save the current tabs and panes as a workspace")
                     .disabled(!canSaveWorkspace)
-                    .padding(.trailing, 4)
-                }
-            }
-
-            Section {
-                if model.connectionGroups.isEmpty {
-                    Button {
-                        onNewConnectionGroup()
-                    } label: {
-                        Label("Create your first group", systemImage: "folder.badge.plus")
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    ForEach(model.connectionGroups) { group in
-                        ConnectionGroupRow(
-                            group: group,
-                            onConnect: { onConnectGroup(group) },
-                            onShowSettings: { onShowGroupSettings(group) }
-                        )
-                    }
-                }
-            } header: {
-                HStack {
-                    Text("Connection groups")
-                    Spacer()
-                    Button {
-                        onNewConnectionGroup()
-                    } label: {
-                        Image(systemName: "folder.badge.plus")
-                            .font(.caption)
-                            .frame(width: 20, height: 20)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.borderless)
-                    .foregroundStyle(.secondary)
-                    .help("Create new connection group")
-                    .accessibilityLabel("Create new connection group")
-                    .disabled(model.availableConnections.isEmpty)
                     .padding(.trailing, 4)
                 }
             }
@@ -1346,8 +1163,7 @@ private struct ContentDetailView: View {
         } else if model.selectedItem == .runbooks {
             RunbookListView(
                 library: runbooks,
-                availableConnections: model.availableConnections,
-                connectionGroups: model.connectionGroups
+                availableConnections: model.availableConnections
             )
         } else {
             ConfigPreviewView(source: document.source)
@@ -1358,11 +1174,6 @@ private struct ContentDetailView: View {
 
 private struct HostSettingsSelection: Identifiable {
     let id: Int
-}
-
-private struct ConnectionGroupEditorSelection: Identifiable {
-    let id: UUID
-    let groupID: UUID?
 }
 
 private struct WorkspaceEditorSelection: Identifiable {
@@ -1453,45 +1264,12 @@ private struct KeySetupSelection: Identifiable {
 private struct StartupLaunchRequest: Identifiable {
     enum Destination {
         case connections([SSHConnectionTarget])
-        case group(SSHConnectionGroup, [SSHConnectionTarget])
         case savedWorkspace(SavedWorkspace)
     }
 
     let id = UUID()
     let destination: Destination
     let items: [StartupFlowLaunchPreviewItem]
-}
-
-private struct ConnectionGroupRow: View {
-    let group: SSHConnectionGroup
-    let onConnect: () -> Void
-    let onShowSettings: () -> Void
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Button(action: onConnect) {
-                HStack(spacing: 8) {
-                    Label(group.name, systemImage: "folder.fill")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("\(group.aliases.count)")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    Image(systemName: "play.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .help("Open all SSH connections in the group")
-            .accessibilityLabel("Open \(group.aliases.count) SSH connections in \(group.name)")
-        }
-        .padding(.vertical, 2)
-        .contextMenu {
-            Button("Connect", systemImage: "play", action: onConnect)
-            Button("Open settings", systemImage: "gearshape", action: onShowSettings)
-        }
-    }
 }
 
 private struct SavedWorkspaceRow: View {
@@ -1650,205 +1428,6 @@ private struct HostGroupDisclosure: View {
 
     private func hostCount(in group: SSHConfigHostGroup) -> Int {
         group.hosts.count + group.children.reduce(0) { $0 + hostCount(in: $1) }
-    }
-}
-
-private struct ConnectionGroupEditorSheet: View {
-    let group: SSHConnectionGroup?
-    let connections: [SSHConnectionTarget]
-    let onSave: (String, [String], SSHConnectionGroupOpenMode, StartupFlowProfile?, Bool) -> Bool
-    let onDelete: (() -> Bool)?
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var name: String
-    @State private var selectedAliases: Set<String>
-    @State private var openMode: SSHConnectionGroupOpenMode
-    @State private var startupProfile: StartupFlowProfile?
-    @State private var overrideHostStartupFlows: Bool
-    @State private var showingDeleteConfirmation = false
-
-    init(
-        group: SSHConnectionGroup?,
-        connections: [SSHConnectionTarget],
-        onSave: @escaping (String, [String], SSHConnectionGroupOpenMode, StartupFlowProfile?, Bool) -> Bool,
-        onDelete: (() -> Bool)?
-    ) {
-        self.group = group
-        self.connections = connections
-        self.onSave = onSave
-        self.onDelete = onDelete
-        _name = State(initialValue: group?.name ?? "")
-        _selectedAliases = State(initialValue: Set(group?.aliases ?? []))
-        _openMode = State(initialValue: group?.openMode ?? .separateTabs)
-        _startupProfile = State(initialValue: group?.startupProfile)
-        _overrideHostStartupFlows = State(initialValue: group?.overrideHostStartupFlows ?? true)
-    }
-
-    private var availableAliases: Set<String> {
-        Set(connections.map(\.alias))
-    }
-
-    private var unavailableAliases: [String] {
-        selectedAliases
-            .subtracting(availableAliases)
-            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
-    }
-
-    private var canSave: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-            !selectedAliases.isEmpty &&
-            unavailableAliases.isEmpty
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            SheetHeader(
-                systemImage: group == nil ? "folder.badge.plus" : "folder.fill",
-                title: group == nil ? String(localized: "Create connection group") : String(localized: "Edit connection group"),
-                subtitle: Text("Opening the group starts all selected connections together.").font(.caption),
-                onClose: { dismiss() }
-            )
-
-            Divider()
-
-            Form {
-                Section("Group") {
-                    TextField("Group name", text: $name, prompt: Text("Prod Servers"))
-                        .editorFieldStyle()
-                }
-
-                Section("Window layout") {
-                    Picker("Open connections", selection: $openMode) {
-                        ForEach(SSHConnectionGroupOpenMode.allCases, id: \.self) { mode in
-                            Text(mode.label).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.radioGroup)
-
-                    Text(
-                        openMode == .separateTabs
-                            ? String(localized: "Each connection opens in its own terminal tab.")
-                            : String(localized: "All connections open in one tab, carrying the group name, in separate panes.")
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                }
-
-                Section("Group Startup Flow") {
-                    Toggle("Enable group startup flow", isOn: Binding(
-                        get: { startupProfile != nil },
-                        set: { isEnabled in
-                            if isEnabled {
-                                let profileAlias = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Group" : name
-                                startupProfile = StartupFlowProfile(alias: profileAlias, automaticallyRun: true)
-                            } else {
-                                startupProfile = nil
-                            }
-                        }
-                    ))
-
-                    if startupProfile != nil {
-                        Toggle("Override host startup flows", isOn: $overrideHostStartupFlows)
-                            .help("When enabled, only the group startup flow runs. When disabled, the group startup flow runs first, followed by each host's individual startup flow.")
-                    }
-                }
-
-                if startupProfile != nil {
-                    StartupFlowOptionalEditorView(profile: $startupProfile)
-                }
-
-                Section("Connections") {
-                    if connections.isEmpty {
-                        Text("No concrete SSH alias found to add to the group.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(connections) { connection in
-                            Toggle(
-                                connection.alias,
-                                isOn: selectionBinding(for: connection.alias)
-                            )
-                        }
-                    }
-                }
-
-                if !unavailableAliases.isEmpty {
-                    Section("Not found in config") {
-                        ForEach(unavailableAliases, id: \.self) { alias in
-                            HStack {
-                                Label(alias, systemImage: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
-                                Spacer()
-                                Button("Remove") {
-                                    selectedAliases.remove(alias)
-                                }
-                            }
-                        }
-                        Text("Remove connections that no longer exist to save the group.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .formStyle(.grouped)
-
-            Divider()
-
-            HStack {
-                if onDelete != nil {
-                    Button("Delete Group", role: .destructive) {
-                        showingDeleteConfirmation = true
-                    }
-                }
-
-                Text("\(selectedAliases.count) connections selected")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                Button("Cancel") {
-                    dismiss()
-                }
-                Button(group == nil ? "Create Group" : "Save Changes") {
-                    let aliases = connections
-                        .map(\.alias)
-                        .filter(selectedAliases.contains)
-                    if onSave(name, aliases, openMode, startupProfile, overrideHostStartupFlows) {
-                        dismiss()
-                    }
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(!canSave)
-            }
-            .padding()
-        }
-        .frame(minWidth: 560, minHeight: 560)
-        .confirmationDialog(
-            "Delete the connection group?",
-            isPresented: $showingDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Delete Group", role: .destructive) {
-                if onDelete?() == true {
-                    dismiss()
-                }
-            }
-        } message: {
-            Text("SSH connections and the config file are unchanged; only this group is deleted.")
-        }
-    }
-
-    private func selectionBinding(for alias: String) -> Binding<Bool> {
-        Binding(
-            get: { selectedAliases.contains(alias) },
-            set: { isSelected in
-                if isSelected {
-                    selectedAliases.insert(alias)
-                } else {
-                    selectedAliases.remove(alias)
-                }
-            }
-        )
     }
 }
 

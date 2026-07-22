@@ -4,8 +4,7 @@ import XCTest
 @testable import SSHConfigurator
 
 final class QuickAccessTests: XCTestCase {
-    func testCatalogIndexesConcreteAliasHostNameUserAndGroupButExcludesPatterns() throws {
-        let groupID = UUID()
+    func testCatalogIndexesConcreteAliasHostNameAndUserButExcludesPatterns() throws {
         let document = SSHConfigDocument(source: """
         Host *.example.com !blocked prod-api
           HostName 10.20.30.40
@@ -17,13 +16,8 @@ final class QuickAccessTests: XCTestCase {
         Host !negative-only
           HostName hidden.example.com
         """)
-        let group = SSHConnectionGroup(
-            id: groupID,
-            name: "Production Servers",
-            aliases: ["prod-api"]
-        )
 
-        let catalog = QuickAccessCatalog(document: document, groups: [group])
+        let catalog = QuickAccessCatalog(document: document)
 
         XCTAssertEqual(catalog.hosts, [
             QuickAccessHostDescriptor(
@@ -35,18 +29,16 @@ final class QuickAccessTests: XCTestCase {
         ])
         XCTAssertFalse(catalog.hostAliases.contains("*.example.com"))
         XCTAssertFalse(catalog.hostAliases.contains("!blocked"))
-        XCTAssertEqual(catalog.groups.first?.id, groupID)
-        XCTAssertEqual(catalog.groups.first?.name, "Production Servers")
     }
 
-    func testFuzzySearchMatchesAliasHostNameUserAndGroupName() {
+    func testFuzzySearchMatchesAliasHostNameAndUser() {
         let host = makeHostEntry(
             alias: "prod-api-eu",
             hostName: "api.eu.example.com",
             user: "deployer"
         )
-        let group = makeGroupEntry(name: "Production Servers")
-        let entries = [host, group]
+        let otherHost = makeHostEntry(alias: "stage-worker", hostID: 2)
+        let entries = [host, otherHost]
 
         XCTAssertEqual(
             QuickAccessSearchEngine.search(query: "prdapi", entries: entries).first?.entry.id,
@@ -61,8 +53,8 @@ final class QuickAccessTests: XCTestCase {
             host.id
         )
         XCTAssertEqual(
-            QuickAccessSearchEngine.search(query: "prd srv", entries: entries).first?.entry.id,
-            group.id
+            QuickAccessSearchEngine.search(query: "stgwrkr", entries: entries).first?.entry.id,
+            otherHost.id
         )
     }
 
@@ -100,10 +92,8 @@ final class QuickAccessTests: XCTestCase {
         XCTAssertLessThanOrEqual(results.count, 80)
     }
 
-    func testActionPolicyRoutesHostActionsAndRestrictsGroupActions() throws {
+    func testActionPolicyRoutesHostActionsAndBlocksDeprecatedGroupKind() throws {
         let host = makeHostEntry(alias: "prod-api", hostID: 42)
-        let groupID = UUID()
-        let group = makeGroupEntry(id: groupID, name: "Prod")
 
         XCTAssertEqual(
             QuickAccessActionPolicy.availableActions(for: host),
@@ -116,15 +106,23 @@ final class QuickAccessTests: XCTestCase {
                 target: .host(hostID: 42, alias: "prod-api")
             )
         )
-        XCTAssertEqual(
-            QuickAccessActionPolicy.availableActions(for: group),
-            [.connect, .settings]
+
+        // `.group`-kind entries only exist as decode-compat leftovers now —
+        // no catalog/entry-building path constructs one — so the policy
+        // must never route anything for them.
+        let deprecatedGroupEntry = QuickAccessEntry(
+            id: UUID(),
+            kind: .group,
+            hostID: nil,
+            alias: nil,
+            title: "Legacy Group",
+            subtitle: nil,
+            searchFields: [],
+            isFavorite: false,
+            lastUsedAt: nil
         )
-        XCTAssertEqual(
-            QuickAccessActionPolicy.route(action: .connect, entry: group),
-            QuickAccessRoute(action: .connect, target: .group(id: groupID))
-        )
-        XCTAssertNil(QuickAccessActionPolicy.route(action: .transfer, entry: group))
+        XCTAssertTrue(QuickAccessActionPolicy.availableActions(for: deprecatedGroupEntry).isEmpty)
+        XCTAssertNil(QuickAccessActionPolicy.route(action: .connect, entry: deprecatedGroupEntry))
     }
 
     func testKeyboardPolicyCoversCommandKNavigationEnterAndEscapeWithoutConflict() {
@@ -243,32 +241,55 @@ final class QuickAccessTests: XCTestCase {
         XCTAssertNotEqual(refreshed.first?.id, oldID, "Dış rename güvenli biçimde tahmin edilmemeli")
     }
 
+    /// Pre-workspace quick-access.json files may still carry a `.group`-kind
+    /// record (connection groups were removed in Phase D). `QuickAccessMetadataRecord`
+    /// keeps the ability to decode `"kind":"group"` so those old files don't
+    /// fail to load outright, and `QuickAccessLibrary.load` prunes any such
+    /// record the first time it reconciles against a (group-less) catalog.
     @MainActor
-    func testGroupFavoriteAndBatchRecentUpdateUseStableGroupIdentity() throws {
+    func testLegacyGroupKindRecordDecodesThenIsPrunedOnReconcile() throws {
         let groupID = UUID()
-        let catalog = QuickAccessCatalog(
-            hosts: [host("prod-api"), host("prod-db")],
-            groups: [.init(id: groupID, name: "Prod", aliases: ["prod-api", "prod-db"])]
+        let recordID = UUID()
+        let json = """
+        {
+            "version": 1,
+            "records": [
+                {
+                    "id": "\(recordID.uuidString)",
+                    "kind": "group",
+                    "groupID": "\(groupID.uuidString)",
+                    "aliasHistory": [],
+                    "isFavorite": true
+                },
+                {
+                    "id": "\(UUID().uuidString)",
+                    "kind": "host",
+                    "alias": "prod-api",
+                    "aliasHistory": [],
+                    "isFavorite": false
+                }
+            ]
+        }
+        """
+        let decoded = try JSONDecoder().decode(
+            QuickAccessMetadataState.self,
+            from: Data(json.utf8)
         )
+        XCTAssertEqual(decoded.records.count, 2)
+        XCTAssertEqual(decoded.records.first?.kind, .group)
+        XCTAssertEqual(decoded.records.first?.groupID, groupID)
+
         let store = InMemoryQuickAccessStore()
+        store.state = decoded
         let library = QuickAccessLibrary(store: store)
-        library.load(catalog: catalog)
-        let groupEntry = try XCTUnwrap(
-            library.entries(for: catalog).first(where: { $0.kind == .group })
-        )
-        XCTAssertTrue(library.toggleFavorite(entryID: groupEntry.id))
-        let usedAt = Date(timeIntervalSince1970: 99)
 
-        XCTAssertTrue(library.markUsed(
-            hostAliases: ["prod-api", "prod-db"],
-            groupID: groupID,
-            at: usedAt
-        ))
+        library.load(catalog: catalog(hosts: ["prod-api"]))
 
-        let entries = library.entries(for: catalog)
-        XCTAssertEqual(entries.filter { $0.lastUsedAt == usedAt }.count, 3)
-        XCTAssertTrue(entries.first(where: { $0.kind == .group })?.isFavorite == true)
-        XCTAssertEqual(store.saveCount, 3, "load, favorite ve batch recent için birer atomik save")
+        XCTAssertFalse(library.metadata.records.contains { $0.kind == .group })
+        XCTAssertTrue(library.metadata.records.contains { $0.kind == .host && $0.alias == "prod-api" })
+        // The prune must actually be written back, not just reflected
+        // in-memory, so a re-launch never re-reads the pruned record.
+        XCTAssertFalse(store.state.records.contains { $0.kind == .group })
     }
 
     @MainActor
@@ -287,7 +308,7 @@ final class QuickAccessTests: XCTestCase {
     }
 
     private func catalog(hosts aliases: [String]) -> QuickAccessCatalog {
-        QuickAccessCatalog(hosts: aliases.map(host), groups: [])
+        QuickAccessCatalog(hosts: aliases.map(host))
     }
 
     private func host(_ alias: String) -> QuickAccessHostDescriptor {
@@ -307,21 +328,6 @@ final class QuickAccessTests: XCTestCase {
         metadata.lastUsedAt = lastUsedAt
         return .host(
             .init(hostID: hostID, alias: alias, hostName: hostName, user: user),
-            metadata: metadata
-        )
-    }
-
-    private func makeGroupEntry(
-        id: UUID = UUID(),
-        name: String,
-        isFavorite: Bool = false,
-        lastUsedAt: Date? = nil
-    ) -> QuickAccessEntry {
-        var metadata = QuickAccessMetadataRecord.group(id: id)
-        metadata.isFavorite = isFavorite
-        metadata.lastUsedAt = lastUsedAt
-        return .group(
-            .init(id: id, name: name, aliases: ["prod-api"]),
             metadata: metadata
         )
     }

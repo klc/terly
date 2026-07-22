@@ -9,13 +9,7 @@ import SwiftUI
 struct RunbookRunSheet: View {
     let runbook: Runbook
     let availableConnections: [SSHConnectionTarget]
-    let connectionGroups: [SSHConnectionGroup]
     let onClose: () -> Void
-
-    private enum TargetMode: Hashable {
-        case host
-        case group
-    }
 
     private enum Phase {
         case targets
@@ -25,9 +19,7 @@ struct RunbookRunSheet: View {
     }
 
     @State private var phase: Phase = .targets
-    @State private var targetMode: TargetMode = .host
     @State private var selectedAlias: String?
-    @State private var selectedGroupID: UUID?
     @State private var parameterValues: [UUID: String] = [:]
     @State private var concurrencyLimit = RunbookExecutionEngine.defaultConcurrencyLimit
     @State private var showingDangerConfirmation = false
@@ -124,22 +116,12 @@ struct RunbookRunSheet: View {
         if selectedAlias == nil {
             selectedAlias = availableConnections.first?.alias
         }
-        if selectedGroupID == nil {
-            selectedGroupID = connectionGroups.first?.id
-        }
     }
 
     // MARK: - Derived state
 
-    private var selectedGroup: SSHConnectionGroup? {
-        connectionGroups.first { $0.id == selectedGroupID }
-    }
-
     private var resolvedTargets: [String] {
-        switch targetMode {
-        case .host: return selectedAlias.map { [$0] } ?? []
-        case .group: return selectedGroup?.aliases ?? []
-        }
+        selectedAlias.map { [$0] } ?? []
     }
 
     private var valuesDictionary: [String: String] {
@@ -175,52 +157,18 @@ struct RunbookRunSheet: View {
 
     private var targetSelectionView: some View {
         Form {
-            Section("Target type") {
-                Picker("Target type", selection: $targetMode) {
-                    Text("Single host").tag(TargetMode.host)
-                    Text("Connection group").tag(TargetMode.group)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-            }
-
-            if targetMode == .host {
-                Section("Host") {
-                    if availableConnections.isEmpty {
-                        Text("No concrete host found in the config.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Picker("Host", selection: $selectedAlias) {
-                            Text("Select…").tag(String?.none)
-                            ForEach(availableConnections) { connection in
-                                Text(connection.alias).tag(String?.some(connection.alias))
-                            }
-                        }
-                        .labelsHidden()
-                    }
-                }
-            } else {
-                Section("Connection group") {
-                    if connectionGroups.isEmpty {
-                        Text("No connection group defined.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Picker("Group", selection: $selectedGroupID) {
-                            Text("Select…").tag(UUID?.none)
-                            ForEach(connectionGroups) { group in
-                                Text(group.name).tag(UUID?.some(group.id))
-                            }
-                        }
-                        .labelsHidden()
-                    }
-                }
-
-                if let group = selectedGroup {
-                    Section("Group members (\(group.aliases.count) hosts)") {
-                        ForEach(group.aliases, id: \.self) { alias in
-                            Text(alias).font(.body.monospaced())
+            Section("Host") {
+                if availableConnections.isEmpty {
+                    Text("No concrete host found in the config.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Picker("Host", selection: $selectedAlias) {
+                        Text("Select…").tag(String?.none)
+                        ForEach(availableConnections) { connection in
+                            Text(connection.alias).tag(String?.some(connection.alias))
                         }
                     }
+                    .labelsHidden()
                 }
             }
         }

@@ -60,7 +60,7 @@ final class QuickAccessLibrary: ObservableObject {
     @Published private(set) var errorMessage: String?
 
     private let store: any QuickAccessPersisting
-    private var catalog = QuickAccessCatalog(hosts: [], groups: [])
+    private var catalog = QuickAccessCatalog(hosts: [])
 
     init(store: any QuickAccessPersisting = QuickAccessStore()) {
         self.store = store
@@ -101,22 +101,10 @@ final class QuickAccessLibrary: ObservableObject {
             records, pair in
             if records[pair.0] == nil { records[pair.0] = pair.1 }
         }
-        let groupPairs: [(UUID, QuickAccessMetadataRecord)] = metadata.records.compactMap { record in
-            guard record.kind == .group, let groupID = record.groupID else { return nil }
-            return (groupID, record)
-        }
-        let groupRecords = groupPairs.reduce(into: [UUID: QuickAccessMetadataRecord]()) {
-            records, pair in
-            if records[pair.0] == nil { records[pair.0] = pair.1 }
-        }
 
-        let hosts = catalog.hosts.compactMap { host in
+        return catalog.hosts.compactMap { host in
             hostRecords[host.alias].map { QuickAccessEntry.host(host, metadata: $0) }
         }
-        let groups = catalog.groups.compactMap { group in
-            groupRecords[group.id].map { QuickAccessEntry.group(group, metadata: $0) }
-        }
-        return hosts + groups
     }
 
     @discardableResult
@@ -130,14 +118,8 @@ final class QuickAccessLibrary: ObservableObject {
     }
 
     @discardableResult
-    func markGroupUsed(id: UUID, at date: Date = Date()) -> Bool {
-        markUsed(hostAliases: [], groupID: id, at: date)
-    }
-
-    @discardableResult
     func markUsed(
         hostAliases: [String],
-        groupID: UUID? = nil,
         at date: Date = Date()
     ) -> Bool {
         let aliases = Set(hostAliases)
@@ -146,10 +128,7 @@ final class QuickAccessLibrary: ObservableObject {
         for index in updated.records.indices {
             let isHost = updated.records[index].kind == .host
                 && updated.records[index].alias.map(aliases.contains) == true
-            let isGroup = updated.records[index].kind == .group
-                && updated.records[index].groupID == groupID
-                && groupID != nil
-            guard isHost || isGroup else { continue }
+            guard isHost else { continue }
             updated.records[index].lastUsedAt = date
             changed = true
         }
@@ -226,14 +205,11 @@ final class QuickAccessLibrary: ObservableObject {
             updated.records.append(.host(alias: alias))
         }
 
-        let linkedGroupIDs = Set(updated.records.compactMap {
-            $0.kind == .group ? $0.groupID : nil
-        })
-        for groupID in catalog.groupIDs.subtracting(linkedGroupIDs).sorted(
-            by: { $0.uuidString < $1.uuidString }
-        ) {
-            updated.records.append(.group(id: groupID))
-        }
+        // Connection groups were removed (Phase D); a pre-workspace
+        // quick-access.json may still carry `.group`-kind records, which
+        // `QuickAccessMetadataRecord` keeps the ability to decode. Prune them
+        // here so old files self-clean the first time they're loaded.
+        updated.records.removeAll { $0.kind == .group }
 
         guard updated != metadata else { return }
         try store.save(updated)

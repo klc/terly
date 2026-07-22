@@ -16,7 +16,6 @@ final class TerminalSessionRecorderTests: XCTestCase {
         let session = TerminalSession(
             hostID: 1,
             alias: "Production",
-            groupID: UUID(),
             layout: .split(
                 id: UUID(),
                 axis: .vertical,

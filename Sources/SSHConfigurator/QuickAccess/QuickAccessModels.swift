@@ -3,6 +3,11 @@ import SSHConfigCore
 
 enum QuickAccessEntryKind: String, Codable, Equatable, Sendable {
     case host
+    /// No longer produced by any current catalog/entry-building path
+    /// (connection groups were removed) — kept for decode compatibility with
+    /// pre-workspace quick-access.json files that may still contain
+    /// `"kind":"group"` records. `reconcileMetadata` prunes any such record
+    /// on load.
     case group
 }
 
@@ -13,36 +18,18 @@ struct QuickAccessHostDescriptor: Equatable, Sendable {
     let user: String?
 }
 
-struct QuickAccessGroupDescriptor: Equatable, Sendable {
-    let id: UUID
-    let name: String
-    let aliases: [String]
-}
-
 struct QuickAccessCatalog: Equatable, Sendable {
     var hosts: [QuickAccessHostDescriptor]
-    var groups: [QuickAccessGroupDescriptor]
 
-    init(
-        document: SSHConfigDocument?,
-        groups: [SSHConnectionGroup]
-    ) {
+    init(document: SSHConfigDocument?) {
         hosts = document.map(Self.hosts(in:)) ?? []
-        self.groups = groups.map {
-            QuickAccessGroupDescriptor(id: $0.id, name: $0.name, aliases: $0.aliases)
-        }
     }
 
-    init(
-        hosts: [QuickAccessHostDescriptor],
-        groups: [QuickAccessGroupDescriptor]
-    ) {
+    init(hosts: [QuickAccessHostDescriptor]) {
         self.hosts = hosts
-        self.groups = groups
     }
 
     var hostAliases: Set<String> { Set(hosts.map(\.alias)) }
-    var groupIDs: Set<UUID> { Set(groups.map(\.id)) }
 
     private static func hosts(in document: SSHConfigDocument) -> [QuickAccessHostDescriptor] {
         var seen: Set<String> = []
@@ -84,6 +71,10 @@ struct QuickAccessMetadataRecord: Codable, Equatable, Identifiable, Sendable {
         )
     }
 
+    /// Kept for decode compatibility with pre-workspace quick-access.json
+    /// files only — nothing constructs a `.group` record anymore.
+    /// `QuickAccessLibrary.reconcileMetadata` prunes any record of this kind
+    /// as soon as it's loaded.
     static func group(id groupID: UUID, recordID: UUID = UUID()) -> Self {
         Self(
             id: recordID,
@@ -145,7 +136,6 @@ struct QuickAccessEntry: Equatable, Identifiable, Sendable {
     let id: UUID
     let kind: QuickAccessEntryKind
     let hostID: Int?
-    let groupID: UUID?
     let alias: String?
     let title: String
     let subtitle: String?
@@ -165,29 +155,10 @@ struct QuickAccessEntry: Equatable, Identifiable, Sendable {
             id: metadata.id,
             kind: .host,
             hostID: host.hostID,
-            groupID: nil,
             alias: host.alias,
             title: host.alias,
             subtitle: details.isEmpty ? nil : details,
             searchFields: [host.alias, host.hostName, host.user].compactMap { $0 },
-            isFavorite: metadata.isFavorite,
-            lastUsedAt: metadata.lastUsedAt
-        )
-    }
-
-    static func group(
-        _ group: QuickAccessGroupDescriptor,
-        metadata: QuickAccessMetadataRecord
-    ) -> Self {
-        Self(
-            id: metadata.id,
-            kind: .group,
-            hostID: nil,
-            groupID: group.id,
-            alias: nil,
-            title: group.name,
-            subtitle: String(localized: "\(group.aliases.count) connections"),
-            searchFields: [group.name],
             isFavorite: metadata.isFavorite,
             lastUsedAt: metadata.lastUsedAt
         )

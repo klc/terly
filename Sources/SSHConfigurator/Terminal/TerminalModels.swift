@@ -330,7 +330,6 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
     let hostID: Int
     let alias: String
     var customTitle: String?
-    let groupID: UUID?
     var layout: TerminalPaneLayout
     var activePaneID: TerminalPane.ID
     var synchronizedPaneIDs: Set<TerminalPane.ID>
@@ -343,14 +342,12 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
         hostID: Int,
         alias: String,
         initialPane: TerminalPane,
-        groupID: UUID? = nil,
         customTitle: String? = nil
     ) {
         self.id = id
         self.hostID = hostID
         self.alias = alias
         self.customTitle = customTitle
-        self.groupID = groupID
         layout = .pane(initialPane)
         activePaneID = initialPane.id
         synchronizedPaneIDs = []
@@ -361,7 +358,6 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
         id: UUID = UUID(),
         hostID: Int,
         alias: String,
-        groupID: UUID? = nil,
         layout: TerminalPaneLayout,
         activePaneID: TerminalPane.ID,
         customTitle: String? = nil
@@ -370,7 +366,6 @@ struct TerminalSession: Identifiable, Equatable, Sendable {
         self.hostID = hostID
         self.alias = alias
         self.customTitle = customTitle
-        self.groupID = groupID
         self.layout = layout
         self.activePaneID = activePaneID
         synchronizedPaneIDs = []
@@ -521,38 +516,6 @@ struct SSHLaunchPlanBuilder: Sendable {
             startupExecution: execution,
             startupState: startupState,
             startupOverride: startupOverride
-        )
-    }
-
-    func makeGroupedSession(
-        groupID: UUID,
-        title: String,
-        targets: [SSHConnectionTarget],
-        startupProfiles: [String: StartupFlowProfile] = [:],
-        skipAllStartups: Bool = false
-    ) throws -> TerminalSession {
-        guard let firstTarget = targets.first else {
-            throw TerminalWorkspaceError.noConnections
-        }
-
-        let panes = try targets.map {
-            try makePane(
-                alias: $0.alias,
-                startupProfile: startupProfiles[$0.alias],
-                skipStartup: skipAllStartups
-            )
-        }
-        guard let layout = TerminalPaneLayout.tiled(panes) else {
-            throw TerminalWorkspaceError.noConnections
-        }
-
-        let normalizedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return TerminalSession(
-            hostID: firstTarget.hostID,
-            alias: normalizedTitle.isEmpty ? firstTarget.alias : normalizedTitle,
-            groupID: groupID,
-            layout: layout,
-            activePaneID: panes[0].id
         )
     }
 

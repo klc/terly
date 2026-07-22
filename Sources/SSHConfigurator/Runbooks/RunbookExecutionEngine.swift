@@ -66,8 +66,7 @@ final class RunbookExecutionEngine: ObservableObject {
     }
 
     /// Starts a fresh run. `targets` is the fully-resolved list of host
-    /// aliases to run against (a single alias, or every member alias of a
-    /// connection group) — resolving that list, and getting the user's
+    /// aliases to run against — resolving that list, and getting the user's
     /// explicit go-ahead on it, is the run sheet's job, not this engine's.
     func run(runbook: Runbook, values: [String: String], targets: [String], concurrencyLimit: Int = defaultConcurrencyLimit) {
         cancel()

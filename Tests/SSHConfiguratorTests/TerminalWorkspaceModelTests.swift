@@ -92,7 +92,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
     }
 
     @MainActor
-    func testOpensConnectionGroupAsSeparateSessionsInOneBatch() {
+    func testOpensMultipleConnectionsAsSeparateSessionsInOneBatch() {
         let model = makeModel()
         let targets = [
             SSHConnectionTarget(hostID: 1, alias: "prod-api"),
@@ -109,7 +109,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
     }
 
     @MainActor
-    func testConnectionGroupLaunchIsAtomicWhenAnAliasIsInvalid() {
+    func testBatchConnectionLaunchIsAtomicWhenAnAliasIsInvalid() {
         let model = makeModel()
         let targets = [
             SSHConnectionTarget(hostID: 1, alias: "prod-api"),
@@ -123,7 +123,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
     }
 
     @MainActor
-    func testConnectionGroupDoesNotPartiallyOpenWithUnsavedChanges() {
+    func testBatchConnectionDoesNotPartiallyOpenWithUnsavedChanges() {
         let model = makeModel()
         let targets = [
             SSHConnectionTarget(hostID: 1, alias: "prod-api"),
@@ -137,7 +137,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
     }
 
     @MainActor
-    func testConnectionGroupReusesAlreadyRunningSessions() {
+    func testBatchConnectionReusesAlreadyRunningSessions() {
         let model = makeModel()
         XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod-api", hasUnsavedChanges: false))
         let existingSessionID = model.selectedSessionID
@@ -155,108 +155,6 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         XCTAssertEqual(model.sessions.count, 2)
         XCTAssertEqual(model.sessions.first?.id, existingSessionID)
         XCTAssertEqual(model.selectedSession?.alias, "prod-db")
-    }
-
-    @MainActor
-    func testOpensConnectionGroupInOneSessionWithSeparatePanes() {
-        let model = makeModel()
-        let groupID = UUID()
-        let targets = [
-            SSHConnectionTarget(hostID: 1, alias: "prod-api"),
-            SSHConnectionTarget(hostID: 2, alias: "prod-worker"),
-            SSHConnectionTarget(hostID: 3, alias: "prod-db"),
-        ]
-
-        XCTAssertTrue(
-            model.openConnectionGroupInSplitSession(
-                groupID: groupID,
-                title: "Prod Servers",
-                targets: targets,
-                hasUnsavedChanges: false
-            )
-        )
-
-        let session = try! XCTUnwrap(model.selectedSession)
-        XCTAssertEqual(model.sessions.count, 1)
-        XCTAssertEqual(session.groupID, groupID)
-        XCTAssertEqual(session.alias, "Prod Servers")
-        XCTAssertEqual(session.panes.map(\.alias), ["prod-api", "prod-worker", "prod-db"])
-        XCTAssertEqual(session.panes.count, 3)
-    }
-
-    @MainActor
-    func testReusesMatchingRunningSplitGroupSession() {
-        let model = makeModel()
-        let groupID = UUID()
-        let targets = [
-            SSHConnectionTarget(hostID: 1, alias: "prod-api"),
-            SSHConnectionTarget(hostID: 2, alias: "prod-db"),
-        ]
-        XCTAssertTrue(
-            model.openConnectionGroupInSplitSession(
-                groupID: groupID,
-                title: "Prod Servers",
-                targets: targets,
-                hasUnsavedChanges: false
-            )
-        )
-        let firstSessionID = model.selectedSessionID
-
-        XCTAssertTrue(
-            model.openConnectionGroupInSplitSession(
-                groupID: groupID,
-                title: "Prod Servers",
-                targets: targets,
-                hasUnsavedChanges: true
-            )
-        )
-
-        XCTAssertEqual(model.sessions.count, 1)
-        XCTAssertEqual(model.selectedSessionID, firstSessionID)
-    }
-
-    @MainActor
-    func testSplitGroupLaunchIsAtomicWhenAnAliasIsInvalid() {
-        let model = makeModel()
-
-        XCTAssertFalse(
-            model.openConnectionGroupInSplitSession(
-                groupID: UUID(),
-                title: "Prod Servers",
-                targets: [
-                    SSHConnectionTarget(hostID: 1, alias: "prod-api"),
-                    SSHConnectionTarget(hostID: 2, alias: "*.example.com"),
-                ],
-                hasUnsavedChanges: false
-            )
-        )
-
-        XCTAssertTrue(model.sessions.isEmpty)
-        XCTAssertEqual(model.errorMessage, TerminalWorkspaceError.noConcreteAlias.localizedDescription)
-    }
-
-    @MainActor
-    func testManualSplitInGroupDuplicatesTheActivePaneConnection() {
-        let model = makeModel()
-        let groupID = UUID()
-        XCTAssertTrue(
-            model.openConnectionGroupInSplitSession(
-                groupID: groupID,
-                title: "Prod Servers",
-                targets: [
-                    SSHConnectionTarget(hostID: 1, alias: "prod-api"),
-                    SSHConnectionTarget(hostID: 2, alias: "prod-db"),
-                ],
-                hasUnsavedChanges: false
-            )
-        )
-        let sessionID = try! XCTUnwrap(model.selectedSessionID)
-        let prodDBPane = try! XCTUnwrap(model.selectedSession?.panes.last)
-        model.selectPane(prodDBPane.id, in: sessionID)
-
-        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .horizontal))
-
-        XCTAssertEqual(model.selectedSession?.panes.map(\.alias), ["prod-api", "prod-db", "prod-db"])
     }
 
     @MainActor
@@ -509,7 +407,7 @@ final class TerminalWorkspaceModelTests: XCTestCase {
     }
 
     @MainActor
-    func testGroupSkipMarksEveryAutomaticProfileSkipped() {
+    func testBatchSkipMarksEveryAutomaticProfileSkipped() {
         let model = makeModel()
         let targets = [
             SSHConnectionTarget(hostID: 1, alias: "prod-api"),
@@ -523,19 +421,18 @@ final class TerminalWorkspaceModelTests: XCTestCase {
             ))
         })
 
-        XCTAssertTrue(model.openConnectionGroupInSplitSession(
-            groupID: UUID(),
-            title: "Prod",
-            targets: targets,
+        XCTAssertTrue(model.openConnections(
+            targets,
             hasUnsavedChanges: false,
             startupProfiles: profiles,
             skipAllStartups: true
         ))
 
-        XCTAssertEqual(model.selectedSession?.panes.map(\.startupState), [.skipped, .skipped])
-        XCTAssertTrue(model.selectedSession?.panes.allSatisfy {
+        let allPanes = model.sessions.flatMap(\.panes)
+        XCTAssertEqual(allPanes.map(\.startupState), [.skipped, .skipped])
+        XCTAssertTrue(allPanes.allSatisfy {
             $0.process.arguments == ["--", $0.alias]
-        } == true)
+        })
     }
 
     @MainActor

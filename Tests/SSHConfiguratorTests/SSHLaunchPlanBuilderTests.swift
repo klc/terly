@@ -54,37 +54,6 @@ final class SSHLaunchPlanBuilderTests: XCTestCase {
         XCTAssertTrue(SSHLaunchPlanBuilder.isConcreteAlias("prod-api"))
     }
 
-    func testBuildsGroupedSessionWithBalancedPaneLayout() throws {
-        let builder = SSHLaunchPlanBuilder(
-            baseEnvironment: ["PATH": "/usr/bin:/bin"],
-            currentDirectoryURL: URL(fileURLWithPath: "/tmp")
-        )
-        let groupID = UUID()
-
-        let session = try builder.makeGroupedSession(
-            groupID: groupID,
-            title: "Prod Servers",
-            targets: [
-                SSHConnectionTarget(hostID: 1, alias: "prod-api"),
-                SSHConnectionTarget(hostID: 2, alias: "prod-worker"),
-                SSHConnectionTarget(hostID: 3, alias: "prod-db"),
-            ]
-        )
-
-        XCTAssertEqual(session.alias, "Prod Servers")
-        XCTAssertEqual(session.groupID, groupID)
-        XCTAssertEqual(session.panes.map(\.alias), ["prod-api", "prod-worker", "prod-db"])
-        XCTAssertEqual(session.panes.map(\.process.arguments), [
-            ["--", "prod-api"],
-            ["--", "prod-worker"],
-            ["--", "prod-db"],
-        ])
-        guard case let .split(_, axis, _, _, _) = session.layout else {
-            return XCTFail("Çoklu bağlantı için split layout bekleniyordu")
-        }
-        XCTAssertEqual(axis, .vertical)
-    }
-
     func testBuildsAutomaticStartupAsOneRemoteCommandAndKeepsPTYInteractive() throws {
         let profile = StartupFlowProfile(
             alias: "prod-api",
@@ -125,36 +94,6 @@ final class SSHLaunchPlanBuilderTests: XCTestCase {
         XCTAssertEqual(pane.process.arguments, ["--", "prod"])
         XCTAssertEqual(pane.startupState, .skipped)
         XCTAssertNotNil(pane.startupExecution)
-    }
-
-    func testGroupedSessionUsesEachHostsOwnProfileWithoutCrossingCommands() throws {
-        let first = StartupFlowProfile(
-            alias: "prod-api",
-            automaticallyRun: true,
-            steps: [.runCommand("echo API_ONLY")]
-        )
-        let second = StartupFlowProfile(
-            alias: "prod-db",
-            automaticallyRun: true,
-            steps: [.changeDirectory("/srv/DB ONLY")]
-        )
-
-        let session = try SSHLaunchPlanBuilder().makeGroupedSession(
-            groupID: UUID(),
-            title: "Prod",
-            targets: [
-                SSHConnectionTarget(hostID: 1, alias: "prod-api"),
-                SSHConnectionTarget(hostID: 2, alias: "prod-db"),
-            ],
-            startupProfiles: ["prod-api": first, "prod-db": second]
-        )
-
-        let apiCommand = try XCTUnwrap(session.panes[0].process.arguments.last)
-        let dbCommand = try XCTUnwrap(session.panes[1].process.arguments.last)
-        XCTAssertTrue(apiCommand.contains("API_ONLY"))
-        XCTAssertFalse(apiCommand.contains("DB ONLY"))
-        XCTAssertTrue(dbCommand.contains("DB ONLY"))
-        XCTAssertFalse(dbCommand.contains("API_ONLY"))
     }
 
     func testAliasBeginningWithDashRemainsAfterOptionTerminator() throws {
