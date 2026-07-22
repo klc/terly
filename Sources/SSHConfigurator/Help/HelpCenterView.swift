@@ -104,6 +104,11 @@ struct HelpCenterView: View {
                         dismiss()
                     }
                 }
+                .accessibilityIdentifier(
+                    presentation == .orientation
+                        ? "orientation.complete"
+                        : "help.close"
+                )
                 .keyboardShortcut(.defaultAction)
             }
             .padding(16)

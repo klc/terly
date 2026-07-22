@@ -16,11 +16,22 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
     @MainActor
     func testAppLaunchesSidebarQuickAccessAndSettingsOpenAndClose() throws {
         let app = XCUIApplication()
+        // GitHub runners have a clean defaults domain, so the first-launch tour
+        // appears before Quick Access. Force that state locally too and complete
+        // it through a stable identifier before exercising the app chrome.
+        app.launchArguments += ["-hasCompletedOrientationV1", "NO"]
         app.launch()
 
         // 1. App window + sidebar are visible.
         let window = app.windows.firstMatch
         XCTAssertTrue(window.waitForExistence(timeout: 10), "Ana pencere açılmalı")
+
+        let completeOrientationButton = app.buttons["orientation.complete"]
+        XCTAssertTrue(
+            completeOrientationButton.waitForExistence(timeout: 10),
+            "İlk açılış turu görünmeli"
+        )
+        completeOrientationButton.click()
 
         let quickAccessButton = app.buttons["Quick access"]
         XCTAssertTrue(quickAccessButton.waitForExistence(timeout: 10), "Toolbar'da Hızlı erişim düğmesi görünmeli")
@@ -53,8 +64,16 @@ final class SSHConfiguratorSmokeUITests: XCTestCase {
             "Ayarlar penceresi açılmalı"
         )
 
-        // 5. Close the Settings window again (⌘W), leaving only the main window.
-        app.typeKey("w", modifierFlags: .command)
+        // 5. Close the Settings window through its standard macOS close button.
+        // Sending ⌘W to the application is focus-dependent and can target the
+        // main window instead of the newly opened Settings window on CI.
+        let settingsWindow = app.windows.element(boundBy: 1)
+        let settingsCloseButton = settingsWindow.buttons[XCUIIdentifierCloseWindow]
+        XCTAssertTrue(
+            settingsCloseButton.waitForExistence(timeout: 10),
+            "Ayarlar penceresinin kapatma düğmesi görünmeli"
+        )
+        settingsCloseButton.click()
         XCTAssertTrue(
             waitForWindowCount(of: app, toBe: 1, timeout: 10),
             "Ayarlar penceresi kapanmalı"

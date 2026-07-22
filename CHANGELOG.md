@@ -9,7 +9,12 @@ automatically included in GitHub Release notes and the Sparkle appcast by
 
 Work in progress on the next release. `release.yml` only extracts a section
 whose heading exactly matches the tag's version, so this heading is inert until
-the changes below are moved under a real version number at tag time.
+changes are moved under a real version number at tag time.
+
+## 1.2.0
+
+A major workspace and recording update that makes multi-connection layouts
+reusable, terminal sessions reviewable, and everyday navigation faster.
 
 ### Added
 - Open different connections side by side in the current terminal tab: use the

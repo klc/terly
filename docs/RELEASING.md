@@ -43,8 +43,8 @@ The following secrets must be configured under **Repository Settings → Secrets
 Once the prepared commit is merged into the default branch, create and push an annotated tag:
 
 ```sh
-git tag -a v1.1.1 -m 'Terly 1.1.1'
-git push origin v1.1.1
+git tag -a v1.2.0 -m 'Terly 1.2.0'
+git push origin v1.2.0
 ```
 
 `.github/workflows/release.yml` reads the release version from the tag and the build number from the GitHub run number. It regenerates the Xcode project, archives/exports using Developer ID, performs Apple notarization and stapling, and builds DMG/ZIP archives. Next, it signs the Sparkle archive, updates `appcast.xml` on `gh-pages`, and attaches all artifacts to the GitHub Release.

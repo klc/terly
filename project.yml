@@ -57,8 +57,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mkilic.Terly
         PRODUCT_NAME: Terly
         PRODUCT_MODULE_NAME: SSHConfigurator
-        MARKETING_VERSION: 1.1.1
-        CURRENT_PROJECT_VERSION: 3
+        MARKETING_VERSION: 1.2.0
+        CURRENT_PROJECT_VERSION: 4
         ENABLE_HARDENED_RUNTIME: YES
         # Yerel/geliştirme imzası ad-hoc kalır (takım/kimlik gerekmez); gerçek Developer ID
         # imzası WP9 release.yml içinde xcodebuild -exportOptionsPlist / CODE_SIGN_IDENTITY
