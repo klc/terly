@@ -1,167 +1,145 @@
-# Terly
+<p align="center">
+  <img src="Design/terly_logo.svg" width="112" alt="Terly logo">
+</p>
 
-A native SwiftUI SSH workspace for macOS: `~/.ssh/config` management, embedded terminal, file transfers, port forwarding, and runbooks. (Formerly: SSH Configurator.)
+<h1 align="center">Terly</h1>
 
-## Features
+<p align="center">
+  <strong>Your SSH workspace, built for macOS.</strong><br>
+  Organize OpenSSH configs, connect in native terminal workspaces, transfer files,<br>
+  run repeatable workflows, and diagnose problems without leaving one app.
+</p>
 
-- Parses existing config losslessly; comments and unknown directives are preserved.
-- Form-based editing for Host list, `HostName`, `User`, `Port`, `IdentityFile`, and `ProxyJump`.
-- Multi-level collapsible grouping of Host aliases based on `-` components (e.g., `ams-api-prod-1` → `ams → api → prod`).
-- Dedicated workspaces for global directives, `Match` blocks, and `Include` lines.
-- Raw text editor for the entire config, and a preview showing diffs between the disk file and the in-memory working copy (e.g., after a write conflict); both are accessible from the menu bar (**File → Raw Config Editor…** / **File → Change History/Preview…**).
-- Working copy model with undo support for unsaved changes before saving.
-- External change detection, backup history/restore, atomic saves, and `0600` file permissions.
-- `ssh -G` validation using a temporary config. Requires explicit confirmation for running local commands if it contains `Match exec`.
-- Connection Diagnostics and Trust Center; displays resolved `ssh -G` settings alongside their source lines, checking DNS, ProxyJump, IdentityFile permissions, SSH agent, `known_hosts` fingerprint, and end-to-end connectivity.
-- Copies diagnostic reports to the clipboard with usernames, local paths, and sensitive commands redacted; all network operations support timeouts and cancellation.
-- Opens the selected Host alias in the built-in SwiftTerm terminal.
-- File and folder upload/download via SCP/SFTP for the selected Host; features local file selection, a remote directory browser, and overwrite confirmations.
-- Runs each connection as a direct SSH process in separate tabs of the built-in terminal.
-- Terminal opens directly by clicking the connection row in the sidebar; gear icon on the row opens connection settings in a modal.
-- Creates named connection groups; group configuration allows opening connections in separate terminal tabs or together in split panes within a single tab.
-- Active terminal can be split horizontally or vertically; splitting opens a new connection with the same SSH alias.
-- Panes can be selected for synchronized input by holding the `⌘` key and clicking; keyboard inputs and pasted commands are sent to all selected terminals simultaneously.
-- Custom Connection Startup Flows in Host settings: steps for switching users with `sudo -iu`, navigating to a remote directory, and running shell commands with failure policies can be added, deleted, and reordered.
-- Auto-startup can be previewed per host before connecting, skipped once for a single connection or an entire group, and manually re-executed in an open terminal.
-- In group connections, each host uses its own profile; synchronized terminal input is blocked until all startup flows complete, preventing commands from duplicating to incorrect panes.
-- Fuzzy search by alias, `HostName`, `User`, or connection group name in the quick access window opened via `⌘K`; allows launching connect, settings, file transfer, and diagnostic actions directly from results.
-- Favorites and recently used connections are prioritized in quick access; catalog updates automatically when the config is refreshed internally or externally.
-- Uploads and downloads directories in addition to individual files; transfers run in a queue with a configurable concurrency limit (1-5), and failed transfers are automatically retried.
-- Tunnel Manager supporting Local (`-L`), Remote (`-R`), and Dynamic (`-D`) port forwarding; tunnels can be started/stopped individually and set to automatically start with connections.
-- Snippet palette opened via `⌘S` allows quickly inserting frequently used commands/text into the terminal; snippets are managed in a separate section.
-- SSH Key Setup Wizard: generates ed25519 key pairs for a host, optionally adds them to the SSH agent, and copies the public key to the server's `authorized_keys` file; accessible from the host settings modal and the sidebar right-click menu.
-- Manual or automatic update checking using Sparkle via the **Updates** tab in the Settings window (see Versioning and Updates).
-- Config/tunnel/snippet/runbook/startup flow synchronization to the user's private git repository via the **Sync** tab in Settings; no intermediate server is used, and authentication relies entirely on the system git/SSH keys (see Git Synchronization).
+<p align="center">
+  <a href="https://github.com/klc/terly/releases/latest"><img src="https://img.shields.io/github/v/release/klc/terly?display_name=tag&style=flat-square" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-111111?style=flat-square&logo=apple" alt="macOS 14 or later">
+  <img src="https://img.shields.io/badge/Swift-6.0-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 6.0">
+  <a href="https://github.com/klc/terly/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/klc/terly/ci.yml?branch=main&style=flat-square&label=build" alt="Build status"></a>
+</p>
 
-## Security
+<p align="center">
+  <a href="#download">Download</a> ·
+  <a href="#what-you-can-do">Features</a> ·
+  <a href="#security-by-default">Security</a> ·
+  <a href="README_TR.md">Türkçe</a>
+</p>
 
-- The application never reads the contents of private key files.
-- Backups are stored in `~/Library/Application Support/Terly/Backups` with `0600` permissions.
-- When restoring a backup, the current config is first backed up as a new backup.
-- Refuses to write directly to config files that are symbolic links.
-- The application operates with write-through: there is no separate **Save** action; every edit action (adding/deleting/copying hosts, field edits, applying from raw config or section editors, adding/removing Includes) is written directly to `~/.ssh/config` as soon as it is completed. Before each write, the current content is automatically backed up; if a write fails due to an external conflict, changes remain only in the in-memory working copy and an error is shown.
-- Terminal commands are executed using individual process arguments without shell concatenation.
-- SCP/SFTP transfers and checksum verification on hosts that may prompt for password/passphrase work via an `SSH_ASKPASS` bridge: the `terly-askpass.sh` helper bundled in the app classifies the prompt sent by ssh/scp/sftp via `argv[1]` — showing a secure password input dialog for passwords/passphrases, and a separate confirmation dialog for server identity (`yes/no`) host key confirmation, returning the user's choice exactly (automatic "yes" is never sent). Entered values are only written to the helper's stdout; they are never written to argv, environment, log files, or disk. If the user cancels the dialog, the helper returns empty output with a non-zero exit code. Since multiple transfers might request passwords simultaneously, the helper executes sequentially using a simple filesystem lock (mkdir): while one dialog is open, other pending prompts wait silently in line, preventing multiple windows from opening at once.
-- The Runbook executor and Connection Diagnostics center intentionally continue using `BatchMode=yes`: since runbooks can run on multiple hosts simultaneously, a password prompt would hang execution or cause a concurrent password storm; diagnostics do not require password prompts because they report agent/key status separately.
-- Diagnostics do not automatically modify or accept host key records; end-to-end checks use `StrictHostKeyChecking=yes`.
-- SSH helper processes, SCP, and SFTP share a common timeout, cancellation, output gathering, and error classification layer.
-- Startup profiles are kept in `~/Library/Application Support/Terly/startup-flows.json` as atomic JSON with `0600` permissions; they are not written to `~/.ssh/config`.
-- Startup metadata is not a vault for passwords, tokens, sudo passwords, or private key contents. The interface warns about secret-like commands; the app does not capture or store sudo passwords.
-- Profile UUIDs are preserved when changing an alias within the application. If the config changes externally and an alias disappears, the profile is displayed as orphaned and can be re-associated with a new alias.
-- Quick access favorites/recents metadata is stored atomically in `~/Library/Application Support/Terly/quick-access.json`, with the directory set to `0700` and the file set to `0600` permissions; this is separate from startup flow metadata.
-- The Key Setup Wizard does not use `ssh-copy-id`; when copying to the server, it only reads the `.pub` file and feeds it to `ssh` via stdin. The private key itself is never opened or read in any code path. Overwriting is only possible with explicit user consent.
-- Git synchronization **does not store** its own git credentials: the system git (`/usr/bin/git`) is called with an argv array (no shell parsing), and authentication is fully delegated to the user's own SSH keys/credential helper. With `GIT_TERMINAL_PROMPT=0`, headless processes will not hang on password prompts and will return with a clear error instead. Private keys, `known_hosts`, transfer history, workspace layouts, and secret snippet values are never included in the sync set — snippet `isSecret` values are already never written to JSON (kept in Keychain), so the sync layer does not need to redact them. Non-fast-forward pulls never merge automatically; remote changes are first compared to local files (diff preview), and are only applied after explicit approval, backing up the current local state beforehand. There is no line-based automatic merging on conflicts (diverged history) — the user chooses one of three options: (a) back up local and pull remote, (b) replace remote with local — which does not use `git push --force` but rather creates a new merge commit, (c) cancel. Regardless of the choice, the local state is backed up before applying.
-- **Bootstrap Paradox**: To use sync on a new machine, you must first have remote access (e.g., GitHub) — meaning an SSH key (added to agent) or HTTPS credential helper must already be set up. This cannot be solved by synchronization itself: generate/add a key using the **Key Setup Wizard** (see above), register the public key on GitHub, and then link the remote URL under the Sync tab.
-- Session recording (see In-App Terminal) captures everything the terminal displays while active, which may include sensitive data from command output. Each recording lives in its own folder created with `0700` permissions, and every per-pane `.cast` file inside it is written with `0600` permissions.
+![Terly workspace showing an embedded terminal and grouped SSH connections](docs/screenshots/terly-workspace.jpg)
 
-## In-App Terminal
+Terly turns an existing `~/.ssh/config` into a visual, native macOS workspace. It keeps OpenSSH as the source of truth, preserves comments and unknown directives, and puts the day-to-day tools around it: terminal tabs, split panes, file transfer, tunnels, diagnostics, snippets, runbooks, and startup flows.
 
-The terminal view currently uses SwiftTerm. Since the terminal session and SSH process model are decoupled from the rendering engine, a `libghostty`-based engine can be integrated under the same contract in the future.
+## Why Terly?
 
-Font, font size, and color themes (System, Solarized Dark/Light, Dracula, Nord, One Dark, Gruvbox Dark) can be customized via the Settings window opened with `⌘,`. The preview updates live with sample text and 16 ANSI colors. Theme changes apply immediately to all open terminal tabs (including background/hidden tabs) and persist across launches; theme file import/export is not supported in this version.
+SSH tools often make you choose between a text file that is flexible but hard to navigate and a connection manager that hides your configuration in a proprietary database. Terly keeps the portable OpenSSH config you already own while adding a focused desktop workflow around it.
 
-Connections without startup flows or those skipped once open directly via `/usr/bin/ssh -- <alias>`. If an automated flow is active, the app sends a single remote bootstrap command using `-tt` instead of typing steps with delays into the PTY. Closing a terminal tab terminates the associated SSH process; connections do not persist in the background when the app is closed.
+| Keep your config | Work in one window | Automate the routine |
+| --- | --- | --- |
+| Lossless parsing preserves comments, `Match`, `Include`, and unknown directives. | Open connections in tabs or split panes with a native SwiftTerm terminal. | Save startup flows, snippets, runbooks, tunnels, and reusable workspaces. |
 
-The working copy must be saved before opening a connection; SSH always uses the `~/.ssh/config` file on disk.
+## What you can do
 
-### Session Recording
+- **Navigate large SSH configs** with recursive groups derived from aliases such as `fra-api-prod-1`.
+- **Edit connections safely** through focused forms or the full raw config editor.
+- **Connect your way** using terminal tabs, horizontal or vertical splits, saved workspaces, and synchronized input.
+- **Jump anywhere with `⌘K`** by searching aliases, hostnames, users, favorites, recents, and connection groups.
+- **Move files without memorizing commands** using Finder for local files and an SFTP browser for remote paths, with queues, retries, progress, and transfer history.
+- **Understand failures** with connection diagnostics for DNS, ProxyJump, identities, agent state, `known_hosts`, and end-to-end reachability.
+- **Forward ports** with Local (`-L`), Remote (`-R`), and Dynamic (`-D`) tunnels.
+- **Standardize connection setup** with startup flows that can switch users, change directories, and run commands in one remote shell context.
+- **Run repeatable operations** through snippets and multi-host runbooks.
+- **Set up ed25519 keys** with a guided flow that can add the key to `ssh-agent` and copy only the public key to the server.
+- **Sync across Macs** through your own private git repository—without a Terly account or intermediary service.
 
-The record button in the terminal toolbar starts a recording for the active tab; a save panel lets you pick (and create) the destination folder. Each pane is recorded lazily — its file is only opened once output actually arrives for it — as its own [asciinema cast v2](https://docs.asciinema.org/manual/asciicast/v2/) file named `<alias>-<n>.cast` (the index disambiguates panes sharing an alias, e.g. after a split), all inside one folder per recording (`Terly-<session-title>-<yyyy-MM-dd-HHmmss>/`). Recordings can be replayed with `asciinema play <file>.cast`. Stopping a recording from the toolbar reveals the folder in Finder; the automatic stop that happens when a recording hits the size cap or when its session closes does not. See the Security section for the permissions and sensitive-data warning.
+## A closer look
 
-### Auto-Reconnect
+<table>
+  <tr>
+    <td width="55%">
+      <img src="docs/screenshots/terly-quick-access.jpg" alt="Terly Quick Access search">
+    </td>
+    <td valign="top">
+      <h3>Everything is a shortcut away</h3>
+      <p>Press <code>⌘K</code> to find a connection and connect, edit settings, transfer files, or start diagnostics directly from the result.</p>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <h3>OpenSSH stays readable</h3>
+      <p>Edit common fields in a clear native form. Terly writes standard OpenSSH directives and leaves comments and unsupported directives intact.</p>
+    </td>
+    <td width="45%">
+      <img src="docs/screenshots/terly-host-settings.jpg" alt="Terly SSH host settings">
+    </td>
+  </tr>
+</table>
 
-If a terminal pane disconnects unexpectedly (remote host closes connection, network drops, or `exit` is typed in the remote shell — all handled identically), a status bar appears in the terminal view: **"Connection lost"** header, **Reconnect** button, and **Close Pane** button. If you close the tab/pane manually, this bar will not appear.
+## Download
 
-The **"Auto-reconnect on this host"** checkbox below the bar is a per-host setting for the SSH alias and is **disabled** by default; it is stored in `~/Library/Application Support/Terly/auto-reconnect.json` (atomic write, file `0600`/directory `0700`). When enabled, it attempts to auto-reconnect up to 5 times on unexpected disconnects with incremental backoff (2s → 4s → 8s → 16s → 32s, capped at 60s); the countdown is displayed on the bar and can be canceled at any time using **Cancel**. If the reconnected session remains active for 15 seconds, the attempt counter resets; if all 5 attempts fail, auto-reconnect stops for that disconnect, requiring manual "Reconnect". When network connectivity is restored, a pending auto-reconnect countdown triggers immediately; if auto-reconnect is disabled for a pane, only a "Network restored" suggestion is shown — the app never connects on its own without user consent. Reconnection follows the same startup flow behavior as a manual "Reconnect". All pending timers are canceled when the application is closed; past countdowns never reappear upon session restore.
+Terly requires **macOS 14 Sonoma or later**.
 
-## Connection Startup Flow
+1. Download the latest `.dmg` from [GitHub Releases](https://github.com/klc/terly/releases/latest).
+2. Drag **Terly** into Applications.
+3. Open the app. Your existing `~/.ssh/config` is loaded automatically.
 
-You can define steps in the **Startup Flow** section of the Host settings (accessible via the gear icon on the connection row). The switch user step can only be used once and must be the first step. Directory and user fields are validated separately; empty or unsupported sequences are silently ignored. Directories are protected with centralized shell quoting, while the "Run command" field is intentionally executed as remote shell syntax.
+Official releases are Developer ID signed, notarized, and updated through Sparkle. Update checks are opt-in and can also be started manually from **Settings → Updates**.
 
-The builder combines all steps into the same remote shell context, leaving the terminal interactive with `exec "${SHELL:-/bin/sh}" -l` at the end. If `sudo` requires a password, the prompt is shown in the terminal. The active startup step, completion, or failure (with exit code) is displayed in the terminal title. Manual re-execution actions are sent only to the active pane and are not replicated through synchronized input.
+> [!IMPORTANT]
+> Terly uses write-through editing: completed changes are written directly to `~/.ssh/config`. Before every write, the current file is backed up. If the file changed externally, Terly refuses to overwrite it and keeps your pending version in memory.
 
-## Quick Connect Finder
+## Security by default
 
-You can open the Quick Access window from anywhere in the app using `⌘K`. As you type, concrete Host aliases are searched by their name, `HostName`, and `User` fields, while connection groups are searched by their group name. `↑`/`↓` changes selection, `Enter` performs the default **Connect** action, and `Esc` closes the window. Wildcard and negative Host patterns are not displayed as connection results.
+- Private key contents are **never read** by the application.
+- Every config write is preceded by a local backup and uses atomic replacement with `0600` permissions.
+- Symbolic-link config targets are rejected to avoid writing through an unexpected path.
+- SSH, SCP, SFTP, and git commands are executed as argument arrays rather than shell-concatenated strings.
+- Host keys are never accepted automatically; diagnostics use strict host-key checking.
+- Password and passphrase prompts use an `SSH_ASKPASS` bridge and are never written to arguments, environment variables, logs, or disk.
+- Secret snippet values stay in Keychain and are excluded from git synchronization.
+- Git sync uses your system git and credentials. Remote changes are previewed and require approval before they touch local files.
 
-The star button toggles favorites. Successfully opened single and group connections are added to the recents list. When an alias is renamed within the application, its quick access ID, favorites status, and history are preserved; aliases removed externally disappear and are not automatically re-associated.
+Backups and application metadata live under `~/Library/Application Support/Terly/` with restricted permissions. Terminal recordings may contain sensitive command output, so each recording folder is created with `0700` permissions and cast files with `0600`.
 
-## File Transfer
+## Built for real workflows
 
-You can open the file transfer page using the **Transfer Files** action in the toolbar when a Host is selected. For uploads, choose local files or folders from Finder and select the remote destination folder via the in-app SFTP browser; the destination file name is pre-populated and editable. For downloads, select the remote file in the browser, and the standard macOS Save dialog will suggest the correct file name. Recently used local and remote folders are remembered.
+### Terminal workspaces
 
-Transfers are executed in a queue: multiple files/folders are transferred concurrently up to a configurable limit (1-5), and pending or active transfers display live percentage/speed progress. Failed transfers are automatically retried a few times; permanently failed or canceled transfers can be manually restarted from the queue. Directory transfers can be performed using SCP (`-r`) or SFTP; SFTP directory transfers use a separate worker. Overwrite confirmation is shown only when a file with the same name exists at the destination.
+Open hosts in separate tabs or split panes, drag panes to rearrange them, select panes with `⌘`-click for synchronized input, and save the entire layout as a reusable workspace. Per-host auto-reconnect is opt-in and uses bounded backoff after an unexpected disconnect.
 
-This version does not support storing passwords: if no SSH agent or key is present, a password dialog will open via the `SSH_ASKPASS` bridge during transfer (see the Security section); the entered password is not stored anywhere permanently. If a transfer is canceled, partial files may remain locally or remotely; check the relevant paths.
+### File transfer
 
-The **History** tab in the transfer page records every completed, permanently failed, and canceled transfer (pending/active transfers are not written to history). Up to 200 records are stored atomically in `~/Library/Application Support/Terly/transfer-history.json` (file `0600`/directory `0700`) and persist across application restarts. The **"Re-transfer"** action on each record adds a new job to the queue with the same parameters; if the local source file for an upload no longer exists, a clear error is shown immediately without queuing (for downloads, source files on the remote server cannot be pre-validated and are left to normal transfer error handling). If **"Mask Paths"** is checked, only the **visual representation** in this list shortens home directories to `~` and obscures username components with `•••` — this is purely visual; `transfer-history.json` continues to store the raw (unmasked) path since "Re-transfer" requires the actual path. **"Clear History"** prompts for confirmation before deleting the record list, leaving transferred or partial files untouched.
+Upload or download files and folders with SCP or SFTP. Transfers run through a queue with configurable concurrency, retries, live percentage and speed, checksum verification, overwrite confirmation, and persistent history. Remote rename, new-folder, and safe non-recursive delete actions are built into the browser.
 
-For canceled or permanently failed **single file** transfers, a **"Delete partial file…"** action appears in the history log; this targets only the destination path of that specific transfer (using `FileManager` for local files, and sftp `rm` for remote files) and asks for confirmation by showing the full path before deleting. This option is not offered for directory transfers — instead, a warning is shown indicating that manual cleanup is required (due to recursive deletion risks).
+### Startup flows and runbooks
 
-In the remote directory browser (when selecting transfer targets), you can perform **Rename** and **Delete** actions via the right-click menu or the "..." button on the row; **New Folder** is a separate button on the toolbar. Deleting always prompts for confirmation, displaying the file name and full remote path. Directory deletion works only on **empty** directories (sftp `rmdir`); the app does not delete directories recursively — attempting to delete a non-empty directory will display a "Directory not empty" error. The Delete key also opens the deletion confirmation dialog when a file is selected.
+A startup flow runs inside one remote shell context and can switch user, change directory, and execute commands before leaving the terminal interactive. Runbooks apply repeatable commands across multiple hosts while keeping authentication behavior explicit and cancellable.
 
-## Tunnel Manager
+### Private git synchronization
 
-You can create Local (`-L`), Remote (`-R`), and Dynamic (`-D`) forward definitions in the **Tunnels** section of the sidebar. Each tunnel binds to a destination Host alias and can be started or stopped individually; if "Auto Connect" is checked, the tunnel is automatically established when the corresponding connection opens. The default local bind address is `127.0.0.1`; a security warning is shown in the UI if a publicly accessible address like `0.0.0.0` or `::` is selected.
+Sync config, tunnels, snippets, runbooks, favorites, and startup metadata through a private repository you control. Pulls are fast-forward only, incoming changes are shown before application, and diverged histories never trigger a silent line merge or force push.
 
-## Snippets
+## Build from source
 
-While in the terminal, you can search and insert frequently used command or text snippets into the active pane using `⌘S`. Snippets are managed (added, edited, deleted) as key/value pairs in the **Snippets** section of the sidebar.
-
-## Key Setup Wizard
-
-The **Setup Key…** action in a host row's right-click menu or the host settings modal opens a three-step wizard:
-
-1. **Generate**: Runs `/usr/bin/ssh-keygen -t ed25519 -f <path> -C <comment>` using individual process arguments. The default path is `~/.ssh/id_ed25519_<alias>` (alias is sanitized for safe filenames); path and comment are editable. Passphrase input is fully delegated to ssh-keygen's own prompt and displayed as a dialog via the `SSH_ASKPASS` bridge — the app never sees or stores the passphrase. If a file already exists at the target path, it is overwritten only after explicit confirmation.
-2. **Add to Agent (optional)**: If checked, runs `/usr/bin/ssh-add <private key path>`. `ssh-add` reads the key file itself; the app does not access the contents.
-3. **Copy to Server**: `ssh-copy-id` IS NOT USED. Instead, only the `<path>.pub` file is read (the private key is never read in any code path) and its content is fed via stdin to `/usr/bin/ssh -- <alias> sh -c 'mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys'`. Before running, the target host, remote command to execute, and the public key text are displayed as a preview.
-
-After successful copying, a check automatically runs `ssh -o BatchMode=yes -- <alias> true` to verify that passwordless login works, displaying the result. Finally, the wizard offers to update the host's `IdentityFile` field to the new key; this update is applied only with user confirmation through the normal write-through editing flow. If the Connection Diagnostics center detects that there are no usable keys in the agent and authentication was rejected, it displays a suggestion prompting the user to launch this wizard.
-
-## Git Synchronization
-
-You can link your own private git repository (e.g., GitHub) as a sync backend from the **Sync** tab in the Settings window. No middleman servers, free history: the app automatically commits on changes, and you push when you want. On a new machine or after a clean install, you can connect the same repo to restore your settings.
-
-**⚠️ Repository must be private.** Everything synced here (Host definitions, tunnel/snippet/runbook/startup flow metadata) is committed to the remote repository, and **git history is permanent**. Deleting a file from the repository later does not automatically erase its historical revisions (which requires tools like `git filter-repo` or `BFG`). If linked to a public repository, this information will become publicly accessible.
-
-**What is synced**: `~/.ssh/config` + any `Include`d files (only those located under `~/.ssh`; others residing outside or carrying names like private keys or `known_hosts` are silently skipped and listed in warnings), startup flows, quick access favorites, auto-reconnect settings, tunnels, runbooks, and snippets (excluding values of snippets marked as secret, which are only stored in Keychain and never written to JSON).
-
-**What is NOT synced**: private key contents (never read/copied), transfer history, terminal workspace layouts (machine-specific), `known_hosts` (changes frequently and creates commit noise), local backups (`Backups/`), and the Keychain.
-
-**Cadence**: Changes are not pushed immediately on every edit. Instead, a local commit is created after 30 seconds of inactivity (debounce). Pushing is **manual** by default ("Sync Now"); automatic pushing can be enabled via a setting. Pulls occur on application startup and manually, performing **fast-forward only** — never auto-merging.
-
-**Remote changes are never applied silently**: Pulling only updates the local synchronization repository. What changes will be made is shown in a side-by-side preview screen (current vs. incoming content); actual files are not touched without your explicit approval. The current local state is automatically backed up before approval. The preview also flags incoming config `IdentityFile` paths that do not exist on the current machine (a basic, text-based check that skips paths containing `ssh_config` tokens; refer to the Connection Diagnostics center for full runtime resolution).
-
-**Conflict (diverged history)**: No line-based automatic merging. Three options are provided: (a) back up local and accept remote, (b) replace remote with local — this option **not using** `git push --force` but instead advances via a new merge commit, (c) cancel. Whichever is chosen, the current local state is backed up before application.
-
-**Bootstrap Paradox**: To use this feature on a new machine, you first need access to the remote repository (e.g., GitHub) — meaning an SSH key (added to agent) or HTTPS credential helper must already be set up. This cannot be solved by synchronization itself: generate/add a key using the **Key Setup Wizard** (see above), register the public key on GitHub, and then link the remote URL under the Sync tab.
-
-## Versioning and Updates
-
-The application version is tracked in `project.yml` under `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`. Local development builds remain signed ad-hoc (`CODE_SIGN_IDENTITY="-"`), while official Developer ID signing is applied in CI only when a release tag (`v*`) is pushed to `.github/workflows/release.yml`.
-
-Updates are distributed via [Sparkle](https://github.com/sparkle-project/Sparkle). Manual update checks and toggling automatic updates can be managed from the **Updates** tab in the Settings window. The `SUFeedURL` and `SUPublicEDKey` values in `project.yml` point to the production channel at `https://klc.github.io/terly/appcast.xml`. The matching private EdDSA key is kept only as a GitHub Actions secret and must never be committed.
-
-For the end-to-end release process, required GitHub secrets, and manual steps required by Mustafa, see **`docs/RELEASING.md`**.
-
-## Development
+You need macOS 14+, Xcode with Swift 6 support, and [XcodeGen](https://github.com/yonaskolb/XcodeGen) 2.40 or later.
 
 ```sh
+git clone https://github.com/klc/terly.git
+cd terly
 xcodegen generate
 open SSHConfigurator.xcodeproj
-swift test
 ```
 
-The `xcodegen generate` command recreates the Xcode project from the source-controlled `project.yml` file.
+Run the test suite from Terminal:
 
-## Testing and CI
+```sh
+CLANG_MODULE_CACHE_PATH=/private/tmp/terly-module-cache swift test
+```
 
-- Unit tests can be run in two ways: `swift test` (SwiftPM, fast) or
-  `xcodebuild -project SSHConfigurator.xcodeproj -scheme SSHConfigurator test -only-testing:SSHConfigCoreTests -only-testing:SSHConfiguratorTests`
-  (Xcode toolchain, which covers running `SSHConfiguratorTests` inside the actual `Terly.app` using `TEST_HOST`). Both test targets use `GENERATE_INFOPLIST_FILE: YES` — without this, `xcodebuild test` fails during the codesign phase because it cannot sign the test bundle (`swift test` is unaffected since it runs bundleless).
-- The UI smoke test (`SSHConfiguratorUITests`, `XCUITest`) covers a single scenario: app launches → sidebar is displayed → `⌘K` opens/`Esc` closes quick access → `⌘,` opens/closes the Settings window. It requires no active SSH connection and only performs read-only actions, never writing to the user's actual `~/.ssh/config`. Locally:
-  `xcodebuild -project SSHConfigurator.xcodeproj -scheme SSHConfigurator -configuration Debug CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=YES CODE_SIGNING_ALLOWED=YES test -only-testing:SSHConfiguratorUITests`.
-  UI tests (unlike unit tests) require a valid (even if ad-hoc) codesign signature **and** "Developer Mode" enabled on the machine for `testmanagerd` to attach; otherwise, the test runner immediately terminates with a "Test crashed with signal kill before establishing connection" error. To enable Developer Mode once: `sudo /usr/sbin/DevToolsSecurity -enable`.
-- CI (`.github/workflows/ci.yml`) runs two jobs: `build-and-test` (build + `swift test` + the `xcodebuild test` command above) and a separate `ui-smoke` job (which enables Developer Mode and runs UI smoke tests with ad-hoc signing).
-- The transfer queue (`TransferQueueEngineIntegrationTests`) and the auto-reconnect chain (`AutoReconnectChainIntegrationTests`) are tested end-to-end using mock implementations of `SSHProcessExecuting` and `ReconnectScheduling`: validating queuing → mock success/failure → status + history records, and disconnection → backoff → mock success → counter resets without starting actual `scp` or `ssh` processes.
-- `SSHConfigDocumentPerformanceTests` parses and groups a synthetic config with 1000 hosts; the threshold (5s) is intentionally generous to accommodate slow CI runners (local execution takes ~25ms) — the goal is not micro-performance tracking, but catching potential O(n²) regressions.
+The Xcode scheme is named `SSHConfigurator`; the built product is `Terly.app`. Release maintainers can find the signing, notarization, Sparkle, and appcast process in [`docs/RELEASING.md`](docs/RELEASING.md).
+
+## Project status
+
+Terly is actively developed. Bug reports, focused feature proposals, and pull requests are welcome through [GitHub Issues](https://github.com/klc/terly/issues).
+
+<p align="center">
+  Built with SwiftUI, <a href="https://github.com/migueldeicaza/SwiftTerm">SwiftTerm</a>, and <a href="https://github.com/sparkle-project/Sparkle">Sparkle</a>.
+</p>
