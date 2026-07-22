@@ -12,6 +12,13 @@ whose heading exactly matches the tag's version, so this heading is inert until
 the changes below are moved under a real version number at tag time.
 
 ### Added
+- Workspaces: save the current tabs and split panes as a named workspace and
+  reopen the whole layout later with one click. Each pane can carry its own
+  startup — a free-form command, one of your startup flows, or nothing — so a
+  single host can open with `htop` in one pane, logs in another, and the
+  project directory in a third. Save from the session header button or the
+  sidebar's Workspaces section; reopening appends to whatever is already open,
+  and panes whose alias has left the SSH config are skipped with a notice.
 - Record a terminal session from the session header. Each recording is a folder
   containing one [asciinema](https://docs.asciinema.org/) cast v2 file per pane,
   named after the pane's alias, playable with `asciinema play`. The folder is
@@ -42,6 +49,14 @@ the changes below are moved under a real version number at tag time.
 ### Changed
 - Keyboard shortcuts now come from a single registry that both the bindings and
   the Help guide read from, so documented shortcuts cannot drift from real ones.
+- The sidebar's general section is now called **General**; **Workspaces** takes
+  its place as the name for saved tab-and-pane layouts.
+
+### Removed
+- Connection groups. Saved workspaces replace them and additionally allow the
+  same host in several panes with different startup commands, which groups
+  could not express. Existing group definitions are not migrated; recreate the
+  layout on screen and save it as a workspace.
 
 ## 1.1.1
 

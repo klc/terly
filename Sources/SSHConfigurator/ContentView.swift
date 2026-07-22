@@ -840,7 +840,7 @@ private struct ContentSidebarView: View {
 
     var body: some View {
         List(selection: $model.selectedItem) {
-            Section("Workspace") {
+            Section("General") {
                 Label("Global settings", systemImage: "slider.horizontal.3")
                     .tag(ConfigNavigationItem.global)
                 Label("Include files", systemImage: "folder")

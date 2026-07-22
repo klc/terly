@@ -1,5 +1,11 @@
 import Foundation
 
+// Session-restore auto-save: mirrors "what's open right now" into
+// workspace-layout.json on every mutation and restores it at launch.
+// Distinct from the user-facing saved-workspace snapshots in
+// Sources/SSHConfigurator/Workspaces/ (SavedWorkspace*, workspaces.json),
+// which are named, user-managed, and opened by appending.
+
 struct PersistedPane: Codable, Equatable {
     let id: UUID
     let alias: String
