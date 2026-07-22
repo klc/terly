@@ -17,15 +17,18 @@
 		05C68EEF7F36A0841BE6672D /* SSHConfiguratorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67EDC3784ED64215C34EC5EE /* SSHConfiguratorApp.swift */; };
 		07C365AEC1851098765FE710 /* TunnelModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBB6D620B4A153BC05CF7FD /* TunnelModels.swift */; };
 		118AC9E4D87BBEC7CDDA70C7 /* SSHConfigDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D22042E64157754DB6E27E7A /* SSHConfigDocument.swift */; };
+		1537CE90AE04BE5B3B1F39A5 /* SavedWorkspaceLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1029DF5E9112667260AC9162 /* SavedWorkspaceLibrary.swift */; };
 		153BE23BF3E8F7F40915358C /* TransferQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 661952EE9147930E793D05A1 /* TransferQueueView.swift */; };
 		15B4C9B5B169604C1BF3411C /* StartupFlowModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C19F8E24EA1C09BAC16452 /* StartupFlowModels.swift */; };
 		176647701CF3AA4187CB3E19 /* SSHProcessClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3888A75A39BCFB09BB65F05C /* SSHProcessClientTests.swift */; };
+		1B641047D8CD0320B6A34C16 /* SavedWorkspaceStartupPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F4B4C121298FE71EF0FEC8 /* SavedWorkspaceStartupPreview.swift */; };
 		2260568DB5A4314EC4121F14 /* RunbookModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A98D3AA064065C446F43D4 /* RunbookModels.swift */; };
 		22D5200B420A49F952159C34 /* TransferQueueEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69ACFD8051580893CCAF2C25 /* TransferQueueEngine.swift */; };
 		230D7D7F0D1D45A12B7DB4C7 /* AppShortcutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EBEBEDBFA6BDFCDC7CB035 /* AppShortcutTests.swift */; };
 		23A45AA9D4002D26FC3A2B4B /* StartupFlowBootstrapBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6044D92F8A0835B09BD4CB17 /* StartupFlowBootstrapBuilderTests.swift */; };
 		256B5AD90DE8B613DD1A3995 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F17E24A3F1336017631C99 /* ContentView.swift */; };
 		2719CFB9A9EEEBE667AFE860 /* TerminalSessionRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44871634DD4F92487FC3912 /* TerminalSessionRecorder.swift */; };
+		2ABF95D78B986793F019E6FD /* WorkspaceEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ACC121B4E9B148B25C4EE46 /* WorkspaceEditSheet.swift */; };
 		2AFB37CF763F3390F921C582 /* QuickAccessSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAA9D117582512EE5CF82D6 /* QuickAccessSearch.swift */; };
 		2C3FA56EABF024E26EF9A742 /* PaneMouseActivationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23524E83576EF2A9B9F88545 /* PaneMouseActivationTests.swift */; };
 		2DAAF6C36DF8E71B2CFC885D /* TransferItemRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4531479E8489C2E9048A11E /* TransferItemRunner.swift */; };
@@ -34,6 +37,7 @@
 		2F99AD7FE708FF32D6A4EA15 /* SSHConfigFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91EA1E8F7BCAC6801318CFF /* SSHConfigFileStore.swift */; };
 		348C2E27830F1A97FEFD8AC0 /* SFTPDirectoryListingParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8035EF86D54C3EBA1720FD55 /* SFTPDirectoryListingParserTests.swift */; };
 		34D85D6D3FAA6CECDD861B79 /* TerminalInputRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C44A5EDFF3C9D84FF370A0 /* TerminalInputRouterTests.swift */; };
+		34F00AEA80492334072AA846 /* SavedWorkspaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC41542D074D7449A482289 /* SavedWorkspaceModels.swift */; };
 		35FC6CEA6EF3309DB8B03879 /* HelpCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BA9D82ADA8972A1550EB59 /* HelpCenterView.swift */; };
 		3C11A8A954D78E4437E0EEF1 /* SnippetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7AE025A8B14F13D7F7D912 /* SnippetModels.swift */; };
 		3E2AC209CB7DAA29B472EED0 /* ConfigViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D378DEDB5144FEBE6D868714 /* ConfigViewModel.swift */; };
@@ -42,6 +46,7 @@
 		457880C7B9D61E67251825D3 /* StepStatusStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9964612A974D49BD95FFBE6A /* StepStatusStyle.swift */; };
 		4686063D852DE5651AB5A770 /* SwiftTermTerminalEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EBC9FD05F3662864A8FE51E /* SwiftTermTerminalEngine.swift */; };
 		4692F3DEE651D42A163855A6 /* ReconnectScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A78A8E224EBA027219F6F0B8 /* ReconnectScheduling.swift */; };
+		46A2120617BD7F72E42946CF /* SavedWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16816BE5BD90041EEBEC578 /* SavedWorkspaceTests.swift */; };
 		47A40314F795FF99B2979F74 /* SCPTransferSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4FA43CAF26493E8C53AA58B /* SCPTransferSheet.swift */; };
 		4823BCB93F4B6C5D2E55F6C3 /* ChecksumVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3609C4544DB886DC63606568 /* ChecksumVerifierTests.swift */; };
 		4A015710DF8D7CE187DA2FB5 /* TunnelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A188030907F7494354977B2 /* TunnelListView.swift */; };
@@ -56,7 +61,6 @@
 		592DAF38522A7C0B81F2A990 /* SCPTransferWorkspaceModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D21B0AACF6A5A0812F8B5D83 /* SCPTransferWorkspaceModelTests.swift */; };
 		5AEAC877C5E320074D8FFDFF /* TransferQueueEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB05D6069138532F872FF57 /* TransferQueueEngineTests.swift */; };
 		5E14DF613547601A4D1A9084 /* AutoReconnectChainIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49D2AD99645EA0E7C11BD4B /* AutoReconnectChainIntegrationTests.swift */; };
-		61D040F2CAE5716556FB3CFC /* ConnectionGroupStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E2E83D1D75C163682BEAF79 /* ConnectionGroupStoreTests.swift */; };
 		62EF9615300E94A1E836C986 /* SSHConnectionDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC750A806CFA9A14F8ACECB /* SSHConnectionDiagnostics.swift */; };
 		6453BC917EBDFCDC7590BFB8 /* SyncRepositoryGitIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCDA36FF3F052E2A1755B26 /* SyncRepositoryGitIntegrationTests.swift */; };
 		64F1AB426DC7B2877DD4797C /* QuickAccessPaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC750B7DBABDBA912D8F7F9 /* QuickAccessPaletteView.swift */; };
@@ -69,6 +73,7 @@
 		6CF5A9FD72C20D722627FB1A /* ChecksumVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D138052CC306199D33F9487B /* ChecksumVerifier.swift */; };
 		6D47AFAAC76AFB3BAE4A18AD /* ReconnectExitClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5899D5BA7A5CCD617EE37F81 /* ReconnectExitClassifierTests.swift */; };
 		6D6421D70C7243FBF4D61F61 /* EmbeddedTerminalEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23417AAD6CF26007CEB7AC9C /* EmbeddedTerminalEngine.swift */; };
+		6DC9FD69872BF16692B3B00E /* PaneStartupOverride.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F2E38F4308D8843414E88B /* PaneStartupOverride.swift */; };
 		6E8A040932227913AFFA7CF3 /* NetworkPathObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF11D1A960878B2409EFF16 /* NetworkPathObserver.swift */; };
 		6FA81111E807E7A6B01FA02E /* SyncSetResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F872805F0B68B8D724A97BAD /* SyncSetResolverTests.swift */; };
 		6FCE9777A8A3C04B882C9666 /* terly-askpass.sh in Resources */ = {isa = PBXBuildFile; fileRef = CB9148B0D9A59E19C05B3C1F /* terly-askpass.sh */; };
@@ -98,6 +103,7 @@
 		9B8D764F2CD2DC2BB5E99B42 /* SSHConfiguratorSmokeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6482BACE9BD2A570E031DA2 /* SSHConfiguratorSmokeUITests.swift */; };
 		9BC3574655E76483708CFEC5 /* SCPTransferPlanBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052B1185B40BAB84D2A9E3E9 /* SCPTransferPlanBuilder.swift */; };
 		9D5CAC95BD08CADD7D42FDFB /* TransferQueueEngineIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E24E1A67EB53A536B98DBF /* TransferQueueEngineIntegrationTests.swift */; };
+		9D978DFE6863872E9B808312 /* SSHConnectionTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13617F587C83C15DCD28A046 /* SSHConnectionTarget.swift */; };
 		A4C1923CFAA19B5B73927589 /* StartupFlowMarkerParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021A7268C73407C8C2C9267A /* StartupFlowMarkerParserTests.swift */; };
 		A828E8558521C2B1DB6BCE0A /* TunnelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB65D8F47D714C7A59BD24BD /* TunnelStore.swift */; };
 		A8A8D4400A7648DA88774C6D /* SSHErrorClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702A7B7DE1A693398DB7F9D1 /* SSHErrorClassifierTests.swift */; };
@@ -117,9 +123,9 @@
 		BA68B94D78720EB569EF37A2 /* QuickAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC61F9449A631FA6C28D0A7 /* QuickAccessTests.swift */; };
 		BA8FC443C98858B2999B2FAA /* QuickAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D091F5D4B7D9F2AA8314C24 /* QuickAccessStore.swift */; };
 		BF258B4936EAF1B76D7FC148 /* SSHConfigDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F10317D13BE43A80DB8615C /* SSHConfigDocumentTests.swift */; };
+		BF78ADD8AE310FBAE108C00D /* SavedWorkspaceStartupPreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B8425AAEBDF56286715D82 /* SavedWorkspaceStartupPreviewTests.swift */; };
 		C259B166E4D715D6E3DD8E7D /* UploadPreflightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B238ECC4EAAD39D682B7AC3F /* UploadPreflightTests.swift */; };
 		C31462175212DD64BD3E5316 /* SSHLaunchPlanBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50CE27EFD080DB16A01CCF8 /* SSHLaunchPlanBuilderTests.swift */; };
-		C4B2C1AB8DC598F721238A19 /* ConnectionGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44385BFF8ABAE6A32DECC8C6 /* ConnectionGroups.swift */; };
 		C50EC8FA58CFB6F0DD065E1A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FCBFFEEE083667EF0489CFD0 /* Localizable.xcstrings */; };
 		C8681D532C512889D07ACCAF /* RunbookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD77CC37B15F48F0E6F2F92C /* RunbookTests.swift */; };
 		CC8B2C78B4E7FD89ACDE4C8B /* SyncRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454562F0B45A7D1EAE043C01 /* SyncRepository.swift */; };
@@ -139,6 +145,7 @@
 		DBA0C3629A947545F46C9727 /* SFTPFolderTransferRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165350CFB521F3F69518113F /* SFTPFolderTransferRunner.swift */; };
 		DDB25C90A4757984E6070B45 /* AskpassHelperLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D99F3CB412828B35FC0C95 /* AskpassHelperLocator.swift */; };
 		DDCF30439D857E544AB120E0 /* StartupFlowMarkerParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CBAED7131DC5CF7242E4C /* StartupFlowMarkerParser.swift */; };
+		DE615FB5EAA5B591A1F48736 /* SavedWorkspaceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2002B6DC6EF1DC996FCB7286 /* SavedWorkspaceStore.swift */; };
 		DFA44B2ED253EBC2604B5B5A /* TerminalWorkspaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48DDA03CC444F0811D9D113 /* TerminalWorkspaceModel.swift */; };
 		E3ED4988C63717D98F354491 /* RunbookExecutionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEAB02B4828176613E7A482 /* RunbookExecutionEngine.swift */; };
 		E6A38606D9DB23885E79A821 /* TerminalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B2E7F3EEDA51C7F8683944 /* TerminalModels.swift */; };
@@ -225,8 +232,9 @@
 		0AC750B7DBABDBA912D8F7F9 /* QuickAccessPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAccessPaletteView.swift; sourceTree = "<group>"; };
 		0DA005D369AA8A862E76744C /* TunnelWorkspaceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunnelWorkspaceModel.swift; sourceTree = "<group>"; };
 		0DD5883801E4F30FDF698AC8 /* RemoteFileBrowserModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFileBrowserModels.swift; sourceTree = "<group>"; };
-		0E2E83D1D75C163682BEAF79 /* ConnectionGroupStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionGroupStoreTests.swift; sourceTree = "<group>"; };
 		0F1BEDC20BD97192FDE85B42 /* WorkspaceLayoutStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceLayoutStore.swift; sourceTree = "<group>"; };
+		1029DF5E9112667260AC9162 /* SavedWorkspaceLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceLibrary.swift; sourceTree = "<group>"; };
+		13617F587C83C15DCD28A046 /* SSHConnectionTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConnectionTarget.swift; sourceTree = "<group>"; };
 		140AA7B0D2EA1BDF9CF0A358 /* SSHConnectionDiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConnectionDiagnosticsView.swift; sourceTree = "<group>"; };
 		1437404898B6F5F6E1D13529 /* SnippetEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetEditorView.swift; sourceTree = "<group>"; };
 		165350CFB521F3F69518113F /* SFTPFolderTransferRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFTPFolderTransferRunner.swift; sourceTree = "<group>"; };
@@ -234,6 +242,7 @@
 		1913FE655D04FDEDFF349873 /* TransferModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferModels.swift; sourceTree = "<group>"; };
 		1992CE6D96799F34D4972C83 /* StartupFlowBootstrapBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupFlowBootstrapBuilder.swift; sourceTree = "<group>"; };
 		1C7C35ADD87A081C9378B37A /* SSHConfigValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigValidator.swift; sourceTree = "<group>"; };
+		2002B6DC6EF1DC996FCB7286 /* SavedWorkspaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceStore.swift; sourceTree = "<group>"; };
 		23417AAD6CF26007CEB7AC9C /* EmbeddedTerminalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedTerminalEngine.swift; sourceTree = "<group>"; };
 		23524E83576EF2A9B9F88545 /* PaneMouseActivationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneMouseActivationTests.swift; sourceTree = "<group>"; };
 		264DCE0011068848CB95B106 /* RemoteFileBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFileBrowserView.swift; sourceTree = "<group>"; };
@@ -248,12 +257,12 @@
 		3A79EC047B3902E166FFA3E7 /* SSHConfigEditing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigEditing.swift; sourceTree = "<group>"; };
 		3E9999A2F7209DE69599ECA8 /* TransferHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferHistoryStore.swift; sourceTree = "<group>"; };
 		3EB05D6069138532F872FF57 /* TransferQueueEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueueEngineTests.swift; sourceTree = "<group>"; };
-		44385BFF8ABAE6A32DECC8C6 /* ConnectionGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionGroups.swift; sourceTree = "<group>"; };
 		4507C47FA0233B8020672816 /* SFTPDirectoryListingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFTPDirectoryListingService.swift; sourceTree = "<group>"; };
 		454562F0B45A7D1EAE043C01 /* SyncRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncRepository.swift; sourceTree = "<group>"; };
 		481EDFB336DFBDFA5DD2C732 /* RunbookEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookEditorView.swift; sourceTree = "<group>"; };
 		4BB6E9BD9441E004AC1BC4D9 /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		4EBC9FD05F3662864A8FE51E /* SwiftTermTerminalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTermTerminalEngine.swift; sourceTree = "<group>"; };
+		4EC41542D074D7449A482289 /* SavedWorkspaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceModels.swift; sourceTree = "<group>"; };
 		4F7C7373DB0DF6E7AFDCF206 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4F9289B94EBCF260C8533544 /* FormFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormFieldStyle.swift; sourceTree = "<group>"; };
 		5126C7D265FEEC3B9AD1E014 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -277,6 +286,8 @@
 		6C6900E42AAA56BD48E825FA /* TerminalSessionRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSessionRecorderTests.swift; sourceTree = "<group>"; };
 		6F10317D13BE43A80DB8615C /* SSHConfigDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigDocumentTests.swift; sourceTree = "<group>"; };
 		702A7B7DE1A693398DB7F9D1 /* SSHErrorClassifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHErrorClassifierTests.swift; sourceTree = "<group>"; };
+		74B8425AAEBDF56286715D82 /* SavedWorkspaceStartupPreviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceStartupPreviewTests.swift; sourceTree = "<group>"; };
+		74F2E38F4308D8843414E88B /* PaneStartupOverride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneStartupOverride.swift; sourceTree = "<group>"; };
 		76F74FC4F82F10F84147B943 /* SSHConfigCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SSHConfigCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		79A53EA2F651B9B92C2458DD /* SyncApplyPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncApplyPreviewView.swift; sourceTree = "<group>"; };
 		79E24E1A67EB53A536B98DBF /* TransferQueueEngineIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueueEngineIntegrationTests.swift; sourceTree = "<group>"; };
@@ -296,6 +307,7 @@
 		945786CE2516669EE8AB959D /* TransferHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferHistoryView.swift; sourceTree = "<group>"; };
 		9964612A974D49BD95FFBE6A /* StepStatusStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepStatusStyle.swift; sourceTree = "<group>"; };
 		9973DA8D6ED46B001444E65F /* TerminalWorkspaceModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalWorkspaceModelTests.swift; sourceTree = "<group>"; };
+		9ACC121B4E9B148B25C4EE46 /* WorkspaceEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceEditSheet.swift; sourceTree = "<group>"; };
 		9B00812DA791EBC953BD25BC /* GitCommandRunnerArgvTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitCommandRunnerArgvTests.swift; sourceTree = "<group>"; };
 		9C7551610A9869FAF75BF86C /* SyncSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSettingsStore.swift; sourceTree = "<group>"; };
 		9D73D8EAF3F9E49DDBD536F3 /* SSHConnectionDiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConnectionDiagnosticsTests.swift; sourceTree = "<group>"; };
@@ -303,6 +315,7 @@
 		9DF1597B318CAA709E38A29B /* TransferHistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferHistoryStoreTests.swift; sourceTree = "<group>"; };
 		9F321B5B0D1647789DFAEFFF /* SSHConfigFileStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigFileStoreTests.swift; sourceTree = "<group>"; };
 		A0E2B99E6E531A3FF884A91B /* SFTPDirectoryListingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFTPDirectoryListingServiceTests.swift; sourceTree = "<group>"; };
+		A1F4B4C121298FE71EF0FEC8 /* SavedWorkspaceStartupPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceStartupPreview.swift; sourceTree = "<group>"; };
 		A2BCD29EC559BD8E1F4ECCE0 /* KeySetupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetupTests.swift; sourceTree = "<group>"; };
 		A4A9B6AB816C556298558F05 /* SnippetPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetPaletteView.swift; sourceTree = "<group>"; };
 		A50CE27EFD080DB16A01CCF8 /* SSHLaunchPlanBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHLaunchPlanBuilderTests.swift; sourceTree = "<group>"; };
@@ -347,6 +360,7 @@
 		D6A22ECF805C72700820CB78 /* ReconnectExitClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectExitClassifier.swift; sourceTree = "<group>"; };
 		D9EBEBEDBFA6BDFCDC7CB035 /* AppShortcutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcutTests.swift; sourceTree = "<group>"; };
 		DA7AE025A8B14F13D7F7D912 /* SnippetModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetModels.swift; sourceTree = "<group>"; };
+		E16816BE5BD90041EEBEC578 /* SavedWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceTests.swift; sourceTree = "<group>"; };
 		E2FB984B84E4AE1D00D33FED /* HostSettingsApplyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostSettingsApplyCoordinator.swift; sourceTree = "<group>"; };
 		E49D2AD99645EA0E7C11BD4B /* AutoReconnectChainIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoReconnectChainIntegrationTests.swift; sourceTree = "<group>"; };
 		E5D8B9B7C5A4E679A74307D7 /* SnippetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetStore.swift; sourceTree = "<group>"; };
@@ -407,6 +421,7 @@
 				640457D54E626608578CA306 /* AutoReconnectSettingsStore.swift */,
 				23417AAD6CF26007CEB7AC9C /* EmbeddedTerminalEngine.swift */,
 				BBF11D1A960878B2409EFF16 /* NetworkPathObserver.swift */,
+				74F2E38F4308D8843414E88B /* PaneStartupOverride.swift */,
 				D6A22ECF805C72700820CB78 /* ReconnectExitClassifier.swift */,
 				A78A8E224EBA027219F6F0B8 /* ReconnectScheduling.swift */,
 				4EBC9FD05F3662864A8FE51E /* SwiftTermTerminalEngine.swift */,
@@ -508,7 +523,6 @@
 			children = (
 				C6BE40066CC577CDAA33D8D6 /* Assets.xcassets */,
 				D378DEDB5144FEBE6D868714 /* ConfigViewModel.swift */,
-				44385BFF8ABAE6A32DECC8C6 /* ConnectionGroups.swift */,
 				64F17E24A3F1336017631C99 /* ContentView.swift */,
 				CF0A198B65DD603D79FA864C /* GeneralSettingsView.swift */,
 				4F7C7373DB0DF6E7AFDCF206 /* Info.plist */,
@@ -530,9 +544,22 @@
 				4CED9FB541EDC857C687057C /* Transfer */,
 				B022FA6380CEF9AA84FC1791 /* Tunnels */,
 				E0BC37DD6DCA88325FC1EE28 /* Updates */,
+				5AC55708DC41436DB2BC5DC7 /* Workspaces */,
 			);
 			name = SSHConfigurator;
 			path = Sources/SSHConfigurator;
+			sourceTree = "<group>";
+		};
+		5AC55708DC41436DB2BC5DC7 /* Workspaces */ = {
+			isa = PBXGroup;
+			children = (
+				1029DF5E9112667260AC9162 /* SavedWorkspaceLibrary.swift */,
+				4EC41542D074D7449A482289 /* SavedWorkspaceModels.swift */,
+				A1F4B4C121298FE71EF0FEC8 /* SavedWorkspaceStartupPreview.swift */,
+				2002B6DC6EF1DC996FCB7286 /* SavedWorkspaceStore.swift */,
+				9ACC121B4E9B148B25C4EE46 /* WorkspaceEditSheet.swift */,
+			);
+			path = Workspaces;
 			sourceTree = "<group>";
 		};
 		5B973600156922EEB60B317D /* SSHConfiguratorTests */ = {
@@ -544,7 +571,6 @@
 				B77A984EB504FF497E93B6B7 /* AutoReconnectManagerTests.swift */,
 				B71A497980E4118E7F8FB53E /* AutoReconnectSettingsStoreTests.swift */,
 				3609C4544DB886DC63606568 /* ChecksumVerifierTests.swift */,
-				0E2E83D1D75C163682BEAF79 /* ConnectionGroupStoreTests.swift */,
 				9B00812DA791EBC953BD25BC /* GitCommandRunnerArgvTests.swift */,
 				16B580874192A7CD06B8A04F /* HostSettingsApplyCoordinatorTests.swift */,
 				A2BCD29EC559BD8E1F4ECCE0 /* KeySetupTests.swift */,
@@ -552,6 +578,8 @@
 				EEC61F9449A631FA6C28D0A7 /* QuickAccessTests.swift */,
 				5899D5BA7A5CCD617EE37F81 /* ReconnectExitClassifierTests.swift */,
 				CD77CC37B15F48F0E6F2F92C /* RunbookTests.swift */,
+				74B8425AAEBDF56286715D82 /* SavedWorkspaceStartupPreviewTests.swift */,
+				E16816BE5BD90041EEBEC578 /* SavedWorkspaceTests.swift */,
 				EDA779FD3CC9CABE217131EA /* SCPTransferPlanBuilderTests.swift */,
 				D21B0AACF6A5A0812F8B5D83 /* SCPTransferWorkspaceModelTests.swift */,
 				8035EF86D54C3EBA1720FD55 /* SFTPDirectoryListingParserTests.swift */,
@@ -672,6 +700,7 @@
 				D56E55A9359B5E56E3AA3E58 /* AppShortcut.swift */,
 				4F9289B94EBCF260C8533544 /* FormFieldStyle.swift */,
 				657861E5BB19632354B40822 /* SheetHeader.swift */,
+				13617F587C83C15DCD28A046 /* SSHConnectionTarget.swift */,
 				9964612A974D49BD95FFBE6A /* StepStatusStyle.swift */,
 			);
 			path = Shared;
@@ -892,7 +921,6 @@
 				2DE391E69614DD886C961CB0 /* AutoReconnectManagerTests.swift in Sources */,
 				AF7AF25F61CAD69F0878BB35 /* AutoReconnectSettingsStoreTests.swift in Sources */,
 				4823BCB93F4B6C5D2E55F6C3 /* ChecksumVerifierTests.swift in Sources */,
-				61D040F2CAE5716556FB3CFC /* ConnectionGroupStoreTests.swift in Sources */,
 				F1EFC5D0149756BA865281F1 /* GitCommandRunnerArgvTests.swift in Sources */,
 				6B2D967A000C70568D1EFC27 /* HostSettingsApplyCoordinatorTests.swift in Sources */,
 				68F128D6499EDF6352F49E3C /* KeySetupTests.swift in Sources */,
@@ -908,6 +936,8 @@
 				A8A8D4400A7648DA88774C6D /* SSHErrorClassifierTests.swift in Sources */,
 				C31462175212DD64BD3E5316 /* SSHLaunchPlanBuilderTests.swift in Sources */,
 				176647701CF3AA4187CB3E19 /* SSHProcessClientTests.swift in Sources */,
+				BF78ADD8AE310FBAE108C00D /* SavedWorkspaceStartupPreviewTests.swift in Sources */,
+				46A2120617BD7F72E42946CF /* SavedWorkspaceTests.swift in Sources */,
 				23A45AA9D4002D26FC3A2B4B /* StartupFlowBootstrapBuilderTests.swift in Sources */,
 				A4C1923CFAA19B5B73927589 /* StartupFlowMarkerParserTests.swift in Sources */,
 				00D84668779E872C03CD5D6D /* StartupFlowStoreTests.swift in Sources */,
@@ -970,7 +1000,6 @@
 				51C72DCA9493745961BB4BA2 /* AutoReconnectSettingsStore.swift in Sources */,
 				6CF5A9FD72C20D722627FB1A /* ChecksumVerifier.swift in Sources */,
 				3E2AC209CB7DAA29B472EED0 /* ConfigViewModel.swift in Sources */,
-				C4B2C1AB8DC598F721238A19 /* ConnectionGroups.swift in Sources */,
 				256B5AD90DE8B613DD1A3995 /* ContentView.swift in Sources */,
 				6D6421D70C7243FBF4D61F61 /* EmbeddedTerminalEngine.swift in Sources */,
 				3EC9D4F8EDE197D68ABFE2FF /* FormFieldStyle.swift in Sources */,
@@ -982,6 +1011,7 @@
 				69BE984535C80C64851BB32A /* KeySetupModels.swift in Sources */,
 				B4CE2565A9B916E965E5F2C4 /* KeySetupWizardView.swift in Sources */,
 				6E8A040932227913AFFA7CF3 /* NetworkPathObserver.swift in Sources */,
+				6DC9FD69872BF16692B3B00E /* PaneStartupOverride.swift in Sources */,
 				7E51B3029B244FD85D230838 /* QuickAccessActionPolicy.swift in Sources */,
 				93281F67ECD6E6BF5C487139 /* QuickAccessModels.swift in Sources */,
 				64F1AB426DC7B2877DD4797C /* QuickAccessPaletteView.swift in Sources */,
@@ -1009,8 +1039,13 @@
 				05C68EEF7F36A0841BE6672D /* SSHConfiguratorApp.swift in Sources */,
 				62EF9615300E94A1E836C986 /* SSHConnectionDiagnostics.swift in Sources */,
 				D3D283540A71ABD6E14C49B2 /* SSHConnectionDiagnosticsView.swift in Sources */,
+				9D978DFE6863872E9B808312 /* SSHConnectionTarget.swift in Sources */,
 				F441565E37922DA7DEC0FE06 /* SSHErrorClassifier.swift in Sources */,
 				ECB03C69CA07F27D5F9B7A2B /* SSHProcessClient.swift in Sources */,
+				1537CE90AE04BE5B3B1F39A5 /* SavedWorkspaceLibrary.swift in Sources */,
+				34F00AEA80492334072AA846 /* SavedWorkspaceModels.swift in Sources */,
+				1B641047D8CD0320B6A34C16 /* SavedWorkspaceStartupPreview.swift in Sources */,
+				DE615FB5EAA5B591A1F48736 /* SavedWorkspaceStore.swift in Sources */,
 				F683EFFD61BC25B566610757 /* SheetHeader.swift in Sources */,
 				D3A9544DEB8A6A24CB97C087 /* SnippetEditorView.swift in Sources */,
 				AB21DE489D532C8F2E9171AB /* SnippetLibrary.swift in Sources */,
@@ -1054,6 +1089,7 @@
 				D7F98A75D9A8EE5FCDF80B02 /* UpdateSettingsView.swift in Sources */,
 				04BEAFB1EA1CAAB98AE6C7E7 /* UpdaterViewModel.swift in Sources */,
 				F7AFDB8BF9E1CBFC7555501D /* UploadPreflight.swift in Sources */,
+				2ABF95D78B986793F019E6FD /* WorkspaceEditSheet.swift in Sources */,
 				DA5E498C9D73F065A5806121 /* WorkspaceLayoutStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
