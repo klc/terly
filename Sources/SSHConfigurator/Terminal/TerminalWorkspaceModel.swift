@@ -341,6 +341,121 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
 
+    /// Phase B: opens a saved workspace snapshot, appending its sessions to
+    /// whatever is already open — never closes, reuses, or reorders existing
+    /// sessions. Every pane gets a fresh `UUID` (so opening the same saved
+    /// workspace twice produces two fully independent sets of sessions/panes),
+    /// and every split gets a fresh split ID.
+    @discardableResult
+    func openSavedWorkspace(
+        _ workspace: SavedWorkspace,
+        hasUnsavedChanges: Bool,
+        startupProfiles: [String: StartupFlowProfile] = [:],
+        validAliases: Set<String>? = nil,
+        skipAllStartups: Bool = false
+    ) -> SavedWorkspaceOpenOutcome? {
+        guard !hasUnsavedChanges else {
+            errorMessage = TerminalWorkspaceError.unsavedChanges.localizedDescription
+            return nil
+        }
+
+        var skippedAliases: [String] = []
+        var seenSkippedAliases: Set<String> = []
+
+        func recordSkipped(_ alias: String) {
+            if seenSkippedAliases.insert(alias).inserted {
+                skippedAliases.append(alias)
+            }
+        }
+
+        // Same "local aliases are always valid" carve-out `restoreWorkspace`
+        // applies.
+        func isValidAlias(_ alias: String) -> Bool {
+            guard let validAliases else { return true }
+            if alias == "Yerel Terminal" || alias == "Local Terminal" { return true }
+            return validAliases.contains(alias)
+        }
+
+        // Prunes panes with an invalid alias (or one `makePane` otherwise
+        // rejects) rather than failing the whole open; a split with one dead
+        // child collapses to the surviving child.
+        func buildLayout(
+            _ layout: SavedWorkspacePaneLayout,
+            paneIDMap: inout [UUID: UUID]
+        ) -> TerminalPaneLayout? {
+            switch layout {
+            case let .pane(savedPane):
+                guard isValidAlias(savedPane.alias) else {
+                    recordSkipped(savedPane.alias)
+                    return nil
+                }
+                do {
+                    let newPane = try launchPlanBuilder.makePane(
+                        id: UUID(),
+                        alias: savedPane.alias,
+                        startupProfile: startupProfiles[savedPane.alias],
+                        skipStartup: skipAllStartups,
+                        startupOverride: savedPane.startup
+                    )
+                    paneIDMap[savedPane.id] = newPane.id
+                    return .pane(newPane)
+                } catch {
+                    recordSkipped(savedPane.alias)
+                    return nil
+                }
+
+            case let .split(axis, ratio, first, second):
+                let newFirst = buildLayout(first, paneIDMap: &paneIDMap)
+                let newSecond = buildLayout(second, paneIDMap: &paneIDMap)
+                switch (newFirst, newSecond) {
+                case let (.some(first), .some(second)):
+                    return .split(id: UUID(), axis: axis, ratio: ratio, first: first, second: second)
+                case let (.some(remaining), .none), let (.none, .some(remaining)):
+                    return remaining
+                case (.none, .none):
+                    return nil
+                }
+            }
+        }
+
+        var newSessions: [TerminalSession] = []
+
+        for savedSession in workspace.sessions {
+            var paneIDMap: [UUID: UUID] = [:]
+            guard let layout = buildLayout(savedSession.layout, paneIDMap: &paneIDMap) else { continue }
+
+            let activePaneID = paneIDMap[savedSession.activePaneID] ?? layout.panes[0].id
+            var synchronizedPaneIDs = Set(savedSession.synchronizedPaneIDs.compactMap { paneIDMap[$0] })
+            if synchronizedPaneIDs.count < 2 {
+                synchronizedPaneIDs = []
+            }
+
+            var session = TerminalSession(
+                hostID: savedSession.hostID,
+                alias: savedSession.alias,
+                groupID: nil,
+                layout: layout,
+                activePaneID: activePaneID,
+                customTitle: savedSession.customTitle
+            )
+            session.synchronizedPaneIDs = synchronizedPaneIDs
+            newSessions.append(session)
+        }
+
+        guard !newSessions.isEmpty else {
+            errorMessage = TerminalWorkspaceError.noConnections.localizedDescription
+            return nil
+        }
+
+        sessions += newSessions
+        selectedSessionID = newSessions.first?.id
+        errorMessage = nil
+        return SavedWorkspaceOpenOutcome(
+            openedSessionIDs: newSessions.map(\.id),
+            skippedAliases: skippedAliases
+        )
+    }
+
     func closeTab(_ sessionID: TerminalSession.ID) {
         if let session = sessions.first(where: { $0.id == sessionID }) {
             markPanesAsUserClosed(session.panes.map(\.id))
