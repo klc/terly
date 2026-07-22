@@ -327,6 +327,105 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
         let newPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
         XCTAssertNotEqual(newPaneID, paneID) // ID must change to force SwiftUI update
     }
+
+    // MARK: - Phase A: per-pane startup override
+
+    func testPersistedPaneRoundTripsEachOverrideCase() throws {
+        let commandPane = PersistedPane(id: UUID(), alias: "prod", startupOverride: .command("htop"))
+        let flowProfile = StartupFlowProfile(alias: "prod", automaticallyRun: false, steps: [.runCommand("echo hi")])
+        let flowPane = PersistedPane(id: UUID(), alias: "prod", startupOverride: .flow(flowProfile))
+        let suppressedPane = PersistedPane(id: UUID(), alias: "prod", startupOverride: .suppressed)
+        let noOverridePane = PersistedPane(id: UUID(), alias: "prod")
+
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+
+        for pane in [commandPane, flowPane, suppressedPane, noOverridePane] {
+            let data = try encoder.encode(pane)
+            let decoded = try decoder.decode(PersistedPane.self, from: data)
+            XCTAssertEqual(decoded, pane)
+            XCTAssertEqual(decoded.startupOverride, pane.startupOverride)
+        }
+    }
+
+    func testLegacyPersistedPaneWithoutOverrideKeyDecodesToNilOverride() throws {
+        let paneID = UUID()
+        let data = try XCTUnwrap("""
+        {"id":"\(paneID.uuidString)","alias":"prod"}
+        """.data(using: .utf8))
+
+        let pane = try JSONDecoder().decode(PersistedPane.self, from: data)
+
+        XCTAssertNil(pane.startupOverride)
+    }
+
+    @MainActor
+    func testRestorePathPrefersPaneOverrideOverAliasKeyedProfile() {
+        let mockStore = MockWorkspaceLayoutStore()
+        let paneID = UUID()
+        let sessionID = UUID()
+        let persistedSession = PersistedSession(
+            id: sessionID,
+            hostID: 5,
+            alias: "stage",
+            groupID: nil,
+            layout: .pane(PersistedPane(id: paneID, alias: "stage", startupOverride: .command("htop"))),
+            activePaneID: paneID,
+            synchronizedPaneIDs: []
+        )
+        mockStore.savedWorkspace = PersistedWorkspace(sessions: [persistedSession], selectedSessionID: sessionID)
+
+        let aliasKeyedProfile = StartupFlowProfile(
+            alias: "stage",
+            automaticallyRun: true,
+            steps: [.runCommand("uptime")]
+        )
+
+        let model = TerminalWorkspaceModel(
+            launchPlanBuilder: makeLaunchPlanBuilder(),
+            workspaceStore: mockStore
+        )
+        model.restoreWorkspace(startupProfiles: ["stage": aliasKeyedProfile])
+
+        let pane = model.selectedSession?.activePane
+        XCTAssertEqual(pane?.startupOverride, .command("htop"))
+        let bootstrapCommand = pane?.process.arguments.last
+        XCTAssertTrue(bootstrapCommand?.contains("htop") == true)
+        XCTAssertFalse(bootstrapCommand?.contains("uptime") == true)
+    }
+
+    @MainActor
+    func testReconnectKeepsOverrideAndReRunsCommand() {
+        let mockStore = MockWorkspaceLayoutStore()
+        let paneID = UUID()
+        let sessionID = UUID()
+        let persistedSession = PersistedSession(
+            id: sessionID,
+            hostID: 5,
+            alias: "stage",
+            groupID: nil,
+            layout: .pane(PersistedPane(id: paneID, alias: "stage", startupOverride: .command("htop"))),
+            activePaneID: paneID,
+            synchronizedPaneIDs: []
+        )
+        mockStore.savedWorkspace = PersistedWorkspace(sessions: [persistedSession], selectedSessionID: sessionID)
+
+        let model = TerminalWorkspaceModel(
+            launchPlanBuilder: makeLaunchPlanBuilder(),
+            workspaceStore: mockStore
+        )
+        model.restoreWorkspace(startupProfiles: [:])
+
+        model.processDidExit(sessionID: sessionID, paneID: paneID, exitCode: 1)
+        // No alias-keyed profile is passed here — the override alone must
+        // still win and re-run the command on the reconnected pane.
+        XCTAssertTrue(model.reconnectPane(paneID, in: sessionID, startupProfile: nil))
+
+        let newPane = model.selectedSession?.activePane
+        XCTAssertNotEqual(newPane?.id, paneID)
+        XCTAssertEqual(newPane?.startupOverride, .command("htop"))
+        XCTAssertTrue(newPane?.process.arguments.last?.contains("htop") == true)
+    }
 }
 
 private func makeLaunchPlanBuilder() -> SSHLaunchPlanBuilder {

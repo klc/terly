@@ -161,4 +161,70 @@ final class SSHLaunchPlanBuilderTests: XCTestCase {
         let pane = try SSHLaunchPlanBuilder().makePane(alias: "-prod")
         XCTAssertEqual(pane.process.arguments, ["--", "-prod"])
     }
+
+    // MARK: - Phase A: per-pane startup override
+
+    func testCommandOverrideRunsAutomaticallyAndRoundTripsOnPane() throws {
+        let pane = try SSHLaunchPlanBuilder().makePane(
+            alias: "prod-api",
+            startupOverride: .command("htop")
+        )
+
+        XCTAssertEqual(pane.process.arguments.prefix(4), ["-tt", "-o", "RemoteCommand=none", "-o"])
+        XCTAssertTrue(pane.process.arguments.contains("-o"))
+        XCTAssertTrue(pane.process.arguments.contains("SessionType=default"))
+        let bootstrapCommand = try XCTUnwrap(pane.process.arguments.last)
+        XCTAssertTrue(bootstrapCommand.contains("htop"))
+        XCTAssertEqual(pane.startupOverride, .command("htop"))
+    }
+
+    func testSuppressedOverrideWinsOverAutoRunAliasProfile() throws {
+        let profile = StartupFlowProfile(
+            alias: "prod-api",
+            automaticallyRun: true,
+            steps: [.runCommand("uptime")]
+        )
+
+        let pane = try SSHLaunchPlanBuilder().makePane(
+            alias: "prod-api",
+            startupProfile: profile,
+            startupOverride: .suppressed
+        )
+
+        XCTAssertEqual(pane.process.arguments, ["--", "prod-api"])
+        XCTAssertNil(pane.startupExecution)
+    }
+
+    func testFlowOverrideNormalizesAliasAndForcesAutomaticRun() throws {
+        let embedded = StartupFlowProfile(
+            alias: "other-alias",
+            automaticallyRun: false,
+            steps: [.runCommand("echo hi")]
+        )
+
+        let effectiveProfile = try XCTUnwrap(
+            PaneStartupOverride.flow(embedded).effectiveProfile(alias: "prod-api")
+        )
+        XCTAssertEqual(effectiveProfile.alias, "prod-api")
+        XCTAssertTrue(effectiveProfile.automaticallyRun)
+
+        let pane = try SSHLaunchPlanBuilder().makePane(
+            alias: "prod-api",
+            startupOverride: .flow(embedded)
+        )
+
+        XCTAssertEqual(pane.startupState, .running(stepIndex: nil))
+        let bootstrapCommand = try XCTUnwrap(pane.process.arguments.last)
+        XCTAssertTrue(bootstrapCommand.contains("echo hi"))
+    }
+
+    func testWhitespaceOnlyCommandOverrideBehavesAsNoStartup() throws {
+        let pane = try SSHLaunchPlanBuilder().makePane(
+            alias: "prod-api",
+            startupOverride: .command("   ")
+        )
+
+        XCTAssertEqual(pane.process.arguments, ["--", "prod-api"])
+        XCTAssertNil(pane.startupExecution)
+    }
 }

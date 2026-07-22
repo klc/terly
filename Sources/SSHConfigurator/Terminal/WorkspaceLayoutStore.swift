@@ -4,17 +4,25 @@ struct PersistedPane: Codable, Equatable {
     let id: UUID
     let alias: String
     let skippedAutomaticStartup: Bool
+    let startupOverride: PaneStartupOverride?
 
-    init(id: UUID, alias: String, skippedAutomaticStartup: Bool = false) {
+    init(
+        id: UUID,
+        alias: String,
+        skippedAutomaticStartup: Bool = false,
+        startupOverride: PaneStartupOverride? = nil
+    ) {
         self.id = id
         self.alias = alias
         self.skippedAutomaticStartup = skippedAutomaticStartup
+        self.startupOverride = startupOverride
     }
 
     private enum CodingKeys: String, CodingKey {
         case id
         case alias
         case skippedAutomaticStartup
+        case startupOverride
     }
 
     init(from decoder: Decoder) throws {
@@ -25,6 +33,10 @@ struct PersistedPane: Codable, Equatable {
             Bool.self,
             forKey: .skippedAutomaticStartup
         ) ?? false
+        startupOverride = try container.decodeIfPresent(
+            PaneStartupOverride.self,
+            forKey: .startupOverride
+        )
     }
 }
 
@@ -197,7 +209,8 @@ extension TerminalPaneLayout {
             return .pane(PersistedPane(
                 id: pane.id,
                 alias: pane.alias,
-                skippedAutomaticStartup: pane.startupState == .skipped
+                skippedAutomaticStartup: pane.startupState == .skipped,
+                startupOverride: pane.startupOverride
             ))
         case let .split(id, axis, ratio, first, second):
             return .split(id: id, axis: axis, ratio: ratio, first: first.persisted, second: second.persisted)
@@ -217,7 +230,8 @@ extension PersistedPaneLayout {
                 id: persistedPane.id,
                 alias: persistedPane.alias,
                 startupProfile: profile,
-                skipStartup: persistedPane.skippedAutomaticStartup
+                skipStartup: persistedPane.skippedAutomaticStartup,
+                startupOverride: persistedPane.startupOverride
             )
             return .pane(pane)
         case let .split(id, axis, ratio, first, second):

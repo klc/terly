@@ -35,6 +35,9 @@ struct TerminalPane: Identifiable, Equatable, Sendable {
     var status: Status
     let startupExecution: StartupFlowExecution?
     var startupState: StartupFlowRunState?
+    /// Phase A: per-pane startup override that wins over the alias-keyed
+    /// startup profile map. `nil` preserves today's behavior exactly.
+    let startupOverride: PaneStartupOverride?
 
     init(
         id: UUID = UUID(),
@@ -42,7 +45,8 @@ struct TerminalPane: Identifiable, Equatable, Sendable {
         process: TerminalProcessConfiguration,
         status: Status = .running,
         startupExecution: StartupFlowExecution? = nil,
-        startupState: StartupFlowRunState? = nil
+        startupState: StartupFlowRunState? = nil,
+        startupOverride: PaneStartupOverride? = nil
     ) {
         self.id = id
         self.alias = alias
@@ -50,6 +54,7 @@ struct TerminalPane: Identifiable, Equatable, Sendable {
         self.status = status
         self.startupExecution = startupExecution
         self.startupState = startupState
+        self.startupOverride = startupOverride
     }
 }
 
@@ -443,7 +448,8 @@ struct SSHLaunchPlanBuilder: Sendable {
         id: UUID = UUID(),
         alias: String,
         startupProfile: StartupFlowProfile? = nil,
-        skipStartup: Bool = false
+        skipStartup: Bool = false,
+        startupOverride: PaneStartupOverride? = nil
     ) throws -> TerminalPane {
         if alias == "Yerel Terminal" || alias == "Local Terminal" {
             let shellPath = baseEnvironment["SHELL"] ?? "/bin/zsh"
@@ -475,10 +481,21 @@ struct SSHLaunchPlanBuilder: Sendable {
         environment["TERM"] = "xterm-256color"
         environment["COLORTERM"] = "truecolor"
 
-        let execution = try startupProfile.flatMap { profile in
+        // Phase A: an explicit per-pane override wins over the alias-keyed
+        // profile. This must NOT fall back to `startupProfile` when the
+        // override resolves to nil (`.suppressed`, a blank `.command`, or an
+        // empty-step `.flow`) — that nil IS the resolved answer.
+        let resolvedProfile: StartupFlowProfile?
+        if let startupOverride {
+            resolvedProfile = startupOverride.effectiveProfile(alias: normalizedAlias)
+        } else {
+            resolvedProfile = startupProfile
+        }
+
+        let execution = try resolvedProfile.flatMap { profile in
             profile.steps.isEmpty ? nil : try startupBuilder.build(profile: profile)
         }
-        let shouldRunStartup = execution != nil && startupProfile?.automaticallyRun == true && !skipStartup
+        let shouldRunStartup = execution != nil && resolvedProfile?.automaticallyRun == true && !skipStartup
         let arguments = shouldRunStartup
             ? [
                 "-tt",
@@ -488,7 +505,7 @@ struct SSHLaunchPlanBuilder: Sendable {
             ]
             : ["--", normalizedAlias]
         let startupState: StartupFlowRunState? = execution.map { _ in
-            if skipStartup && startupProfile?.automaticallyRun == true { return .skipped }
+            if skipStartup && resolvedProfile?.automaticallyRun == true { return .skipped }
             return shouldRunStartup ? .running(stepIndex: nil) : .ready
         }
 
@@ -502,7 +519,8 @@ struct SSHLaunchPlanBuilder: Sendable {
                 currentDirectoryURL: currentDirectoryURL
             ),
             startupExecution: execution,
-            startupState: startupState
+            startupState: startupState,
+            startupOverride: startupOverride
         )
     }
 

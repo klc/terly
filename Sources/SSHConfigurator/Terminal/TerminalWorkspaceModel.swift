@@ -770,7 +770,8 @@ final class TerminalWorkspaceModel: ObservableObject {
                 id: newPaneID,
                 alias: pane.alias,
                 startupProfile: startupProfile,
-                skipStartup: false
+                skipStartup: false,
+                startupOverride: pane.startupOverride
             )
 
             let updatedLayout = sessions[index].layout.replacing(paneID: pane.id, with: newPane)
