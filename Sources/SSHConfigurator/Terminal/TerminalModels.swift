@@ -23,6 +23,11 @@ enum TerminalSplitAxis: String, Equatable, Sendable, Codable {
     case horizontal
 }
 
+enum TerminalSplitPosition: Equatable, Sendable {
+    case before
+    case after
+}
+
 struct TerminalPane: Identifiable, Equatable, Sendable {
     enum Status: Equatable, Sendable {
         case running
@@ -111,7 +116,8 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
     func splitting(
         paneID: TerminalPane.ID,
         with newPane: TerminalPane,
-        axis: TerminalSplitAxis
+        axis: TerminalSplitAxis,
+        position: TerminalSplitPosition = .after
     ) -> TerminalPaneLayout? {
         switch self {
         case let .pane(pane):
@@ -120,15 +126,25 @@ indirect enum TerminalPaneLayout: Equatable, Sendable {
                 id: UUID(),
                 axis: axis,
                 ratio: 0.5,
-                first: .pane(pane),
-                second: .pane(newPane)
+                first: position == .before ? .pane(newPane) : .pane(pane),
+                second: position == .before ? .pane(pane) : .pane(newPane)
             )
 
         case let .split(id, currentAxis, ratio, first, second):
-            if let updatedFirst = first.splitting(paneID: paneID, with: newPane, axis: axis) {
+            if let updatedFirst = first.splitting(
+                paneID: paneID,
+                with: newPane,
+                axis: axis,
+                position: position
+            ) {
                 return .split(id: id, axis: currentAxis, ratio: ratio, first: updatedFirst, second: second)
             }
-            if let updatedSecond = second.splitting(paneID: paneID, with: newPane, axis: axis) {
+            if let updatedSecond = second.splitting(
+                paneID: paneID,
+                with: newPane,
+                axis: axis,
+                position: position
+            ) {
                 return .split(id: id, axis: currentAxis, ratio: ratio, first: first, second: updatedSecond)
             }
             return nil

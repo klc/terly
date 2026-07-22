@@ -3064,6 +3064,16 @@
         }
       }
     },
+    "Hold ⌥ while clicking a connection to split it vertically in the current tab; add ⇧ for horizontal. You can also use the connection's shortcut menu or drag it onto a pane edge." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir bağlantıya tıklarken ⌥ tuşunu basılı tutarak geçerli sekmede dikey böl; yatay bölmek için ⇧ tuşunu da ekle. Bağlantının kısayol menüsünü kullanabilir veya bağlantıyı bir bölme kenarına sürükleyebilirsin."
+          }
+        }
+      }
+    },
     "Host" : {
       "localizations" : {
         "tr" : {
@@ -6123,6 +6133,16 @@
         }
       }
     },
+    "Split horizontally in current tab" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçerli sekmede yatay böl"
+          }
+        }
+      }
+    },
     "Split it horizontally (%@)." : {
       "localizations" : {
         "tr" : {
@@ -6169,6 +6189,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dikey böl"
+          }
+        }
+      }
+    },
+    "Split vertically in current tab" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçerli sekmede dikey böl"
           }
         }
       }

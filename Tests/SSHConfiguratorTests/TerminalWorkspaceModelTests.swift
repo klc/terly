@@ -1053,6 +1053,204 @@ final class TerminalWorkspaceModelTests: XCTestCase {
         XCTAssertEqual(model.selectedSession?.zoomedPaneID, leftID, "no-op nav must not exit zoom")
     }
 
+    // MARK: - Different-connection splits
+
+    @MainActor
+    func testOpenConnectionAsSplitKeepsSessionIdentityAndSupportsBefore() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+
+        XCTAssertTrue(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: sessionID,
+            axis: .vertical,
+            position: .before,
+            hasUnsavedChanges: false
+        ))
+
+        XCTAssertEqual(model.sessions.count, 1)
+        XCTAssertEqual(model.selectedSession?.hostID, 1)
+        XCTAssertEqual(model.selectedSession?.alias, "prod")
+        XCTAssertEqual(model.selectedSession?.panes.map(\.alias), ["db", "prod"])
+    }
+
+    @MainActor
+    func testOpenConnectionAsSplitCanTargetInactivePane() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let originalPaneID = try! XCTUnwrap(model.selectedSession?.activePaneID)
+        XCTAssertTrue(model.splitActivePane(in: sessionID, axis: .vertical))
+
+        XCTAssertTrue(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: sessionID,
+            splitting: originalPaneID,
+            axis: .horizontal,
+            hasUnsavedChanges: false
+        ))
+
+        XCTAssertEqual(model.selectedSession?.panes.map(\.alias), ["prod", "db", "prod"])
+        XCTAssertEqual(model.selectedSession?.activePane?.alias, "db")
+    }
+
+    @MainActor
+    func testOpenConnectionAsSplitUnknownTargetsDoNotMutateOrSetError() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let originalSessions = model.sessions
+
+        XCTAssertFalse(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: UUID(),
+            axis: .vertical,
+            hasUnsavedChanges: false
+        ))
+        XCTAssertEqual(model.sessions, originalSessions)
+        XCTAssertNil(model.errorMessage)
+
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertFalse(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: sessionID,
+            splitting: UUID(),
+            axis: .vertical,
+            hasUnsavedChanges: false
+        ))
+        XCTAssertEqual(model.sessions, originalSessions)
+        XCTAssertNil(model.errorMessage)
+    }
+
+    @MainActor
+    func testOpenConnectionAsSplitRejectsUnsavedChangesAndPatterns() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        let originalLayout = try! XCTUnwrap(model.selectedSession?.layout)
+
+        XCTAssertFalse(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: sessionID,
+            axis: .vertical,
+            hasUnsavedChanges: true
+        ))
+        XCTAssertEqual(model.errorMessage, TerminalWorkspaceError.unsavedChanges.localizedDescription)
+        XCTAssertEqual(model.selectedSession?.layout, originalLayout)
+
+        XCTAssertFalse(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 3, alias: "*.example.com"),
+            in: sessionID,
+            axis: .vertical,
+            hasUnsavedChanges: false
+        ))
+        XCTAssertNotNil(model.errorMessage)
+        XCTAssertEqual(model.selectedSession?.layout, originalLayout)
+    }
+
+    @MainActor
+    func testOpenConnectionAsSplitAppliesAndSkipsStartupProfiles() {
+        let profile = StartupFlowProfile(
+            alias: "db",
+            automaticallyRun: true,
+            steps: [.runCommand("uptime")]
+        )
+
+        let runningModel = makeModel()
+        XCTAssertTrue(runningModel.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let runningSessionID = try! XCTUnwrap(runningModel.selectedSessionID)
+        XCTAssertTrue(runningModel.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: runningSessionID,
+            axis: .vertical,
+            hasUnsavedChanges: false,
+            startupProfile: profile
+        ))
+        XCTAssertEqual(runningModel.selectedSession?.activePane?.startupState, .running(stepIndex: nil))
+        XCTAssertTrue(runningModel.selectedSession?.activePane?.process.arguments.contains("-tt") == true)
+
+        let skippedModel = makeModel()
+        XCTAssertTrue(skippedModel.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let skippedSessionID = try! XCTUnwrap(skippedModel.selectedSessionID)
+        XCTAssertTrue(skippedModel.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: skippedSessionID,
+            axis: .vertical,
+            hasUnsavedChanges: false,
+            startupProfile: profile,
+            skipStartup: true
+        ))
+        XCTAssertEqual(skippedModel.selectedSession?.activePane?.startupState, .skipped)
+        XCTAssertEqual(skippedModel.selectedSession?.activePane?.process.arguments, ["--", "db"])
+    }
+
+    @MainActor
+    func testOpenConnectionAsSplitClearsSyncAndZoomAndBypassesAliasReuse() {
+        let model = makeModel()
+        XCTAssertTrue(model.openConnections(
+            [
+                SSHConnectionTarget(hostID: 1, alias: "prod"),
+                SSHConnectionTarget(hostID: 2, alias: "db"),
+            ],
+            hasUnsavedChanges: false
+        ))
+        let dbSessionID = try! XCTUnwrap(model.selectedSessionID)
+        let prodSessionID = model.sessions[0].id
+        let firstProdPaneID = model.sessions[0].activePaneID
+        XCTAssertTrue(model.splitActivePane(in: prodSessionID, axis: .horizontal))
+        let secondProdPaneID = model.sessions[0].activePaneID
+        model.selectPane(firstProdPaneID, in: prodSessionID, extendingSynchronization: true)
+        XCTAssertEqual(model.sessions[0].synchronizedPaneIDs, Set([firstProdPaneID, secondProdPaneID]))
+        model.toggleZoom(in: prodSessionID)
+        XCTAssertEqual(model.sessions[0].zoomedPaneID, secondProdPaneID)
+
+        XCTAssertTrue(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: prodSessionID,
+            axis: .vertical,
+            hasUnsavedChanges: false
+        ))
+        XCTAssertEqual(model.sessions[0].panes.map(\.alias), ["prod", "prod", "db"])
+        XCTAssertEqual(model.sessions[0].activePane?.alias, "db")
+        XCTAssertTrue(model.sessions[0].synchronizedPaneIDs.isEmpty)
+        XCTAssertNil(model.sessions[0].zoomedPaneID)
+
+        XCTAssertTrue(model.openConnection(hostID: 2, alias: "db", hasUnsavedChanges: false))
+        XCTAssertEqual(model.sessions.count, 2)
+        XCTAssertEqual(model.selectedSessionID, dbSessionID)
+    }
+
+    func testSplittingBeforePlacesPaneInFirstNormalizedHalf() {
+        let original = TerminalPane(
+            alias: "prod",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: ["--", "prod"],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let inserted = TerminalPane(
+            alias: "db",
+            process: TerminalProcessConfiguration(
+                executableURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+                arguments: ["--", "db"],
+                environment: [:],
+                currentDirectoryURL: nil
+            )
+        )
+        let layout = try! XCTUnwrap(TerminalPaneLayout.pane(original).splitting(
+            paneID: original.id,
+            with: inserted,
+            axis: .vertical,
+            position: .before
+        ))
+
+        XCTAssertEqual(layout.panes.map(\.alias), ["db", "prod"])
+        XCTAssertEqual(layout.normalizedFrames()[inserted.id], CGRect(x: 0, y: 0, width: 0.5, height: 1))
+        XCTAssertEqual(layout.normalizedFrames()[original.id], CGRect(x: 0.5, y: 0, width: 0.5, height: 1))
+    }
+
     @MainActor
     private func makeModel() -> TerminalWorkspaceModel {
         TerminalWorkspaceModel(

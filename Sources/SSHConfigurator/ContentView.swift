@@ -46,6 +46,7 @@ struct ContentView: View {
             savedWorkspaces: savedWorkspaces,
             expansionBinding: expansionBinding,
             onConnectHost: connect,
+            onConnectHostAsSplit: connectAsSplit,
             onDuplicateHost: model.duplicateHost,
             onDiagnoseHost: { showDiagnostics(for: $0) },
             onTransferHost: { showTransfer(for: $0) },
@@ -81,6 +82,19 @@ struct ContentView: View {
             isHostSettingsSheetPresented: editingHostSelection != nil,
             onRequestTransfer: { showTransfer(forAlias: $0) },
             onDropFilesForUpload: uploadDroppedFiles,
+            onDropConnectionForSplit: { target, sessionID, paneID, axis, position in
+                requestStartupLaunch(
+                    for: .splitPane(
+                        SplitPaneDestination(
+                            target: target,
+                            sessionID: sessionID,
+                            paneID: paneID,
+                            axis: axis,
+                            position: position
+                        )
+                    )
+                )
+            },
             onSaveWorkspace: showSaveWorkspaceEditor
         )
         .frame(minWidth: 680, minHeight: 460)
@@ -503,6 +517,28 @@ struct ContentView: View {
         requestStartupLaunch(for: .connections([target]))
     }
 
+    private func connectAsSplit(_ host: SSHHostBlock, axis: TerminalSplitAxis) {
+        let alias = host.patterns.first(where: SSHLaunchPlanBuilder.isConcreteAlias) ?? ""
+        let target = SSHConnectionTarget(hostID: host.id, alias: alias)
+        let terminalIsVisible = model.selectedHost != nil || model.selectedItem == .localTerminal
+        guard terminalIsVisible, let sessionID = terminalWorkspace.selectedSessionID else {
+            requestStartupLaunch(for: .connections([target]))
+            return
+        }
+
+        requestStartupLaunch(
+            for: .splitPane(
+                SplitPaneDestination(
+                    target: target,
+                    sessionID: sessionID,
+                    paneID: nil,
+                    axis: axis,
+                    position: .after
+                )
+            )
+        )
+    }
+
     private func openConnections(
         _ connections: [SSHConnectionTarget],
         skipAllStartups: Bool
@@ -520,6 +556,31 @@ struct ContentView: View {
             model.selectedItem = .host(lastConnection.hostID)
         } else {
             model.selectedItem = previousSelection
+        }
+    }
+
+    private func openConnectionAsSplitOrFallBack(
+        _ split: SplitPaneDestination,
+        skipAllStartups: Bool
+    ) {
+        guard let session = terminalWorkspace.sessions.first(where: { $0.id == split.sessionID }),
+              split.paneID.map({ session.layout.pane(id: $0) != nil }) ?? true else {
+            openConnections([split.target], skipAllStartups: skipAllStartups)
+            return
+        }
+
+        let didOpen = terminalWorkspace.openConnectionAsSplit(
+            split.target,
+            in: split.sessionID,
+            splitting: split.paneID,
+            axis: split.axis,
+            position: split.position,
+            hasUnsavedChanges: model.hasChanges,
+            startupProfile: startupFlows.profile(for: split.target.alias),
+            skipStartup: skipAllStartups
+        )
+        if didOpen {
+            _ = quickAccess.markUsed(hostAliases: [split.target.alias])
         }
     }
 
@@ -555,6 +616,9 @@ struct ContentView: View {
         case let .connections(targets):
             connections = targets
             profiles = startupProfiles(for: connections)
+        case let .splitPane(split):
+            connections = [split.target]
+            profiles = startupProfiles(for: connections)
         case .savedWorkspace:
             return // handled above
         }
@@ -586,6 +650,8 @@ struct ContentView: View {
         switch request.destination {
         case let .connections(connections):
             openConnections(connections, skipAllStartups: skipAllStartups)
+        case let .splitPane(split):
+            openConnectionAsSplitOrFallBack(split, skipAllStartups: skipAllStartups)
         case let .savedWorkspace(workspace):
             open(savedWorkspace: workspace, skipAllStartups: skipAllStartups)
         }
@@ -823,6 +889,7 @@ private struct ContentSidebarView: View {
     @ObservedObject var savedWorkspaces: SavedWorkspaceLibrary
     let expansionBinding: (SSHConfigHostGroup) -> Binding<Bool>
     let onConnectHost: (SSHHostBlock) -> Void
+    let onConnectHostAsSplit: (SSHHostBlock, TerminalSplitAxis) -> Void
     let onDuplicateHost: (SSHHostBlock) -> Void
     let onDiagnoseHost: (SSHHostBlock) -> Void
     let onTransferHost: (SSHHostBlock) -> Void
@@ -872,6 +939,7 @@ private struct ContentSidebarView: View {
                             expansionBinding: expansionBinding,
                             selectedItem: model.selectedItem,
                             onConnect: onConnectHost,
+                            onConnectSplit: onConnectHostAsSplit,
                             onDuplicate: onDuplicateHost,
                             onDiagnose: onDiagnoseHost,
                             onTransfer: onTransferHost,
@@ -885,6 +953,7 @@ private struct ContentSidebarView: View {
                                 host: host,
                                 isSelected: model.selectedItem == .host(host.id),
                                 onConnect: { onConnectHost(host) },
+                                onConnectSplit: { onConnectHostAsSplit(host, $0) },
                                 onDuplicate: { onDuplicateHost(host) },
                                 onDiagnose: { onDiagnoseHost(host) },
                                 onTransfer: { onTransferHost(host) },
@@ -1068,6 +1137,13 @@ private struct ContentDetailView: View {
     let isHostSettingsSheetPresented: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
+    let onDropConnectionForSplit: (
+        SSHConnectionTarget,
+        TerminalSession.ID,
+        TerminalPane.ID,
+        TerminalSplitAxis,
+        TerminalSplitPosition
+    ) -> Void
     let onSaveWorkspace: () -> Void
 
     var body: some View {
@@ -1084,6 +1160,7 @@ private struct ContentDetailView: View {
                         isVisible: terminalIsVisible,
                         onRequestTransfer: onRequestTransfer,
                         onDropFilesForUpload: onDropFilesForUpload,
+                        onDropConnectionForSplit: onDropConnectionForSplit,
                         onSaveWorkspace: onSaveWorkspace
                     )
                     .opacity(terminalIsVisible ? 1 : 0)
@@ -1264,12 +1341,21 @@ private struct KeySetupSelection: Identifiable {
 private struct StartupLaunchRequest: Identifiable {
     enum Destination {
         case connections([SSHConnectionTarget])
+        case splitPane(SplitPaneDestination)
         case savedWorkspace(SavedWorkspace)
     }
 
     let id = UUID()
     let destination: Destination
     let items: [StartupFlowLaunchPreviewItem]
+}
+
+private struct SplitPaneDestination {
+    let target: SSHConnectionTarget
+    let sessionID: TerminalSession.ID
+    let paneID: TerminalPane.ID?
+    let axis: TerminalSplitAxis
+    let position: TerminalSplitPosition
 }
 
 private struct SavedWorkspaceRow: View {
@@ -1336,6 +1422,7 @@ private struct HostNavigationRow: View {
     let host: SSHHostBlock
     let isSelected: Bool
     let onConnect: () -> Void
+    let onConnectSplit: (TerminalSplitAxis) -> Void
     let onDuplicate: () -> Void
     let onDiagnose: () -> Void
     let onTransfer: () -> Void
@@ -1345,7 +1432,14 @@ private struct HostNavigationRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Button(action: onConnect) {
+            Button {
+                let modifiers = NSEvent.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                if modifiers.contains(.option) {
+                    onConnectSplit(modifiers.contains(.shift) ? .horizontal : .vertical)
+                } else {
+                    onConnect()
+                }
+            } label: {
                 Label(host.displayName, systemImage: host.isPattern ? "asterisk" : "server.rack")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -1355,7 +1449,15 @@ private struct HostNavigationRow: View {
         }
         .padding(.vertical, 2)
         .listRowBackground(isSelected ? Color.accentColor.opacity(0.16) : Color.clear)
+        .draggableConnection(dragPayload)
         .contextMenu {
+            Button("Split vertically in current tab", systemImage: "rectangle.split.2x1") {
+                onConnectSplit(.vertical)
+            }
+            Button("Split horizontally in current tab", systemImage: "rectangle.split.1x2") {
+                onConnectSplit(.horizontal)
+            }
+            Divider()
             if host.patterns.contains(where: SSHLaunchPlanBuilder.isConcreteAlias) {
                 Button("Test connection", systemImage: "stethoscope", action: onDiagnose)
                 Button("Transfer files", systemImage: "arrow.left.arrow.right", action: onTransfer)
@@ -1367,6 +1469,22 @@ private struct HostNavigationRow: View {
             Button("Delete Host", systemImage: "trash", role: .destructive, action: onDelete)
         }
     }
+
+    private var dragPayload: ConnectionDragPayload? {
+        guard let alias = host.patterns.first(where: SSHLaunchPlanBuilder.isConcreteAlias) else { return nil }
+        return ConnectionDragPayload(hostID: host.id, alias: alias)
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func draggableConnection(_ payload: ConnectionDragPayload?) -> some View {
+        if let payload {
+            draggable(payload)
+        } else {
+            self
+        }
+    }
 }
 
 private struct HostGroupDisclosure: View {
@@ -1375,6 +1493,7 @@ private struct HostGroupDisclosure: View {
     let expansionBinding: (SSHConfigHostGroup) -> Binding<Bool>
     let selectedItem: ConfigNavigationItem?
     let onConnect: (SSHHostBlock) -> Void
+    let onConnectSplit: (SSHHostBlock, TerminalSplitAxis) -> Void
     let onDuplicate: (SSHHostBlock) -> Void
     let onDiagnose: (SSHHostBlock) -> Void
     let onTransfer: (SSHHostBlock) -> Void
@@ -1389,6 +1508,7 @@ private struct HostGroupDisclosure: View {
                     host: host,
                     isSelected: selectedItem == .host(host.id),
                     onConnect: { onConnect(host) },
+                    onConnectSplit: { onConnectSplit(host, $0) },
                     onDuplicate: { onDuplicate(host) },
                     onDiagnose: { onDiagnose(host) },
                     onTransfer: { onTransfer(host) },
@@ -1405,6 +1525,7 @@ private struct HostGroupDisclosure: View {
                     expansionBinding: expansionBinding,
                     selectedItem: selectedItem,
                     onConnect: onConnect,
+                    onConnectSplit: onConnectSplit,
                     onDuplicate: onDuplicate,
                     onDiagnose: onDiagnose,
                     onTransfer: onTransfer,

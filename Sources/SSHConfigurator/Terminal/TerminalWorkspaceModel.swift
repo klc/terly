@@ -475,6 +475,55 @@ final class TerminalWorkspaceModel: ObservableObject {
         }
     }
 
+    /// Opens a different saved connection beside an existing pane. Unlike
+    /// `splitActivePane`, this reads a new alias from the on-disk SSH config,
+    /// so unsaved config edits must block it. The same-alias split above stays
+    /// guard-free because it reuses the already-running pane's launch details.
+    @discardableResult
+    func openConnectionAsSplit(
+        _ target: SSHConnectionTarget,
+        in sessionID: TerminalSession.ID,
+        splitting paneID: TerminalPane.ID? = nil,
+        axis: TerminalSplitAxis,
+        position: TerminalSplitPosition = .after,
+        hasUnsavedChanges: Bool,
+        startupProfile: StartupFlowProfile? = nil,
+        skipStartup: Bool = false
+    ) -> Bool {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return false }
+        guard !hasUnsavedChanges else {
+            errorMessage = TerminalWorkspaceError.unsavedChanges.localizedDescription
+            return false
+        }
+
+        let targetPaneID = paneID ?? sessions[index].activePaneID
+        guard sessions[index].layout.pane(id: targetPaneID) != nil else { return false }
+
+        do {
+            let newPane = try launchPlanBuilder.makePane(
+                alias: target.alias,
+                startupProfile: startupProfile,
+                skipStartup: skipStartup
+            )
+            guard let updatedLayout = sessions[index].layout.splitting(
+                paneID: targetPaneID,
+                with: newPane,
+                axis: axis,
+                position: position
+            ) else { return false }
+
+            sessions[index].layout = updatedLayout
+            sessions[index].activePaneID = newPane.id
+            sessions[index].synchronizedPaneIDs = []
+            sessions[index].zoomedPaneID = nil
+            errorMessage = nil
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
     func setSplitRatio(_ ratio: Double, splitID: UUID, in sessionID: TerminalSession.ID) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionID }) else { return }
         sessions[index].layout = sessions[index].layout.updatingRatio(splitID: splitID, ratio: ratio)

@@ -203,6 +203,36 @@ final class WorkspaceLayoutStoreTests: XCTestCase {
     }
 
     @MainActor
+    func testDifferentConnectionBeforeSplitPersistsAndRestoresInOrder() {
+        let mockStore = MockWorkspaceLayoutStore()
+        let builder = SSHLaunchPlanBuilder(
+            sshURL: URL(fileURLWithPath: "/usr/bin/ssh"),
+            baseEnvironment: ["PATH": "/usr/bin:/bin"],
+            currentDirectoryURL: URL(fileURLWithPath: "/tmp")
+        )
+        let model = TerminalWorkspaceModel(launchPlanBuilder: builder, workspaceStore: mockStore)
+        XCTAssertTrue(model.openConnection(hostID: 1, alias: "prod", hasUnsavedChanges: false))
+        let sessionID = try! XCTUnwrap(model.selectedSessionID)
+        XCTAssertTrue(model.openConnectionAsSplit(
+            SSHConnectionTarget(hostID: 2, alias: "db"),
+            in: sessionID,
+            axis: .horizontal,
+            position: .before,
+            hasUnsavedChanges: false
+        ))
+        model.flushPendingSave()
+
+        let restored = TerminalWorkspaceModel(launchPlanBuilder: builder, workspaceStore: mockStore)
+        restored.restoreWorkspace()
+
+        XCTAssertEqual(restored.selectedSession?.panes.map(\.alias), ["db", "prod"])
+        let frames = try! XCTUnwrap(restored.selectedSession?.layout.normalizedFrames())
+        let panes = try! XCTUnwrap(restored.selectedSession?.panes)
+        XCTAssertEqual(frames[panes[0].id], CGRect(x: 0, y: 0, width: 1, height: 0.5))
+        XCTAssertEqual(frames[panes[1].id], CGRect(x: 0, y: 0.5, width: 1, height: 0.5))
+    }
+
+    @MainActor
     func testWorkspaceRestorationFiltersInvalidAliases() {
         let mockStore = MockWorkspaceLayoutStore()
         

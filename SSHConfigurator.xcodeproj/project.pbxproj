@@ -157,6 +157,7 @@
 		F441565E37922DA7DEC0FE06 /* SSHErrorClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD86CA487B1511C44B082EB0 /* SSHErrorClassifier.swift */; };
 		F64E74492D36E4175C2B7348 /* SSHConfigValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C7C35ADD87A081C9378B37A /* SSHConfigValidator.swift */; };
 		F683EFFD61BC25B566610757 /* SheetHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657861E5BB19632354B40822 /* SheetHeader.swift */; };
+		F69040B94D1C639A94B782FE /* ConnectionDragPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A4F442164007E10799EE28 /* ConnectionDragPayload.swift */; };
 		F7AFDB8BF9E1CBFC7555501D /* UploadPreflight.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BAE8DC10740C0AE33C6943 /* UploadPreflight.swift */; };
 		F821B48CB12C183D92A7770F /* RunbookEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 481EDFB336DFBDFA5DD2C732 /* RunbookEditorView.swift */; };
 		FA02669BB18AF27EBA393534 /* AppShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56E55A9359B5E56E3AA3E58 /* AppShortcut.swift */; };
@@ -241,6 +242,7 @@
 		16B580874192A7CD06B8A04F /* HostSettingsApplyCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostSettingsApplyCoordinatorTests.swift; sourceTree = "<group>"; };
 		1913FE655D04FDEDFF349873 /* TransferModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferModels.swift; sourceTree = "<group>"; };
 		1992CE6D96799F34D4972C83 /* StartupFlowBootstrapBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupFlowBootstrapBuilder.swift; sourceTree = "<group>"; };
+		19A4F442164007E10799EE28 /* ConnectionDragPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDragPayload.swift; sourceTree = "<group>"; };
 		1C7C35ADD87A081C9378B37A /* SSHConfigValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHConfigValidator.swift; sourceTree = "<group>"; };
 		2002B6DC6EF1DC996FCB7286 /* SavedWorkspaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedWorkspaceStore.swift; sourceTree = "<group>"; };
 		23417AAD6CF26007CEB7AC9C /* EmbeddedTerminalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedTerminalEngine.swift; sourceTree = "<group>"; };
@@ -419,6 +421,7 @@
 			children = (
 				6147232F7B2C32C29989961C /* AutoReconnectManager.swift */,
 				640457D54E626608578CA306 /* AutoReconnectSettingsStore.swift */,
+				19A4F442164007E10799EE28 /* ConnectionDragPayload.swift */,
 				23417AAD6CF26007CEB7AC9C /* EmbeddedTerminalEngine.swift */,
 				BBF11D1A960878B2409EFF16 /* NetworkPathObserver.swift */,
 				74F2E38F4308D8843414E88B /* PaneStartupOverride.swift */,
@@ -1000,6 +1003,7 @@
 				51C72DCA9493745961BB4BA2 /* AutoReconnectSettingsStore.swift in Sources */,
 				6CF5A9FD72C20D722627FB1A /* ChecksumVerifier.swift in Sources */,
 				3E2AC209CB7DAA29B472EED0 /* ConfigViewModel.swift in Sources */,
+				F69040B94D1C639A94B782FE /* ConnectionDragPayload.swift in Sources */,
 				256B5AD90DE8B613DD1A3995 /* ContentView.swift in Sources */,
 				6D6421D70C7243FBF4D61F61 /* EmbeddedTerminalEngine.swift in Sources */,
 				3EC9D4F8EDE197D68ABFE2FF /* FormFieldStyle.swift in Sources */,

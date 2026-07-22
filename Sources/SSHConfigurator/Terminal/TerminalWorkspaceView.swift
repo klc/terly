@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Normalized (0–1) geometry for one split boundary, produced by
 /// `TerminalWorkspaceView.dividerGeometry(for:in:)` so dividers can be
@@ -24,6 +25,87 @@ private struct PaneDragState {
     let source: TerminalPane.ID
     var location: CGPoint
     var target: TerminalPane.ID?
+}
+
+private enum PaneDropEdge: Equatable {
+    case left, right, top, bottom
+
+    var axis: TerminalSplitAxis {
+        switch self {
+        case .left, .right: .vertical
+        case .top, .bottom: .horizontal
+        }
+    }
+
+    var position: TerminalSplitPosition {
+        switch self {
+        case .left, .top: .before
+        case .right, .bottom: .after
+        }
+    }
+
+    static func nearest(to location: CGPoint, in size: CGSize) -> PaneDropEdge {
+        let distances: [(PaneDropEdge, CGFloat)] = [
+            (.left, location.x),
+            (.right, size.width - location.x),
+            (.top, location.y),
+            (.bottom, size.height - location.y),
+        ]
+        return distances.min(by: { $0.1 < $1.1 })?.0 ?? .right
+    }
+}
+
+private struct ConnectionDropTarget: Equatable {
+    let paneID: TerminalPane.ID
+    let edge: PaneDropEdge
+}
+
+private struct ConnectionPaneDropDelegate: DropDelegate {
+    let paneID: TerminalPane.ID
+    let size: CGSize
+    @Binding var target: ConnectionDropTarget?
+    let onDrop: (ConnectionDragPayload, PaneDropEdge) -> Void
+
+    func validateDrop(info: DropInfo) -> Bool {
+        info.hasItemsConforming(to: [.terlySSHConnection])
+    }
+
+    func dropEntered(info: DropInfo) {
+        updateTarget(at: info.location)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        updateTarget(at: info.location)
+        return DropProposal(operation: .copy)
+    }
+
+    func dropExited(info: DropInfo) {
+        if target?.paneID == paneID {
+            target = nil
+        }
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        let edge = PaneDropEdge.nearest(to: info.location, in: size)
+        guard let provider = info.itemProviders(for: [.terlySSHConnection]).first else { return false }
+        target = nil
+        provider.loadDataRepresentation(forTypeIdentifier: UTType.terlySSHConnection.identifier) { data, _ in
+            guard let data, let payload = try? JSONDecoder().decode(ConnectionDragPayload.self, from: data) else {
+                return
+            }
+            DispatchQueue.main.async {
+                onDrop(payload, edge)
+            }
+        }
+        return true
+    }
+
+    private func updateTarget(at location: CGPoint) {
+        target = ConnectionDropTarget(
+            paneID: paneID,
+            edge: PaneDropEdge.nearest(to: location, in: size)
+        )
+    }
 }
 
 /// Transparent AppKit view that owns a cursor rect for the divider hit strip.
@@ -75,6 +157,13 @@ struct TerminalWorkspaceView: View {
     let isVisible: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
+    let onDropConnectionForSplit: (
+        SSHConnectionTarget,
+        TerminalSession.ID,
+        TerminalPane.ID,
+        TerminalSplitAxis,
+        TerminalSplitPosition
+    ) -> Void
     let onSaveWorkspace: () -> Void
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
@@ -86,6 +175,7 @@ struct TerminalWorkspaceView: View {
     @State private var hoveredDividerID: UUID?
     @State private var paneDrag: PaneDragState?
     @State private var fileDropTargetPaneID: TerminalPane.ID?
+    @State private var connectionDropTarget: ConnectionDropTarget?
     @State private var renamingTabID: TerminalSession.ID?
     @State private var renamingTabTitle = ""
     @FocusState private var renameFieldFocused: Bool
@@ -110,6 +200,7 @@ struct TerminalWorkspaceView: View {
                 .onChange(of: model.selectedSessionID) { _, _ in
                     closeSearch(returningFocus: false)
                     paneDrag = nil
+                    connectionDropTarget = nil
                 }
                 .onChange(of: session.activePaneID) { _, _ in
                     closeSearch(returningFocus: false)
@@ -583,6 +674,14 @@ struct TerminalWorkspaceView: View {
         let isDragSource = paneDrag?.source == pane.id
         let isDragTarget = paneDrag?.target == pane.id
         let isFileDropTarget = fileDropTargetPaneID == pane.id
+        let connectionDropEdge = connectionDropTarget?.paneID == pane.id
+            ? connectionDropTarget?.edge
+            : nil
+        let normalizedPaneFrame = paneFrames[pane.id] ?? CGRect(x: 0, y: 0, width: 1, height: 1)
+        let paneSize = CGSize(
+            width: max(1, geometry.size.width * normalizedPaneFrame.width - 2),
+            height: max(1, geometry.size.height * normalizedPaneFrame.height - 2)
+        )
         let canUploadDroppedFiles = session.hostID != -1 && SSHLaunchPlanBuilder.isConcreteAlias(pane.alias)
         // Hoisted out of the `engine.makeSurface(...)` call (with an explicit
         // type, built via if/else rather than a ternary — a ternary here
@@ -748,6 +847,29 @@ struct TerminalWorkspaceView: View {
                 .allowsHitTesting(false)
             }
         }
+        .overlay {
+            if let connectionDropEdge {
+                connectionDropOverlay(edge: connectionDropEdge)
+                    .allowsHitTesting(false)
+            }
+        }
+        .onDrop(
+            of: [.terlySSHConnection],
+            delegate: ConnectionPaneDropDelegate(
+                paneID: pane.id,
+                size: paneSize,
+                target: $connectionDropTarget,
+                onDrop: { payload, edge in
+                    onDropConnectionForSplit(
+                        SSHConnectionTarget(hostID: payload.hostID, alias: payload.alias),
+                        session.id,
+                        pane.id,
+                        edge.axis,
+                        edge.position
+                    )
+                }
+            )
+        )
         .dropDestination(for: URL.self) { urls, _ in
             guard canUploadDroppedFiles, !urls.isEmpty else { return false }
             onDropFilesForUpload(urls, pane.alias)
@@ -758,6 +880,27 @@ struct TerminalWorkspaceView: View {
             } else if fileDropTargetPaneID == pane.id {
                 fileDropTargetPaneID = nil
             }
+        }
+    }
+
+    @ViewBuilder
+    private func connectionDropOverlay(edge: PaneDropEdge) -> some View {
+        GeometryReader { geometry in
+            let isVertical = edge == .left || edge == .right
+            let size = CGSize(
+                width: isVertical ? geometry.size.width / 2 : geometry.size.width,
+                height: isVertical ? geometry.size.height : geometry.size.height / 2
+            )
+            let origin = CGPoint(
+                x: edge == .right ? geometry.size.width / 2 : 0,
+                y: edge == .bottom ? geometry.size.height / 2 : 0
+            )
+
+            Rectangle()
+                .fill(Color.accentColor.opacity(0.25))
+                .overlay(Rectangle().stroke(Color.accentColor, lineWidth: 2))
+                .frame(width: size.width, height: size.height)
+                .position(x: origin.x + size.width / 2, y: origin.y + size.height / 2)
         }
     }
 

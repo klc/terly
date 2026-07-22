@@ -12,6 +12,10 @@ whose heading exactly matches the tag's version, so this heading is inert until
 the changes below are moved under a real version number at tag time.
 
 ### Added
+- Open different connections side by side in the current terminal tab: use the
+  sidebar shortcut menu, ⌥-click for a vertical split, ⌥⇧-click for a horizontal
+  split, or drag a connection onto the nearest pane edge. If no terminal tab is
+  visible, the connection opens in a normal new tab instead.
 - Workspaces: save the current tabs and split panes as a named workspace and
   reopen the whole layout later with one click. Each pane can carry its own
   startup — a free-form command, one of your startup flows, or nothing — so a

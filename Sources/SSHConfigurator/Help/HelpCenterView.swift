@@ -33,6 +33,7 @@ struct HelpCenterView: View {
                         systemImage: "sidebar.left",
                         rows: [
                             ("server.rack", "Select a connection to open its terminal."),
+                            ("rectangle.split.2x1", "Hold ⌥ while clicking a connection to split it vertically in the current tab; add ⇧ for horizontal. You can also use the connection's shortcut menu or drag it onto a pane edge."),
                             ("plus", "Use + to add a server or connection group."),
                             ("gearshape", "Open connection settings; duplicate and transfer actions are beside it."),
                             ("magnifyingglass", "Use Quick Access or press \(AppShortcut.quickAccess.displayString) to find a connection from anywhere."),
