@@ -19,6 +19,7 @@ struct ContentView: View {
     @StateObject private var quickAccess = QuickAccessLibrary()
     @StateObject private var snippets = SnippetLibrary()
     @StateObject private var runbooks = RunbookLibrary()
+    @StateObject private var recordingsLibrary = RecordingsLibrary()
     private let hostSettingsApplyCoordinator = HostSettingsApplyCoordinator()
     @State private var showingDeleteConfirmation = false
     @State private var collapsedHostGroupIDs: Set<String> = []
@@ -79,6 +80,7 @@ struct ContentView: View {
             tunnelWorkspace: tunnelWorkspace,
             snippets: snippets,
             runbooks: runbooks,
+            recordingsLibrary: recordingsLibrary,
             isHostSettingsSheetPresented: editingHostSelection != nil,
             onRequestTransfer: { showTransfer(forAlias: $0) },
             onDropFilesForUpload: uploadDroppedFiles,
@@ -328,6 +330,9 @@ struct ContentView: View {
             }
             .onChange(of: quickAccessCatalog) { _, catalog in
                 quickAccess.reconcile(catalog: catalog)
+            }
+            .onChange(of: terminalRecorder.activeSessionIDs) { _, _ in
+                recordingsLibrary.refresh()
             }
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
                 tunnelWorkspace.stopAllTunnels()
@@ -920,6 +925,8 @@ private struct ContentSidebarView: View {
                     .tag(ConfigNavigationItem.snippets)
                 Label("Runbooks", systemImage: "list.bullet.rectangle")
                     .tag(ConfigNavigationItem.runbooks)
+                Label("Recordings", systemImage: "record.circle")
+                    .tag(ConfigNavigationItem.recordings)
                 Button {
                     onOpenLocalTerminal()
                     model.selectedItem = .localTerminal
@@ -1134,6 +1141,7 @@ private struct ContentDetailView: View {
     @ObservedObject var tunnelWorkspace: TunnelWorkspaceModel
     @ObservedObject var snippets: SnippetLibrary
     @ObservedObject var runbooks: RunbookLibrary
+    @ObservedObject var recordingsLibrary: RecordingsLibrary
     let isHostSettingsSheetPresented: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
@@ -1242,6 +1250,8 @@ private struct ContentDetailView: View {
                 library: runbooks,
                 availableConnections: model.availableConnections
             )
+        } else if model.selectedItem == .recordings {
+            RecordingListView(library: recordingsLibrary, recorder: terminalRecorder)
         } else {
             ConfigPreviewView(source: document.source)
                 .padding(24)

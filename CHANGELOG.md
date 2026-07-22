@@ -25,10 +25,15 @@ the changes below are moved under a real version number at tag time.
   and panes whose alias has left the SSH config are skipped with a notice.
 - Record a terminal session from the session header. Each recording is a folder
   containing one [asciinema](https://docs.asciinema.org/) cast v2 file per pane,
-  named after the pane's alias, playable with `asciinema play`. The folder is
-  created with owner-only permissions (`0700`), each cast file with `0600`, and
-  the save panel warns that recordings capture everything the terminal displays.
-  Stopping a recording reveals its folder in Finder.
+  named after the pane's alias. The folder is created with owner-only permissions
+  (`0700`) and each cast file with `0600`.
+- A **Recordings** library in the General sidebar with recording metadata,
+  multi-pane disclosure, Finder reveal, rename, and confirmed move-to-Trash
+  actions. Its built-in asciicast v2 player supports play/pause, seeking, and
+  1x/2x/4x playback while keeping files compatible with asciinema.
+- A configurable recording root in **Settings → General**. Recordings default to
+  `~/Library/Application Support/Terly/Recordings`; changing the root does not
+  migrate existing recordings.
 - Several recordings can run at once — one per terminal tab — and each carries a
   100 MB cap that stops it cleanly rather than filling the disk.
 - A Help Center (**Help → Terly Help**, ⇧⌘/) covering connections, terminal
@@ -51,6 +56,9 @@ the changes below are moved under a real version number at tag time.
   output chunk just to have it discarded.
 
 ### Changed
+- Starting a recording no longer opens a save panel. Terly creates a dated folder
+  automatically under the configured recording root, and stopped recordings are
+  opened from the sidebar instead of being revealed automatically in Finder.
 - Keyboard shortcuts now come from a single registry that both the bindings and
   the Help guide read from, so documented shortcuts cannot drift from real ones.
 - The sidebar's general section is now called **General**; **Workspaces** takes

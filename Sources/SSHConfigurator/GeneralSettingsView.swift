@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// App display language override. `system` clears the per-app override so
@@ -39,6 +40,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
 struct GeneralSettingsView: View {
     @State private var language: AppLanguage = .current
+    @ObservedObject private var recordingSettings = RecordingSettings.shared
 
     var body: some View {
         Form {
@@ -53,7 +55,48 @@ struct GeneralSettingsView: View {
             Text("The language change takes effect the next time Terly starts.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            Section("Recordings") {
+                LabeledContent("Storage location") {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(recordingSettings.resolvedRootURL().path)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .textSelection(.enabled)
+                        if recordingSettings.customRootPath == nil {
+                            Text("Default")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                HStack {
+                    Button("Change…") { chooseRecordingFolder() }
+                    Button("Restore Default") {
+                        recordingSettings.customRootPath = nil
+                    }
+                    .disabled(recordingSettings.customRootPath == nil)
+                }
+
+                Text("Changing the location does not move existing recordings. New recordings and the Recordings list use the selected folder.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(20)
+    }
+
+    private func chooseRecordingFolder() {
+        let panel = NSOpenPanel()
+        panel.title = String(localized: "Choose Recordings Folder")
+        panel.prompt = String(localized: "Choose")
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+        panel.directoryURL = recordingSettings.resolvedRootURL().deletingLastPathComponent()
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        recordingSettings.customRootPath = url.path
     }
 }

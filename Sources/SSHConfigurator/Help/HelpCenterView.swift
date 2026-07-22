@@ -45,7 +45,7 @@ struct HelpCenterView: View {
                         title: "Terminal buttons",
                         systemImage: "terminal",
                         rows: [
-                            ("record.circle", "Start session recording and choose a folder to save it to. Press again to stop and reveal it in Finder."),
+                            ("record.circle", "Start session recording. Press again to stop; recordings appear in the sidebar automatically."),
                             ("arrow.left.arrow.right", "Open file transfer for the active connection."),
                             ("plus.rectangle.on.rectangle", "Open the active terminal's connection again in a new tab (\(AppShortcut.newTab.displayString))."),
                             ("rectangle.split.2x1", "Split the active terminal vertically (\(AppShortcut.splitVertically.displayString))."),
@@ -73,8 +73,9 @@ struct HelpCenterView: View {
                             systemImage: "lock.doc",
                             rows: [
                                 ("eye", "Only output shown by the terminal while recording is active is saved."),
-                                ("folder", "Each recording is saved as a folder with one asciinema .cast file per pane, named after the pane's alias."),
-                                ("play.rectangle", "Play a .cast file back with asciinema play <file>."),
+                                ("folder", "Recordings are saved automatically under Application Support. Change the root folder in Settings > General; existing recordings are not moved."),
+                                ("rectangle.stack", "Open Recordings in the General sidebar section to play, rename, reveal, or move recordings to the Trash."),
+                                ("play.rectangle", "The built-in player supports seeking and 1x, 2x, or 4x playback. Files remain compatible with asciinema."),
                                 ("lock", "The recording folder is created with owner-only permissions (0700) and each .cast file with 0600. They may contain sensitive data."),
                             ]
                         )

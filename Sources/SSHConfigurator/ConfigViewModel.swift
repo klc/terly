@@ -11,6 +11,7 @@ enum ConfigNavigationItem: Hashable {
     case tunnels
     case snippets
     case runbooks
+    case recordings
     case localTerminal
 }
 

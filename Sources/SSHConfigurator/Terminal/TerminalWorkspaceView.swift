@@ -398,7 +398,7 @@ struct TerminalWorkspaceView: View {
                 .help(
                     Text(
                         recorder.isRecording(session.id)
-                            ? String(localized: "Stop recording and reveal the recording folder in Finder")
+                            ? String(localized: "Stop recording")
                             : String(localized: "Record this session's terminal output to a folder")
                     )
                 )
@@ -906,23 +906,15 @@ struct TerminalWorkspaceView: View {
 
     private func toggleRecording(_ session: TerminalSession) {
         if recorder.isRecording(session.id) {
-            // Read the folder URL before stopping — `stop` clears the
-            // recording state, so `fileURL(for:)` would return nil after.
-            let folderURL = recorder.fileURL(for: session.id)
             recorder.stop(sessionID: session.id)
-            if let folderURL {
-                NSWorkspace.shared.activateFileViewerSelecting([folderURL])
-            }
             return
         }
 
-        let panel = NSSavePanel()
-        panel.title = String(localized: "Save Session Recording")
-        panel.prompt = String(localized: "Start Recording")
-        panel.message = String(localized: "Recordings capture everything the terminal displays, including command output that may contain sensitive data. They are saved with owner-only permissions.")
-        panel.nameFieldStringValue = TerminalSessionRecorder.suggestedFolderName(for: session.displayTitle)
-        panel.canCreateDirectories = true
-        guard panel.runModal() == .OK, let folderURL = panel.url else { return }
+        let root = RecordingSettings.shared.resolvedRootURL()
+        let folderURL = root.appendingPathComponent(
+            TerminalSessionRecorder.suggestedFolderName(for: session.displayTitle),
+            isDirectory: true
+        )
         // No `createDirectory` here: `start` creates it with 0700 in one step.
         // Creating it first would briefly leave the folder at the default 0755.
         recorder.start(session: session, folderURL: folderURL)

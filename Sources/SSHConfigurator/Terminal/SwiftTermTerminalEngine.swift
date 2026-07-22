@@ -459,29 +459,8 @@ final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
     func applyTheme(_ theme: TerminalTheme, forceRefresh: Bool = false) {
         guard forceRefresh || appliedThemeID != theme.id else { return }
         appliedThemeID = theme.id
-
-        let palette = theme.palette
-        installColors(palette.ansi.map { $0.swiftTermColor })
-        nativeBackgroundColor = palette.background.nsColor
-        nativeForegroundColor = palette.foreground.nsColor
-        caretColor = palette.cursor?.nsColor ?? Self.systemDefaultCaretColor
-
-        // installColors/nativeForegroundColor/nativeBackgroundColor each already
-        // mark the terminal's full screen dirty and schedule a throttled Metal
-        // redraw (SwiftTerm's `colorsChanged()`), but that schedule can be
-        // silently overwritten by an unrelated small content update before this
-        // surface is next actually drawn (its row cache keys on content
-        // generation and font/size, not color). Forcing an immediate display
-        // request here narrows that window for visible surfaces; the
-        // `forceRefresh` reapplication on unhide closes it for hidden ones.
-        needsDisplay = true
+        applyThemePalette(theme)
     }
-
-    /// SwiftTerm's own default caret color (`MacCaretView.caretColor`'s initial
-    /// value), used to restore the exact original look when a theme with no
-    /// explicit cursor color (only "system" today) is applied over one that did
-    /// set a custom cursor color.
-    private static let systemDefaultCaretColor = NSColor.selectedControlColor
 
     func configureStartupMarkers(
         prefix: String,
@@ -622,5 +601,18 @@ final class SynchronizableLocalProcessTerminalView: LocalProcessTerminalView {
             onOutput?(visible)
             super.dataReceived(slice: visible[...])
         }
+    }
+}
+
+extension TerminalView {
+    /// Applies the palette through TerminalView-level APIs so live terminals
+    /// and the read-only recording player share exactly the same appearance.
+    func applyThemePalette(_ theme: TerminalTheme) {
+        let palette = theme.palette
+        installColors(palette.ansi.map { $0.swiftTermColor })
+        nativeBackgroundColor = palette.background.nsColor
+        nativeForegroundColor = palette.foreground.nsColor
+        caretColor = palette.cursor?.nsColor ?? NSColor.selectedControlColor
+        needsDisplay = true
     }
 }
