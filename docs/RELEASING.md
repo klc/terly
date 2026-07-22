@@ -1,30 +1,26 @@
-# Terly yayın rehberi
+# Terly release guide
 
-Bu rehber imzalı, notarize edilmiş bir Terly sürümünü GitHub Release ve Sparkle
-update channel üzerinden yayınlamak için gereken source of truth'tur.
+This guide is the single source of truth for publishing a signed and notarized Terly release via GitHub Releases and the Sparkle update channel.
 
 ## GitHub secrets
 
-Repository Settings → Secrets and variables → Actions altında şunlar bulunmalı:
+The following secrets must be configured under **Repository Settings → Secrets and variables → Actions**:
 
-- `MACOS_CERTIFICATE_P12`: Developer ID Application `.p12` dosyasının base64 içeriği.
-- `MACOS_CERTIFICATE_PASSWORD`: `.p12` parolası.
+- `MACOS_CERTIFICATE_P12`: Base64 content of the Developer ID Application `.p12` file.
+- `MACOS_CERTIFICATE_PASSWORD`: The `.p12` password.
 - `NOTARY_TEAM_ID`: Apple Developer Team ID.
-- `NOTARY_KEY_P8`: App Store Connect API `.p8` anahtarının base64 içeriği.
+- `NOTARY_KEY_P8`: Base64 content of the App Store Connect API `.p8` key.
 - `NOTARY_KEY_ID`: App Store Connect API Key ID.
 - `NOTARY_ISSUER_ID`: App Store Connect Issuer ID.
-- `SPARKLE_ED_PRIVATE_KEY`: `generate_keys` çıktısındaki private EdDSA anahtarı.
+- `SPARKLE_ED_PRIVATE_KEY`: The private EdDSA key output from `generate_keys`.
 
-`GITHUB_TOKEN` GitHub Actions tarafından otomatik sağlanır. Sertifika, notary
-anahtarı ve Sparkle private key hiçbir zaman repoya eklenmemelidir.
+`GITHUB_TOKEN` is provided automatically by GitHub Actions. Certificates, notary keys, and the Sparkle private key must never be committed to the repository.
 
-## Yayın öncesi kontrol
+## Pre-release checklist
 
-1. `project.yml` içinde `MARKETING_VERSION` hedef sürümle eşleşmeli ve
-   `CURRENT_PROJECT_VERSION` önceki kaynak build numarasından büyük olmalı.
-2. `CHANGELOG.md` içinde tam `## X.Y.Z` başlığı bulunmalı. Workflow release
-   notlarını bu başlıktan bir sonraki sürüm başlığına kadar alır.
-3. Xcode projesini üret ve doğrula:
+1. `MARKETING_VERSION` in `project.yml` must match the target release version, and `CURRENT_PROJECT_VERSION` must be greater than the previous source build number.
+2. `CHANGELOG.md` must contain an exact `## X.Y.Z` heading. The workflow extracts release notes from this heading up to the next version heading.
+3. Generate and verify the Xcode project:
 
    ```sh
    xcodegen generate
@@ -39,35 +35,26 @@ anahtarı ve Sparkle private key hiçbir zaman repoya eklenmemelidir.
      CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- build
    ```
 
-4. `git diff --check` temiz olmalı; `Package.resolved` beklenmedik bir lokal
-   SwiftTerm pin değişikliği içermemeli.
-5. Manuel smoke test: pane resize/swap/zoom, tab reorder/rename, Finder upload
-   overwrite onayı, transfer cancel/retry ve uygulama restart sonrası workspace.
+4. `git diff --check` must be clean; `Package.resolved` should not contain unexpected local SwiftTerm pin changes.
+5. Manual smoke test: pane resize/swap/zoom, tab reorder/rename, Finder upload overwrite confirmation, transfer cancel/retry, and workspace restoration after app restart.
 
-## Yayınlama
+## Publishing
 
-Hazır commit varsayılan branche alındıktan sonra annotated tag oluşturup gönder:
+Once the prepared commit is merged into the default branch, create and push an annotated tag:
 
 ```sh
 git tag -a v1.1.1 -m 'Terly 1.1.1'
 git push origin v1.1.1
 ```
 
-`.github/workflows/release.yml` tag'den sürümü, GitHub run number'dan build
-numarasını alır; Xcode projesini yeniden üretir, Developer ID ile archive/export
-eder, Apple notarization ve staple işlemlerini yapar, DMG/ZIP üretir. Ardından
-Sparkle arşivini imzalayıp `gh-pages` üzerindeki `appcast.xml` dosyasını günceller
-ve aynı dosyaları GitHub Release'e ekler.
+`.github/workflows/release.yml` reads the release version from the tag and the build number from the GitHub run number. It regenerates the Xcode project, archives/exports using Developer ID, performs Apple notarization and stapling, and builds DMG/ZIP archives. Next, it signs the Sparkle archive, updates `appcast.xml` on `gh-pages`, and attaches all artifacts to the GitHub Release.
 
-## Yayın sonrası doğrulama
+## Post-release verification
 
-- GitHub Actions `Release` job'u tamamen yeşil olmalı.
-- GitHub Release altında `Terly-X.Y.Z.dmg` ve `Terly-X.Y.Z.zip` bulunmalı.
-- `https://klc.github.io/terly/appcast.xml` yeni sürümü ve doğru download URL'ini göstermeli.
-- Temiz bir Mac'te DMG açılmalı; `spctl -a -vv /Applications/Terly.app` accepted
-  ve source olarak `Notarized Developer ID` göstermeli.
-- Eski Terly sürümünde Ayarlar → Güncellemeler → Güncellemeleri Denetle yeni
-  sürümü bulmalı ve kurabilmeli.
+- The GitHub Actions `Release` job must be green (successful).
+- `Terly-X.Y.Z.dmg` and `Terly-X.Y.Z.zip` must be present under the GitHub Release.
+- `https://klc.github.io/terly/appcast.xml` must reflect the new version and point to the correct download URL.
+- The DMG should open on a clean Mac; `spctl -a -vv /Applications/Terly.app` must show accepted with `Notarized Developer ID` as the source.
+- Checking for updates in an older Terly release (**Settings → Updates → Check for Updates**) must discover and install the new version.
 
-Workflow başarısız olursa aynı tag'i değiştirip tekrar kullanma. Hata düzeltmesini
-commit et, patch sürümünü artır (`v1.1.1` gibi) ve yeni tag yayınla.
+If the workflow fails, do not overwrite or reuse the same tag. Commit the fix, bump the patch version (e.g., `v1.1.2`), and publish a new tag.
