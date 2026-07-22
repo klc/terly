@@ -1,10 +1,9 @@
 import SwiftUI
 
 struct StartupFlowLaunchPreviewItem: Identifiable, Equatable {
+    let id = UUID()
     let target: SSHConnectionTarget
     let profile: StartupFlowProfile?
-
-    var id: String { target.alias }
 }
 
 struct StartupFlowLaunchPreviewSheet: View {
