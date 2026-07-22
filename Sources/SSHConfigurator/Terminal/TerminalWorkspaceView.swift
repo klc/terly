@@ -75,6 +75,7 @@ struct TerminalWorkspaceView: View {
     let isVisible: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
+    let onSaveWorkspace: () -> Void
     @State private var showingSettingsPopover = false
     @State private var searchPaneID: TerminalPane.ID?
     @State private var searchTerm = ""
@@ -323,6 +324,11 @@ struct TerminalWorkspaceView: View {
                 }
                 .help("Open the active terminal's connection again in a new tab")
                 .keyboardShortcut(.newTab)
+
+                Button("Save as workspace", systemImage: "rectangle.stack.badge.plus") {
+                    onSaveWorkspace()
+                }
+                .help("Save all open tabs and panes as a workspace")
 
                 Button("Split vertically", systemImage: "rectangle.split.2x1") {
                     model.splitActivePane(

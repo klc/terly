@@ -15,6 +15,7 @@ struct ContentView: View {
     @StateObject private var transferEngine = TransferQueueEngine()
     @StateObject private var tunnelWorkspace = TunnelWorkspaceModel(launchPlanBuilder: SSHLaunchPlanBuilder(baseEnvironment: SSHProcessEnvironment.interactive()))
     @StateObject private var startupFlows = StartupFlowLibrary()
+    @StateObject private var savedWorkspaces = SavedWorkspaceLibrary()
     @StateObject private var quickAccess = QuickAccessLibrary()
     @StateObject private var snippets = SnippetLibrary()
     @StateObject private var runbooks = RunbookLibrary()
@@ -23,6 +24,8 @@ struct ContentView: View {
     @State private var collapsedHostGroupIDs: Set<String> = []
     @State private var editingHostSelection: HostSettingsSelection?
     @State private var connectionGroupEditorSelection: ConnectionGroupEditorSelection?
+    @State private var workspaceEditorSelection: WorkspaceEditorSelection?
+    @State private var skippedWorkspaceAliasesMessage: String?
     @State private var transferSelection: SCPTransferSelection?
     @State private var diagnosticSelection: SSHDiagnosticSelection?
     @State private var keySetupSelection: KeySetupSelection?
@@ -34,45 +37,71 @@ struct ContentView: View {
     @State private var droppedUploadErrorMessage: String?
     private let uploadPreflight = UploadPreflight()
 
-    var body: some View {
+    // Broken out of `body` — with every sidebar callback inlined directly in
+    // the `NavigationSplitView` closure, the type-checker timed out trying to
+    // solve the whole `ContentSidebarView(...)` call as one expression.
+    private var sidebar: some View {
+        ContentSidebarView(
+            model: model,
+            startupFlows: startupFlows,
+            savedWorkspaces: savedWorkspaces,
+            expansionBinding: expansionBinding,
+            onConnectHost: connect,
+            onConnectGroup: connect,
+            onDuplicateHost: model.duplicateHost,
+            onDiagnoseHost: { showDiagnostics(for: $0) },
+            onTransferHost: { showTransfer(for: $0) },
+            onKeySetupHost: { showKeySetup(for: $0) },
+            onShowHostSettings: { showSettings(for: $0) },
+            onShowGroupSettings: { showSettings(for: $0) },
+            onNewConnectionGroup: showNewConnectionGroupEditor,
+            onNewHost: {
+                model.addHost()
+                if let host = model.selectedHost {
+                    showSettings(for: host)
+                }
+            },
+            onDeleteHost: { requestDeleteHost($0) },
+            onOpenLocalTerminal: { terminalWorkspace.openLocalTerminal() },
+            canSaveWorkspace: canSaveCurrentScreenAsWorkspace,
+            onSaveCurrentAsWorkspace: showSaveWorkspaceEditor,
+            onOpenWorkspace: connect,
+            onEditWorkspace: { showEditWorkspaceEditor($0) },
+            onUpdateWorkspaceFromCurrentScreen: { updateWorkspaceFromCurrentScreen($0) },
+            onDeleteWorkspace: { _ = savedWorkspaces.delete(id: $0.id) }
+        )
+    }
+
+    private var detail: some View {
+        ContentDetailView(
+            model: model,
+            terminalWorkspace: terminalWorkspace,
+            terminalEngine: terminalEngine,
+            terminalRecorder: terminalRecorder,
+            startupFlows: startupFlows,
+            tunnelWorkspace: tunnelWorkspace,
+            snippets: snippets,
+            runbooks: runbooks,
+            isHostSettingsSheetPresented: editingHostSelection != nil,
+            onRequestTransfer: { showTransfer(forAlias: $0) },
+            onDropFilesForUpload: uploadDroppedFiles,
+            onSaveWorkspace: showSaveWorkspaceEditor
+        )
+        .frame(minWidth: 680, minHeight: 460)
+    }
+
+    // `body` used to be one long modifier chain hung off the
+    // `NavigationSplitView`. Once the workspace alerts/sheet were added, the
+    // whole chain became one expression too large for the type-checker to
+    // solve in reasonable time — the reported error line kept moving to
+    // whichever modifier happened to tip it over, unrelated to what actually
+    // changed. Splitting the chain into `let`-bound stages (each its own
+    // expression) fixes it without changing behavior.
+    private var navigationSplit: some View {
         NavigationSplitView {
-            ContentSidebarView(
-                model: model,
-                startupFlows: startupFlows,
-                expansionBinding: expansionBinding,
-                onConnectHost: connect,
-                onConnectGroup: connect,
-                onDuplicateHost: model.duplicateHost,
-                onDiagnoseHost: { showDiagnostics(for: $0) },
-                onTransferHost: { showTransfer(for: $0) },
-                onKeySetupHost: { showKeySetup(for: $0) },
-                onShowHostSettings: { showSettings(for: $0) },
-                onShowGroupSettings: { showSettings(for: $0) },
-                onNewConnectionGroup: showNewConnectionGroupEditor,
-                onNewHost: {
-                    model.addHost()
-                    if let host = model.selectedHost {
-                        showSettings(for: host)
-                    }
-                },
-                onDeleteHost: { requestDeleteHost($0) },
-                onOpenLocalTerminal: { terminalWorkspace.openLocalTerminal() }
-            )
+            sidebar
         } detail: {
-            ContentDetailView(
-                model: model,
-                terminalWorkspace: terminalWorkspace,
-                terminalEngine: terminalEngine,
-                terminalRecorder: terminalRecorder,
-                startupFlows: startupFlows,
-                tunnelWorkspace: tunnelWorkspace,
-                snippets: snippets,
-                runbooks: runbooks,
-                isHostSettingsSheetPresented: editingHostSelection != nil,
-                onRequestTransfer: { showTransfer(forAlias: $0) },
-                onDropFilesForUpload: uploadDroppedFiles
-            )
-            .frame(minWidth: 680, minHeight: 460)
+            detail
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
@@ -85,217 +114,245 @@ struct ContentView: View {
                 .accessibilityLabel("Quick access")
             }
         }
-        .alert(
-            "Delete the selected host?",
-            isPresented: $showingDeleteConfirmation
-        ) {
-            Button("Delete", role: .destructive) {
-                model.deleteSelectedHost()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("The host is permanently removed from ~/.ssh/config. The previous version is kept as a backup.")
-        }
-        .alert(
-            "Operation failed",
-            isPresented: Binding(
-                get: { model.errorMessage != nil },
-                set: { if !$0 { model.dismissError() } }
-            )
-        ) {
-            Button("OK", role: .cancel) {
-                model.dismissError()
-            }
-        } message: {
-            Text(model.errorMessage ?? "")
-        }
-        .alert(
-            "Terminal could not be opened",
-            isPresented: Binding(
-                get: { terminalWorkspace.errorMessage != nil },
-                set: { if !$0 { terminalWorkspace.dismissError() } }
-            )
-        ) {
-            Button("OK", role: .cancel) {
-                terminalWorkspace.dismissError()
-            }
-        } message: {
-            Text(terminalWorkspace.errorMessage ?? "")
-        }
-        .modifier(DroppedUploadSafetyAlerts(
-            pendingUpload: $pendingDroppedUpload,
-            errorMessage: $droppedUploadErrorMessage,
-            onConfirm: { pending in
-                transferEngine.enqueue(pending.items)
-                showTransfer(forAlias: pending.alias)
-            }
-        ))
-        .modifier(WorkspacePersistenceAlert(model: terminalWorkspace))
-        .alert(
-            "Startup flow could not be saved",
-            isPresented: Binding(
-                get: { startupFlows.errorMessage != nil },
-                set: { if !$0 { startupFlows.dismissError() } }
-            )
-        ) {
-            Button("OK", role: .cancel) { startupFlows.dismissError() }
-        } message: {
-            Text(startupFlows.errorMessage ?? "")
-        }
-        .alert(
-            "Quick access metadata could not be saved",
-            isPresented: Binding(
-                get: { quickAccess.errorMessage != nil },
-                set: { if !$0 { quickAccess.dismissError() } }
-            )
-        ) {
-            Button("OK", role: .cancel) { quickAccess.dismissError() }
-        } message: {
-            Text(quickAccess.errorMessage ?? "")
-        }
-        .alert(
-            "Match exec detected",
-            isPresented: Binding(
-                get: { model.requiresMatchExecConfirmation },
-                set: { if !$0 { model.dismissMatchExecConfirmation() } }
-            )
-        ) {
-            Button("Validate by running the command") {
-                model.dismissMatchExecConfirmation()
-                model.validateSelectedHost(allowingMatchExec: true)
-            }
-            Button("Cancel", role: .cancel) {
-                model.dismissMatchExecConfirmation()
-            }
-        } message: {
-            Text("ssh -G can run the local command inside Match exec. Make sure you want to continue.")
-        }
-        .sheet(item: $editingHostSelection, onDismiss: discardUnsavedWorkingCopy) { selection in
-            hostSettingsSheet(for: selection)
-        }
-        .sheet(item: $connectionGroupEditorSelection) { selection in
-            ConnectionGroupEditorSheet(
-                group: selection.groupID.flatMap { groupID in
-                    model.connectionGroups.first { $0.id == groupID }
-                },
-                connections: model.availableConnections,
-                onSave: { name, aliases, openMode, startupProfile, overrideHostStartupFlows in
-                    model.saveConnectionGroup(
-                        id: selection.groupID,
-                        name: name,
-                        aliases: aliases,
-                        openMode: openMode,
-                        startupProfile: startupProfile,
-                        overrideHostStartupFlows: overrideHostStartupFlows
-                    )
-                },
-                onDelete: selection.groupID.flatMap { groupID in
-                    model.connectionGroups.first { $0.id == groupID }
-                }.map { group in
-                    { model.deleteConnectionGroup(group) }
+    }
+
+    private var coreAlerts: some View {
+        navigationSplit
+            .alert(
+                "Delete the selected host?",
+                isPresented: $showingDeleteConfirmation
+            ) {
+                Button("Delete", role: .destructive) {
+                    model.deleteSelectedHost()
                 }
-            )
-        }
-        .sheet(item: $transferSelection) { selection in
-            SCPTransferSheet(
-                alias: selection.alias,
-                workspace: transferWorkspace,
-                hasUnsavedChanges: model.hasChanges,
-                queue: transferEngine.queue,
-                engine: transferEngine
-            )
-        }
-        .sheet(item: $diagnosticSelection) { selection in
-            if let document = model.document {
-                SSHConnectionDiagnosticsView(
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("The host is permanently removed from ~/.ssh/config. The previous version is kept as a backup.")
+            }
+            .alert(
+                "Operation failed",
+                isPresented: Binding(
+                    get: { model.errorMessage != nil },
+                    set: { if !$0 { model.dismissError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) {
+                    model.dismissError()
+                }
+            } message: {
+                Text(model.errorMessage ?? "")
+            }
+            .alert(
+                "Terminal could not be opened",
+                isPresented: Binding(
+                    get: { terminalWorkspace.errorMessage != nil },
+                    set: { if !$0 { terminalWorkspace.dismissError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) {
+                    terminalWorkspace.dismissError()
+                }
+            } message: {
+                Text(terminalWorkspace.errorMessage ?? "")
+            }
+    }
+
+    private var workspaceAndUploadAlerts: some View {
+        coreAlerts
+            .modifier(DroppedUploadSafetyAlerts(
+                pendingUpload: $pendingDroppedUpload,
+                errorMessage: $droppedUploadErrorMessage,
+                onConfirm: { pending in
+                    transferEngine.enqueue(pending.items)
+                    showTransfer(forAlias: pending.alias)
+                }
+            ))
+            .modifier(WorkspacePersistenceAlert(model: terminalWorkspace))
+            .alert(
+                "Startup flow could not be saved",
+                isPresented: Binding(
+                    get: { startupFlows.errorMessage != nil },
+                    set: { if !$0 { startupFlows.dismissError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) { startupFlows.dismissError() }
+            } message: {
+                Text(startupFlows.errorMessage ?? "")
+            }
+            .alert(
+                "Saved workspace could not be saved",
+                isPresented: Binding(
+                    get: { savedWorkspaces.errorMessage != nil },
+                    set: { if !$0 { savedWorkspaces.dismissError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) { savedWorkspaces.dismissError() }
+            } message: {
+                Text(savedWorkspaces.errorMessage ?? "")
+            }
+            .alert(
+                "Some connections were skipped",
+                isPresented: Binding(
+                    get: { skippedWorkspaceAliasesMessage != nil },
+                    set: { if !$0 { skippedWorkspaceAliasesMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { skippedWorkspaceAliasesMessage = nil }
+            } message: {
+                Text(skippedWorkspaceAliasesMessage ?? "")
+            }
+    }
+
+    private var remainingAlerts: some View {
+        workspaceAndUploadAlerts
+            .alert(
+                "Quick access metadata could not be saved",
+                isPresented: Binding(
+                    get: { quickAccess.errorMessage != nil },
+                    set: { if !$0 { quickAccess.dismissError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) { quickAccess.dismissError() }
+            } message: {
+                Text(quickAccess.errorMessage ?? "")
+            }
+            .alert(
+                "Match exec detected",
+                isPresented: Binding(
+                    get: { model.requiresMatchExecConfirmation },
+                    set: { if !$0 { model.dismissMatchExecConfirmation() } }
+                )
+            ) {
+                Button("Validate by running the command") {
+                    model.dismissMatchExecConfirmation()
+                    model.validateSelectedHost(allowingMatchExec: true)
+                }
+                Button("Cancel", role: .cancel) {
+                    model.dismissMatchExecConfirmation()
+                }
+            } message: {
+                Text("ssh -G can run the local command inside Match exec. Make sure you want to continue.")
+            }
+    }
+
+    private var editorSheets: some View {
+        remainingAlerts
+            .sheet(item: $editingHostSelection, onDismiss: discardUnsavedWorkingCopy) { selection in
+                hostSettingsSheet(for: selection)
+            }
+            .sheet(item: $connectionGroupEditorSelection) { selection in
+                ConnectionGroupEditorSheet(
+                    group: selection.groupID.flatMap { groupID in
+                        model.connectionGroups.first { $0.id == groupID }
+                    },
+                    connections: model.availableConnections,
+                    onSave: { name, aliases, openMode, startupProfile, overrideHostStartupFlows in
+                        model.saveConnectionGroup(
+                            id: selection.groupID,
+                            name: name,
+                            aliases: aliases,
+                            openMode: openMode,
+                            startupProfile: startupProfile,
+                            overrideHostStartupFlows: overrideHostStartupFlows
+                        )
+                    },
+                    onDelete: selection.groupID.flatMap { groupID in
+                        model.connectionGroups.first { $0.id == groupID }
+                    }.map { group in
+                        { model.deleteConnectionGroup(group) }
+                    }
+                )
+            }
+            .sheet(item: $workspaceEditorSelection) { selection in
+                WorkspaceEditSheet(
+                    workspace: selection.seed,
+                    isNew: selection.isNew,
+                    availableFlows: startupFlows.records.map(\.profile),
+                    onSave: { updated in
+                        savedWorkspaces.save(updated)
+                    }
+                )
+            }
+    }
+
+    private var remainingSheets: some View {
+        editorSheets
+            .sheet(item: $transferSelection) { selection in
+                SCPTransferSheet(
                     alias: selection.alias,
-                    document: document,
+                    workspace: transferWorkspace,
+                    hasUnsavedChanges: model.hasChanges,
+                    queue: transferEngine.queue,
+                    engine: transferEngine
+                )
+            }
+            .sheet(item: $diagnosticSelection) { selection in
+                if let document = model.document {
+                    SSHConnectionDiagnosticsView(
+                        alias: selection.alias,
+                        document: document,
+                        onIdentityFileAccepted: { path in
+                            applyIdentityFile(path, hostID: selection.id)
+                        }
+                    )
+                }
+            }
+            .sheet(item: $keySetupSelection) { selection in
+                KeySetupWizardView(
+                    alias: selection.alias,
                     onIdentityFileAccepted: { path in
                         applyIdentityFile(path, hostID: selection.id)
                     }
                 )
             }
-        }
-        .sheet(item: $keySetupSelection) { selection in
-            KeySetupWizardView(
-                alias: selection.alias,
-                onIdentityFileAccepted: { path in
-                    applyIdentityFile(path, hostID: selection.id)
-                }
-            )
-        }
-        .sheet(item: $startupLaunchRequest) { request in
-            StartupFlowLaunchPreviewSheet(
-                items: request.items,
-                onRun: { executeStartupLaunch(request, skipAllStartups: false) },
-                onSkip: { executeStartupLaunch(request, skipAllStartups: true) }
-            )
-        }
-        .sheet(
-            isPresented: $showingQuickAccess,
-            onDismiss: performPendingQuickAccessRoute
-        ) {
-            QuickAccessPaletteView(
-                entries: quickAccessEntries,
-                onToggleFavorite: { entryID in
-                    _ = quickAccess.toggleFavorite(entryID: entryID)
-                },
-                onRoute: { route in
-                    pendingQuickAccessRoute = route
-                    showingQuickAccess = false
-                }
-            )
-        }
-        .modifier(RawConfigAccessSupport(model: model))
-        .modifier(HelpPresentationSupport())
-        .task {
-            model.load()
-            transferEngine.historyLibrary.load()
-            // WP7: the model doesn't own StartupFlowLibrary, so an automatic
-            // reconnect looks up the alias's startup profile through here —
-            // exactly what a manual reconnect click already gets from the view.
-            terminalWorkspace.startupProfileProvider = { startupFlows.profile(for: $0) }
-            if let context = startupReconciliationContext {
-                startupFlows.load(context: context)
+            .sheet(item: $startupLaunchRequest) { request in
+                StartupFlowLaunchPreviewSheet(
+                    items: request.items,
+                    onRun: { executeStartupLaunch(request, skipAllStartups: false) },
+                    onSkip: { executeStartupLaunch(request, skipAllStartups: true) }
+                )
             }
-            
-            var startupProfiles: [String: StartupFlowProfile] = [:]
-            for target in model.availableConnections {
-                if let profile = startupFlows.profile(for: target.alias) {
-                    startupProfiles[target.alias] = profile
-                }
+            .sheet(
+                isPresented: $showingQuickAccess,
+                onDismiss: performPendingQuickAccessRoute
+            ) {
+                QuickAccessPaletteView(
+                    entries: quickAccessEntries,
+                    onToggleFavorite: { entryID in
+                        _ = quickAccess.toggleFavorite(entryID: entryID)
+                    },
+                    onRoute: { route in
+                        pendingQuickAccessRoute = route
+                        showingQuickAccess = false
+                    }
+                )
             }
-            let validAliases = Set(model.availableConnections.map(\.alias) + model.connectionGroups.map(\.name))
-            terminalWorkspace.restoreWorkspace(startupProfiles: startupProfiles, validAliases: validAliases)
+    }
 
-            if terminalWorkspace.sessions.isEmpty {
-                model.selectedItem = .localTerminal
-                terminalWorkspace.openLocalTerminal()
+    var body: some View {
+        remainingSheets
+            .modifier(RawConfigAccessSupport(model: model))
+            .modifier(HelpPresentationSupport())
+            .task {
+                performInitialLoad()
             }
-
-            tunnelWorkspace.load()
-            quickAccess.load(catalog: quickAccessCatalog)
-            snippets.load()
-            runbooks.load()
-            collapseAllHostGroups()
-        }
-        .onChange(of: startupReconciliationContext) { _, context in
-            reconcileStartupFlows(context)
-        }
-        .onChange(of: quickAccessCatalog) { _, catalog in
-            quickAccess.reconcile(catalog: catalog)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
-            tunnelWorkspace.stopAllTunnels()
-        }
-        .modifier(
-            SnippetPaletteSupport(
-                snippets: snippets,
-                terminalWorkspace: terminalWorkspace,
-                showingPalette: $showingSnippetPalette,
-                onInsert: insertSnippetValue
+            .onChange(of: startupReconciliationContext) { _, context in
+                reconcileStartupFlows(context)
+            }
+            .onChange(of: quickAccessCatalog) { _, catalog in
+                quickAccess.reconcile(catalog: catalog)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+                tunnelWorkspace.stopAllTunnels()
+            }
+            .modifier(
+                SnippetPaletteSupport(
+                    snippets: snippets,
+                    terminalWorkspace: terminalWorkspace,
+                    showingPalette: $showingSnippetPalette,
+                    onInsert: insertSnippetValue
+                )
             )
-        )
     }
 
     private func insertSnippetValue(_ value: String) {
@@ -328,6 +385,45 @@ struct ContentView: View {
 
     private func groupIDs(in group: SSHConfigHostGroup) -> [String] {
         [group.id] + group.children.flatMap(groupIDs(in:))
+    }
+
+    /// Extracted out of the `.task` closure in `body` — inlined as one giant
+    /// multi-statement closure, this pushed the surrounding modifier chain's
+    /// expression past the type-checker's time budget (see the `sidebar`/
+    /// `detail` extraction above for the same issue on the view side).
+    private func performInitialLoad() {
+        model.load()
+        transferEngine.historyLibrary.load()
+        // WP7: the model doesn't own StartupFlowLibrary, so an automatic
+        // reconnect looks up the alias's startup profile through here —
+        // exactly what a manual reconnect click already gets from the view.
+        terminalWorkspace.startupProfileProvider = { startupFlows.profile(for: $0) }
+        if let context = startupReconciliationContext {
+            startupFlows.load(context: context)
+        }
+
+        var startupProfiles: [String: StartupFlowProfile] = [:]
+        for target in model.availableConnections {
+            if let profile = startupFlows.profile(for: target.alias) {
+                startupProfiles[target.alias] = profile
+            }
+        }
+        let hostAliases: [String] = model.availableConnections.map(\.alias)
+        let groupNames: [String] = model.connectionGroups.map(\.name)
+        let validAliases = Set(hostAliases + groupNames)
+        terminalWorkspace.restoreWorkspace(startupProfiles: startupProfiles, validAliases: validAliases)
+
+        if terminalWorkspace.sessions.isEmpty {
+            model.selectedItem = .localTerminal
+            terminalWorkspace.openLocalTerminal()
+        }
+
+        tunnelWorkspace.load()
+        quickAccess.load(catalog: quickAccessCatalog)
+        snippets.load()
+        runbooks.load()
+        savedWorkspaces.load()
+        collapseAllHostGroups()
     }
 
     private func connectSelectedHost() {
@@ -461,7 +557,32 @@ struct ContentView: View {
         requestStartupLaunch(for: .group(group, connections))
     }
 
+    private func connect(_ workspace: SavedWorkspace) {
+        requestStartupLaunch(for: .savedWorkspace(workspace))
+    }
+
     private func requestStartupLaunch(for destination: StartupLaunchRequest.Destination) {
+        // Saved workspaces build pane-level (not connection-level) preview
+        // items — one per pane whose effective profile will actually
+        // auto-run — which is a different shape than the connections/group
+        // items built below, so it's handled as its own early branch.
+        if case let .savedWorkspace(workspace) = destination {
+            let aliasProfiles = workspaceStartupProfiles(for: workspace)
+            let items = SavedWorkspaceStartupPreview.autoRunningItems(
+                for: workspace,
+                aliasStartupProfiles: aliasProfiles
+            )
+            guard !items.isEmpty else {
+                executeStartupLaunch(
+                    StartupLaunchRequest(destination: destination, items: items),
+                    skipAllStartups: false
+                )
+                return
+            }
+            startupLaunchRequest = StartupLaunchRequest(destination: destination, items: items)
+            return
+        }
+
         let connections: [SSHConnectionTarget]
         let profiles: [String: StartupFlowProfile]
         switch destination {
@@ -471,6 +592,8 @@ struct ContentView: View {
         case let .group(group, targets):
             connections = targets
             profiles = startupProfiles(for: group, connections: targets)
+        case .savedWorkspace:
+            return // handled above
         }
 
         let items = connections.map {
@@ -543,7 +666,70 @@ struct ContentView: View {
                 connections: connections,
                 skipAllStartups: skipAllStartups
             )
+        case let .savedWorkspace(workspace):
+            open(savedWorkspace: workspace, skipAllStartups: skipAllStartups)
         }
+    }
+
+    /// Opens a saved workspace, appending its sessions to whatever's already
+    /// open. `validAliases` deliberately excludes connection-group names —
+    /// `SavedWorkspace.capture` never records a group membership, so a saved
+    /// pane's alias is always either a concrete host alias or the
+    /// local-terminal alias (which `openSavedWorkspace` always treats as
+    /// valid regardless of this set).
+    private func open(savedWorkspace workspace: SavedWorkspace, skipAllStartups: Bool) {
+        let previousSelection = model.selectedItem
+        let aliasProfiles = workspaceStartupProfiles(for: workspace)
+        let validAliases = Set(model.availableConnections.map(\.alias))
+
+        guard let outcome = terminalWorkspace.openSavedWorkspace(
+            workspace,
+            hasUnsavedChanges: model.hasChanges,
+            startupProfiles: aliasProfiles,
+            validAliases: validAliases,
+            skipAllStartups: skipAllStartups
+        ) else {
+            model.selectedItem = previousSelection
+            return
+        }
+
+        if !outcome.skippedAliases.isEmpty {
+            let message = String(
+                localized: "Some connections were skipped because they are no longer in the SSH config: \(outcome.skippedAliases.joined(separator: ", "))"
+            )
+            // This runs inside the same button action that just called
+            // `dismiss()` on `StartupFlowLaunchPreviewSheet` (when a preview
+            // was shown first) — presenting a new alert in the same tick a
+            // sheet starts dismissing is a known SwiftUI drop point, so the
+            // assignment is deferred one runloop tick to land cleanly after
+            // the dismissal.
+            DispatchQueue.main.async {
+                skippedWorkspaceAliasesMessage = message
+            }
+        }
+
+        let openedSessions = terminalWorkspace.sessions.filter { outcome.openedSessionIDs.contains($0.id) }
+        let openedAliases = Set(openedSessions.flatMap { $0.panes.map(\.alias) })
+        if !openedAliases.isEmpty {
+            _ = quickAccess.markUsed(hostAliases: Array(openedAliases))
+        }
+
+        if let firstOpenedSession = openedSessions.first(where: { $0.id == outcome.openedSessionIDs.first }) {
+            model.selectedItem = firstOpenedSession.hostID == -1 ? .localTerminal : .host(firstOpenedSession.hostID)
+        } else {
+            model.selectedItem = previousSelection
+        }
+    }
+
+    /// Alias-keyed startup profile dictionary for every pane in `workspace`
+    /// — the same dictionary is used both to decide the launch preview (via
+    /// `SavedWorkspaceStartupPreview`) and to actually open the workspace, so
+    /// the preview can never promise a different startup than what runs.
+    private func workspaceStartupProfiles(for workspace: SavedWorkspace) -> [String: StartupFlowProfile] {
+        let aliases = Set(workspace.sessions.flatMap { $0.layout.panes.map(\.alias) })
+        return Dictionary(uniqueKeysWithValues: aliases.compactMap { alias in
+            startupFlows.profile(for: alias).map { (alias, $0) }
+        })
     }
 
     private func startupProfiles(
@@ -733,6 +919,39 @@ struct ContentView: View {
             groupID: nil
         )
     }
+
+    private var canSaveCurrentScreenAsWorkspace: Bool {
+        !terminalWorkspace.sessions.isEmpty
+    }
+
+    private func showSaveWorkspaceEditor() {
+        guard canSaveCurrentScreenAsWorkspace else { return }
+        let seed = SavedWorkspace.capture(name: "", from: terminalWorkspace.sessions)
+        workspaceEditorSelection = WorkspaceEditorSelection(id: UUID(), workspaceID: nil, isNew: true, seed: seed)
+    }
+
+    private func showEditWorkspaceEditor(_ workspace: SavedWorkspace) {
+        workspaceEditorSelection = WorkspaceEditorSelection(
+            id: workspace.id,
+            workspaceID: workspace.id,
+            isNew: false,
+            seed: workspace
+        )
+    }
+
+    /// Re-captures the live screen into an existing saved workspace, keeping
+    /// its identity (`id`), `name`, and `createdAt` — only the sessions
+    /// snapshot changes.
+    private func updateWorkspaceFromCurrentScreen(_ workspace: SavedWorkspace) {
+        guard canSaveCurrentScreenAsWorkspace else { return }
+        let recaptured = SavedWorkspace.capture(
+            name: workspace.name,
+            from: terminalWorkspace.sessions,
+            id: workspace.id,
+            createdAt: workspace.createdAt
+        )
+        savedWorkspaces.save(recaptured)
+    }
 }
 
 /// The host/group navigation list. Only observes `model` (host list, selection,
@@ -743,6 +962,7 @@ private struct ContentSidebarView: View {
     @EnvironmentObject private var syncCoordinator: SyncCoordinator
     @ObservedObject var model: ConfigViewModel
     @ObservedObject var startupFlows: StartupFlowLibrary
+    @ObservedObject var savedWorkspaces: SavedWorkspaceLibrary
     let expansionBinding: (SSHConfigHostGroup) -> Binding<Bool>
     let onConnectHost: (SSHHostBlock) -> Void
     let onConnectGroup: (SSHConnectionGroup) -> Void
@@ -756,6 +976,12 @@ private struct ContentSidebarView: View {
     let onNewHost: () -> Void
     let onDeleteHost: (SSHHostBlock) -> Void
     let onOpenLocalTerminal: () -> Void
+    let canSaveWorkspace: Bool
+    let onSaveCurrentAsWorkspace: () -> Void
+    let onOpenWorkspace: (SavedWorkspace) -> Void
+    let onEditWorkspace: (SavedWorkspace) -> Void
+    let onUpdateWorkspaceFromCurrentScreen: (SavedWorkspace) -> Void
+    let onDeleteWorkspace: (SavedWorkspace) -> Void
 
     var body: some View {
         List(selection: $model.selectedItem) {
@@ -831,6 +1057,48 @@ private struct ContentSidebarView: View {
                     .help("Add new SSH connection")
                     .accessibilityLabel("Add new SSH connection")
                     .disabled(model.document == nil)
+                    .padding(.trailing, 4)
+                }
+            }
+
+            Section {
+                if savedWorkspaces.workspaces.isEmpty {
+                    Button {
+                        onSaveCurrentAsWorkspace()
+                    } label: {
+                        Label("Save your first workspace", systemImage: "rectangle.stack.badge.plus")
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!canSaveWorkspace)
+                } else {
+                    ForEach(savedWorkspaces.workspaces) { workspace in
+                        SavedWorkspaceRow(
+                            workspace: workspace,
+                            canUpdateFromCurrentScreen: canSaveWorkspace,
+                            onOpen: { onOpenWorkspace(workspace) },
+                            onEdit: { onEditWorkspace(workspace) },
+                            onUpdateFromCurrentScreen: { onUpdateWorkspaceFromCurrentScreen(workspace) },
+                            onDelete: { onDeleteWorkspace(workspace) }
+                        )
+                    }
+                }
+            } header: {
+                HStack {
+                    Text("Workspaces")
+                    Spacer()
+                    Button {
+                        onSaveCurrentAsWorkspace()
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.caption)
+                            .frame(width: 20, height: 20)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.secondary)
+                    .help("Save the current tabs and panes as a workspace")
+                    .accessibilityLabel("Save the current tabs and panes as a workspace")
+                    .disabled(!canSaveWorkspace)
                     .padding(.trailing, 4)
                 }
             }
@@ -983,6 +1251,7 @@ private struct ContentDetailView: View {
     let isHostSettingsSheetPresented: Bool
     let onRequestTransfer: (String) -> Void
     let onDropFilesForUpload: ([URL], String) -> Void
+    let onSaveWorkspace: () -> Void
 
     var body: some View {
         if let document = model.document {
@@ -997,7 +1266,8 @@ private struct ContentDetailView: View {
                         isActive: terminalIsVisible && !isHostSettingsSheetPresented,
                         isVisible: terminalIsVisible,
                         onRequestTransfer: onRequestTransfer,
-                        onDropFilesForUpload: onDropFilesForUpload
+                        onDropFilesForUpload: onDropFilesForUpload,
+                        onSaveWorkspace: onSaveWorkspace
                     )
                     .opacity(terminalIsVisible ? 1 : 0)
                     .allowsHitTesting(terminalIsVisible)
@@ -1095,6 +1365,13 @@ private struct ConnectionGroupEditorSelection: Identifiable {
     let groupID: UUID?
 }
 
+private struct WorkspaceEditorSelection: Identifiable {
+    let id: UUID
+    let workspaceID: SavedWorkspace.ID?
+    let isNew: Bool
+    let seed: SavedWorkspace
+}
+
 private struct SCPTransferSelection: Identifiable {
     let id: Int
     let alias: String
@@ -1177,6 +1454,7 @@ private struct StartupLaunchRequest: Identifiable {
     enum Destination {
         case connections([SSHConnectionTarget])
         case group(SSHConnectionGroup, [SSHConnectionTarget])
+        case savedWorkspace(SavedWorkspace)
     }
 
     let id = UUID()
@@ -1213,6 +1491,66 @@ private struct ConnectionGroupRow: View {
             Button("Connect", systemImage: "play", action: onConnect)
             Button("Open settings", systemImage: "gearshape", action: onShowSettings)
         }
+    }
+}
+
+private struct SavedWorkspaceRow: View {
+    let workspace: SavedWorkspace
+    let canUpdateFromCurrentScreen: Bool
+    let onOpen: () -> Void
+    let onEdit: () -> Void
+    let onUpdateFromCurrentScreen: () -> Void
+    let onDelete: () -> Void
+
+    @State private var showingDeleteConfirmation = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Button(action: onOpen) {
+                HStack(spacing: 8) {
+                    Label(workspace.name, systemImage: "rectangle.stack")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "play.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Open this workspace's saved tabs and panes")
+            .accessibilityLabel("Open workspace \(workspace.name), \(subtitle)")
+        }
+        .padding(.vertical, 2)
+        .contextMenu {
+            Button("Open", systemImage: "play", action: onOpen)
+            Button("Edit…", systemImage: "pencil", action: onEdit)
+            Button(
+                "Update from current screen",
+                systemImage: "arrow.triangle.2.circlepath",
+                action: onUpdateFromCurrentScreen
+            )
+            .disabled(!canUpdateFromCurrentScreen)
+            Divider()
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                showingDeleteConfirmation = true
+            }
+        }
+        .confirmationDialog(
+            "Delete this workspace?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive, action: onDelete)
+        } message: {
+            Text("This only deletes the saved snapshot; open connections and the SSH config are unchanged.")
+        }
+    }
+
+    private var subtitle: String {
+        String(localized: "\(workspace.tabCount) tabs · \(workspace.paneCount) panes")
     }
 }
 
