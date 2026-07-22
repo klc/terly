@@ -3029,7 +3029,14 @@
       }
     },
     "Enable group startup flow" : {
-
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grup başlangıç akışını etkinleştir"
+          }
+        }
+      }
     },
     "Enabled" : {
       "localizations" : {
@@ -3433,7 +3440,14 @@
       }
     },
     "Group Startup Flow" : {
-
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grup Başlangıç Akışı"
+          }
+        }
+      }
     },
     "Group startup flows" : {
       "localizations" : {
@@ -4966,7 +4980,14 @@
       }
     },
     "Override host startup flows" : {
-
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Host başlangıç akışlarını geçersiz kıl"
+          }
+        }
+      }
     },
     "Overwrite" : {
       "localizations" : {
@@ -8579,7 +8600,14 @@
       }
     },
     "When enabled, only the group startup flow runs. When disabled, the group startup flow runs first, followed by each host's individual startup flow." : {
-
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinse yalnızca grup başlangıç akışı çalışır. Kapalıysa önce grup başlangıç akışı, ardından her host'un kendi başlangıç akışı çalışır."
+          }
+        }
+      }
     },
     "Wildcard host blocks require a concrete alias." : {
       "localizations" : {
